@@ -60,10 +60,11 @@ class LiveCellDataset(Dataset[Sample]):
             raise ValueError(f"image_size must be an integer, got {image_size!r}.")
         if image_size <= 0:
             raise ValueError("image_size must be positive.")
-        if image_size % 4:
+        if image_size % 2:
             raise ValueError(
-                f"image_size must be a multiple of 4 so the U-Net's two poolings are "
-                f"invertible, got {image_size}."
+                f"image_size must be even, got {image_size}. The exact requirement is "
+                "depth-dependent (a multiple of 2**depth, and at least 2**(depth+1)) and "
+                "is enforced by TrainConfig and by the model itself."
             )
         self.manifest_path = Path(manifest_path).resolve()
         self.image_size = image_size

@@ -62,10 +62,19 @@ def test_a_read_only_cache_location_does_not_break_loading(
     assert dataset.native_mask(0).sum() > 0
 
 
-@pytest.mark.parametrize("size", [0, -8, 17, 30])
-def test_invalid_image_size_is_rejected(tiny_training_data: Path, size: int) -> None:
+@pytest.mark.parametrize("size", [0, -8, 17, 33, 2.5, True])
+def test_invalid_image_size_is_rejected(tiny_training_data: Path, size: object) -> None:
     with pytest.raises(ValueError):
         LiveCellDataset(tiny_training_data / "manifests" / "train.jsonl", image_size=size)
+
+
+def test_the_dataset_defers_the_depth_dependent_size_rule_to_the_model() -> None:
+    """The dataset cannot know the network depth, so it only checks what it can."""
+    from tribovision.model import TriboUNet
+
+    # 30 is even and loadable, but a depth-3 U-Net still rejects it.
+    with pytest.raises(ValueError, match="nearest valid size"):
+        TriboUNet(base_channels=2, depth=3).check_input_size(30, 30)
 
 
 def test_manifest_problems_surface_as_dataset_errors(tiny_training_data: Path) -> None:

@@ -116,3 +116,31 @@ def test_aggregate_reports_both_macro_and_micro_views() -> None:
     assert summary["micro_dice"] > 0.98
     assert summary["images"] == 2
     assert evaluation.aggregate([]) == {"images": 0}
+
+
+def test_matching_is_inclusive_at_exactly_the_threshold() -> None:
+    """Guards `>=` versus `>` at the IoU cut, which no other test can see.
+
+    Two 4x4 squares overlapping in a 2x8 strip give intersection 8, union 24,
+    IoU exactly 1/3. Constructed so the boundary is exact in integer pixels.
+    """
+    truth = np.zeros((12, 12), dtype=np.int64)
+    truth[2:6, 2:10] = 1
+    predicted = np.zeros((12, 12), dtype=np.int64)
+    predicted[4:8, 2:10] = 1
+    ious = evaluation.instance_iou_matrix(predicted, truth)
+    assert ious[0, 0] == pytest.approx(1 / 3)
+
+    matched_at = evaluation.matching_score(predicted, truth, thresholds=(1 / 3,))
+    just_above = evaluation.matching_score(predicted, truth, thresholds=(1 / 3 + 1e-9,))
+    assert matched_at["mean"] == 1.0
+    assert just_above["mean"] == 0.0
+
+
+def test_instance_counts_use_the_same_inclusive_boundary() -> None:
+    truth = np.zeros((12, 12), dtype=np.int64)
+    truth[2:6, 2:10] = 1
+    predicted = np.zeros((12, 12), dtype=np.int64)
+    predicted[4:8, 2:10] = 1
+    assert evaluation.instance_counts(predicted, truth, threshold=1 / 3)["tp"] == 1
+    assert evaluation.instance_counts(predicted, truth, threshold=1 / 3 + 1e-9)["tp"] == 0

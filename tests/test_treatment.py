@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import csv
 import json
+import math
 from pathlib import Path
 
 import numpy as np
@@ -23,6 +24,7 @@ from tribovision.treatment import (
     leave_one_day_out,
     load_treatment_manifest,
     run_treatment_analysis,
+    stratified_spearman,
     write_template,
 )
 
@@ -110,6 +112,28 @@ def test_benjamini_hochberg_matches_a_worked_example() -> None:
     assert all(a >= b for a, b in zip(benjamini_hochberg(raw), raw, strict=True))
 
 
+def test_benjamini_hochberg_enforces_monotonicity() -> None:
+    """Without the running minimum, a later q-value can drop below an earlier one.
+
+    For p = [0.01, 0.04, 0.03] the rank-scaled values in sorted order are
+    [0.03, 0.045, 0.04]. Without the step-up minimum the middle one stays at
+    0.045, so the *smaller* p-value 0.03 would receive a larger q-value than the
+    larger p-value 0.04 — an ordering violation that makes the correction
+    incoherent. The correct answer pulls it down to 0.04.
+    """
+    assert benjamini_hochberg([0.01, 0.04, 0.03]) == pytest.approx([0.03, 0.04, 0.04])
+    q = benjamini_hochberg([0.001, 0.9, 0.02, 0.5, 0.03])
+    ordered = [q[index] for index in np.argsort([0.001, 0.9, 0.02, 0.5, 0.03])]
+    assert all(a <= b + 1e-12 for a, b in zip(ordered, ordered[1:], strict=False))
+
+
+def test_benjamini_hochberg_survives_a_non_finite_p_value() -> None:
+    """One undefined test used to turn every q-value in the family into NaN."""
+    q = benjamini_hochberg([0.001, float("nan"), 0.5])
+    assert math.isnan(q[1])
+    assert q[0] == pytest.approx(0.002) and q[2] == pytest.approx(0.5)
+
+
 def test_dose_response_fit_recovers_a_known_ic50() -> None:
     concentrations = np.array([0, 1, 3, 10, 30, 100, 300, 1000] * 3, dtype=float)
     responses = four_parameter_logistic(
@@ -121,10 +145,47 @@ def test_dose_response_fit_recovers_a_known_ic50() -> None:
     assert fit["r_squared"] > 0.99
 
 
-def test_dose_response_refuses_to_fit_too_few_concentrations() -> None:
-    fit = fit_dose_response(np.array([0.0, 10.0, 10.0]), np.array([1.0, 0.5, 0.5]))
+@pytest.mark.parametrize(
+    "concentrations",
+    [
+        # One concentration: nothing to fit.
+        [0.0, 10.0, 10.0],
+        # Four points, four parameters: zero residual degrees of freedom.
+        [0.0, 1.0, 10.0, 100.0, 1000.0],
+        # Five distinct concentrations but only 6 non-zero wells.
+        [0.0, 1.0, 1.0, 3.0, 10.0, 30.0, 100.0],
+    ],
+)
+def test_dose_response_refuses_a_design_that_cannot_constrain_four_parameters(
+    concentrations: list[float],
+) -> None:
+    values = np.linspace(1.0, 0.2, len(concentrations))
+    fit = fit_dose_response(np.array(concentrations), values)
     assert not fit["fitted"]
-    assert "at least three distinct" in fit["reason"]
+    assert "at least 5 distinct non-zero concentrations" in fit["reason"]
+
+
+def test_dose_response_fits_once_the_design_is_adequate() -> None:
+    concentrations = np.array([0, 1, 3, 10, 30, 100, 300, 1000] * 2, dtype=float)
+    responses = four_parameter_logistic(
+        np.log10(np.maximum(concentrations, 1e-9)), 0.0, 1.0, 30.0, -1.0
+    )
+    assert fit_dose_response(concentrations, responses)["fitted"]
+
+
+def test_a_bootstrap_interval_is_withheld_when_resamples_do_not_converge() -> None:
+    """A CI from only the well-behaved resamples is biased narrow, so report none."""
+    concentrations = np.array([0, 1, 3, 10, 30, 100, 300, 1000] * 3, dtype=float)
+    responses = four_parameter_logistic(
+        np.log10(np.maximum(concentrations, 1e-9)), 0.0, 1.0, 30.0, -1.0
+    )
+    fit = fit_dose_response(concentrations, responses)
+    assert 0.0 <= fit["bootstrap_convergence_rate"] <= 1.0
+    if fit["bootstrap_convergence_rate"] < 0.8:
+        assert fit["ic50_ci95"] is None
+        assert "biased narrow" in fit["ic50_ci95_note"]
+    else:
+        assert fit["ic50_ci95"] is not None
 
 
 def test_an_extrapolated_ic50_is_flagged() -> None:
@@ -214,3 +275,138 @@ def test_the_well_is_the_unit_so_extra_fields_do_not_inflate_n(tmp_path: Path) -
     )
     assert few["wells"] == many["wells"]
     assert many["images_analysed"] == 3 * few["images_analysed"]
+
+
+# --------------------------------------------------- design checks added later
+
+
+def test_a_single_experiment_day_is_refused(tmp_path: Path) -> None:
+    """Nothing can be validated on a day the model did not see."""
+    manifest = build_synthetic_experiment(tmp_path, days=("2026-03-01",))
+    with pytest.raises(TreatmentDataError, match="only one experiment day"):
+        load_treatment_manifest(manifest)
+
+
+def test_a_zero_dose_well_is_not_automatically_a_vehicle_control(tmp_path: Path) -> None:
+    manifest = build_synthetic_experiment(tmp_path)
+    rows = list(csv.DictReader(manifest.open()))
+    for row in rows:
+        if row["control_type"] == "vehicle":
+            row["control_type"] = "untreated"
+    with manifest.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+    with pytest.raises(TreatmentDataError, match="control_type='vehicle'"):
+        load_treatment_manifest(manifest)
+
+
+# ------------------------------------------------ leave-one-day-out correctness
+
+
+def test_a_day_that_cannot_be_trained_against_is_not_scored_as_zero() -> None:
+    """Skipped folds used to keep a prediction of 0.0 and enter R^2 as real."""
+    features = np.random.default_rng(0).normal(size=(6, 2))
+    targets = np.arange(6.0)
+    result = leave_one_day_out(features, targets, ["a"] + ["b"] * 5, permutations=20)
+    assert result["evaluated"] is False
+    assert result["wells_skipped"] == 5
+    assert "at least two wells on the other days" in result["reason"]
+
+
+def test_within_day_r_squared_is_reported_next_to_the_plain_one() -> None:
+    rng = np.random.default_rng(5)
+    days = ["d1"] * 10 + ["d2"] * 10
+    features = rng.normal(size=(20, 2))
+    targets = 1.5 * features[:, 0] + rng.normal(0, 0.1, size=20)
+    result = leave_one_day_out(features, targets, days, permutations=100, seed=1)
+    assert result["evaluated"]
+    assert "within_day_r_squared" in result
+    assert result["wells_scored"] == 20 and result["wells_skipped"] == 0
+    assert 0.0 <= result["r_squared_percentile_in_null"] <= 1.0
+    assert "within_day_r_squared" in result["interpretation"]
+
+
+def test_a_pure_between_day_difference_inflates_plain_r2_but_not_within_day_r2() -> None:
+    """The whole point of reporting both numbers.
+
+    Three days with evenly spaced batch offsets, and a feature that carries only
+    the offset. Trained on two days, the model extrapolates the third day's level
+    correctly, so R^2 against the global mean looks excellent — while explaining
+    nothing at all about which well within a day has higher viability.
+    """
+    rng = np.random.default_rng(11)
+    days = ["d1"] * 8 + ["d2"] * 8 + ["d3"] * 8
+    offsets = np.array([0.0] * 8 + [5.0] * 8 + [10.0] * 8)
+    features = np.column_stack([offsets + rng.normal(0, 0.02, 24), rng.normal(size=24)])
+    targets = offsets + rng.normal(0, 0.3, 24)
+    result = leave_one_day_out(features, targets, days, permutations=50, seed=3)
+    assert result["evaluated"]
+    # Between-day structure alone explains nearly all variance around the global mean...
+    assert result["r_squared"] > 0.9
+    # ...and essentially none of the variance within a day.
+    assert result["within_day_r_squared"] < 0.5
+    assert result["within_day_r_squared"] < result["r_squared"]
+
+
+# ------------------------------------------------- day-stratified dose response
+
+
+def test_a_pure_day_effect_is_not_reported_as_a_dose_effect() -> None:
+    """Concentration confounded with day: the pooled test is fooled, the blocked one is not."""
+    days = np.array(["d1"] * 8 + ["d2"] * 8)
+    # Day 1 received only low doses, day 2 only high doses.
+    concentrations = np.array([0, 0, 10, 10, 20, 20, 30, 30] * 2, dtype=float)
+    concentrations[8:] += 100
+    values = np.where(days == "d1", 1.0, 3.0) + np.random.default_rng(0).normal(0, 0.01, 16)
+    result = stratified_spearman(concentrations, values, days, permutations=500, seed=1)
+    assert result["p_value"] < 0.01  # pooled: looks like a strong dose response
+    assert result["p_value_day_stratified"] > 0.05  # blocked: it was the day
+
+
+def test_a_real_within_day_dose_effect_survives_blocking() -> None:
+    days = np.array(["d1"] * 10 + ["d2"] * 10)
+    concentrations = np.array([0, 10, 20, 30, 40] * 4, dtype=float)
+    values = -0.05 * concentrations + np.where(days == "d1", 0.0, 2.0)
+    result = stratified_spearman(concentrations, values, days, permutations=500, seed=1)
+    assert result["spearman_rho"] < -0.5
+    assert result["p_value_day_stratified"] < 0.05
+
+
+# -------------------------------------------------- confirmatory vs exploratory
+
+
+def test_features_are_labelled_by_what_they_actually_measure(tmp_path: Path) -> None:
+    report = run_treatment_analysis(
+        build_synthetic_experiment(tmp_path / "s", seed=3),
+        tmp_path / "out",
+        instance_method="connected_components",
+        min_area=5,
+        permutations=200,
+    )
+    kinds = report["feature_kinds"]
+    assert kinds["total_area_pixels"] == "density"
+    assert kinds["area_pixels_mean"] == "density-contaminated"
+    assert kinds["circularity_mean"] == "shape"
+    assert "fewer cells at higher dose" in report["confluency_caveat"]
+    for name, entry in report["dose_response"].items():
+        assert entry["feature_kind"] == kinds.get(name, entry["feature_kind"])
+
+
+def test_the_confirmatory_endpoint_is_tested_separately_from_the_exploratory_model(
+    tmp_path: Path,
+) -> None:
+    report = run_treatment_analysis(
+        build_synthetic_experiment(tmp_path / "s", seed=3),
+        tmp_path / "out",
+        instance_method="connected_components",
+        min_area=5,
+        permutations=200,
+    )
+    linkage = report["viability_linkage"]
+    assert "confirmatory_prediction" in linkage
+    assert "exploratory_prediction" in linkage
+    confirmatory = linkage["confirmatory_prediction"]
+    assert confirmatory["feature"] == report["primary_feature"]
+    # The pre-specified endpoint must be a shape feature, not a confluency proxy.
+    assert report["feature_kinds"].get(report["primary_feature"]) == "shape"

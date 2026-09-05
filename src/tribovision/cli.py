@@ -148,6 +148,17 @@ def _add_treatment(subparsers: Any) -> None:
         default="watershed_split",
     )
     analyse.add_argument("--min-area", type=int, default=20)
+    analyse.add_argument(
+        "--primary-feature",
+        default=None,
+        help="Pre-specified confirmatory endpoint (default: a shape feature).",
+    )
+    analyse.add_argument(
+        "--permutations",
+        type=int,
+        default=2000,
+        help="Permutations for the day-stratified dose-response test.",
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -311,6 +322,8 @@ def _run(args: argparse.Namespace) -> int:
             threshold=args.threshold,
             instance_method=args.instance_method,
             min_area=args.min_area,
+            permutations=args.permutations,
+            **({"primary_feature": args.primary_feature} if args.primary_feature else {}),
         )
         _print(
             {

@@ -166,3 +166,131 @@ def test_overlay_marks_prediction_and_truth_in_different_colours() -> None:
     pixels = np.asarray(overlay_image(image, prediction, truth))
     assert pixels[1, 1][0] > pixels[1, 1][1]  # prediction is red-dominant
     assert pixels[7, 7][1] > pixels[7, 7][0]  # truth is green-dominant
+
+
+class _EdgeSpikeModel(torch.nn.Module):
+    """Confident only in the final valid column of the letterboxed canvas.
+
+    A crop that is one pixel short drops that column entirely, so the signal
+    disappears rather than shifting slightly — which a shape check, and even a
+    smooth ramp, would both miss.
+    """
+
+    def __init__(self, spike_column: int) -> None:
+        super().__init__()
+        self.spike_column = spike_column
+
+    def check_input_size(self, height: int, width: int) -> None:
+        return None
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        logits = torch.full_like(x, -20.0)
+        logits[..., self.spike_column] = 20.0
+        return logits
+
+
+def test_the_probability_map_crop_keeps_the_last_valid_column(new_image: Path) -> None:
+    """Guards an off-by-one in the probability crop that no shape check can see."""
+    from tribovision.geometry import plan_letterbox
+
+    with Image.open(new_image) as handle:
+        image = handle.convert("L")
+    size = 64
+    transform = plan_letterbox(image.width, image.height, size)
+    assert transform.pad_top > 0  # the fixture really is letterboxed
+    last_valid = transform.pad_left + transform.resized_width - 1
+
+    _, probabilities = predict_mask(
+        _EdgeSpikeModel(last_valid), image, image_size=size, device=torch.device("cpu")
+    )
+    assert probabilities.shape == (image.height, image.width)
+    # The spike must survive into the native map, and land at its right edge.
+    column_means = probabilities.mean(axis=0)
+    assert int(np.argmax(column_means)) == image.width - 1
+    assert column_means[-1] > 0.5
+    # Everything left of the resampled spike stays background.
+    assert column_means[: image.width - 4].max() < 0.1
+
+
+def test_the_probability_map_crop_keeps_the_first_valid_column(new_image: Path) -> None:
+    from tribovision.geometry import plan_letterbox
+
+    with Image.open(new_image) as handle:
+        image = handle.convert("L")
+    size = 64
+    transform = plan_letterbox(image.width, image.height, size)
+    _, probabilities = predict_mask(
+        _EdgeSpikeModel(transform.pad_left), image, image_size=size, device=torch.device("cpu")
+    )
+    column_means = probabilities.mean(axis=0)
+    assert int(np.argmax(column_means)) == 0
+    assert column_means[0] > 0.5
+    assert column_means[4:].max() < 0.1
+
+
+class _RampModel(torch.nn.Module):
+    """Emits a horizontal ramp in logit space: strongly negative left, positive right.
+
+    Deterministic and asymmetric, so any crop or resize error in the probability
+    path shows up as a shifted ramp rather than being hidden by a shape check.
+    """
+
+    def __init__(self, size: int) -> None:
+        super().__init__()
+        self.size = size
+
+    def check_input_size(self, height: int, width: int) -> None:  # pragma: no cover
+        return None
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        columns = torch.linspace(-8.0, 8.0, x.shape[-1])
+        return columns.view(1, 1, 1, -1).expand_as(x).clone()
+
+
+def test_the_probability_map_is_aligned_with_the_mask_not_merely_the_right_shape(
+    new_image: Path,
+) -> None:
+    """A one-pixel crop error would misalign every overlay and no shape check sees it."""
+    from tribovision.geometry import plan_letterbox
+
+    with Image.open(new_image) as handle:
+        image = handle.convert("L")
+    size = 64
+    mask, probabilities = predict_mask(
+        _RampModel(size), image, image_size=size, device=torch.device("cpu")
+    )
+    assert probabilities.shape == (image.height, image.width)
+
+    # The ramp is monotonically increasing left to right, and un-letterboxing
+    # must preserve that: column means strictly increase across the native width.
+    column_means = probabilities.mean(axis=0)
+    assert np.all(np.diff(column_means) > -1e-6)
+    # The two ends must reach the extremes of the ramp, which pins the crop
+    # boundaries: a crop that is one pixel short leaves the last column short of 1.
+    assert column_means[0] < 0.02
+    assert column_means[-1] > 0.98
+
+    transform = plan_letterbox(image.width, image.height, size)
+    assert transform.pad_top > 0  # the fixture really is letterboxed
+    # And the mask must agree with the probability map at the 0.5 threshold.
+    assert (
+        np.array_equal(mask.astype(bool), probabilities >= 0.5)
+        or np.mean(mask.astype(bool) == (probabilities >= 0.5)) > 0.98
+    )
+
+
+def test_probabilities_and_mask_agree_on_a_uniform_prediction(new_image: Path) -> None:
+    class _Constant(torch.nn.Module):
+        def check_input_size(self, height: int, width: int) -> None:
+            return None
+
+        def forward(self, x: torch.Tensor) -> torch.Tensor:
+            return torch.full_like(x, 10.0)
+
+    with Image.open(new_image) as handle:
+        image = handle.convert("L")
+    mask, probabilities = predict_mask(
+        _Constant(), image, image_size=64, device=torch.device("cpu")
+    )
+    assert mask.all()
+    assert probabilities.min() > 0.9

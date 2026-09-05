@@ -25,7 +25,9 @@ def test_segmentation_finds_a_bright_block_against_a_flat_background() -> None:
     pixels = np.full((40, 40), 30, dtype=np.uint8)
     pixels[10:30, 10:30] = 220
     mask = segment_classical(Image.fromarray(pixels), background_radius=3.0, min_area=4)
-    assert mask[15:25, 15:25].mean() > 0.5 or mask[10:30, 10:30].sum() > 0
+    # The block must be found, and the far corner must stay background.
+    assert mask[10:30, 10:30].mean() > 0.5
+    assert mask[0:5, 0:5].sum() == 0
 
 
 def test_baseline_writes_auditable_outputs(tiny_training_data: Path, tmp_path: Path) -> None:
@@ -39,7 +41,13 @@ def test_baseline_writes_auditable_outputs(tiny_training_data: Path, tmp_path: P
     )
 
     assert report["overall"]["images"] == 1
-    assert 0.0 <= report["overall"]["macro_dice"] <= 1.0
+    # A real value, not `0 <= x <= 1`. With this small a blur radius the rule
+    # dilates each square (tp 100, fp 80, fn 0), giving exactly 0.714 Dice, and
+    # it finds the right number of objects.
+    assert report["overall"]["macro_dice"] == pytest.approx(0.7143, abs=0.01)
+    assert report["overall"]["total_fn"] == 0
+    assert report["overall"]["count_mae"] == 0
+    assert report["overall"]["matching_score_50"] == 1.0
     assert (output / "per_image_metrics.csv").is_file()
     assert (output / "morphology_features.csv").is_file()
     assert list(output.glob("*_overlay.png")) and list(output.glob("*_mask.png"))
@@ -47,6 +55,21 @@ def test_baseline_writes_auditable_outputs(tiny_training_data: Path, tmp_path: P
     persisted = json.loads((output / "baseline_report.json").read_text())
     assert "no Tribonema treatment" in " ".join(persisted["limitations"])
     assert "/Users/" not in persisted["manifest"]
+
+
+def test_the_baseline_is_exact_on_perfectly_separable_frames(
+    tiny_training_data: Path, tmp_path: Path
+) -> None:
+    """At its default blur radius the rule segments flat squares perfectly.
+
+    That is what makes this fixture unsuitable for the acceptance gate, which is
+    why tests/test_benchmark.py uses a crowded one instead.
+    """
+    report = run_baseline(
+        tiny_training_data / "manifests" / "test.jsonl", tmp_path / "out", max_images=1
+    )
+    assert report["overall"]["macro_dice"] == pytest.approx(1.0)
+    assert report["overall"]["matching_score_50_95"] == pytest.approx(1.0)
 
 
 def test_the_instance_metric_is_not_advertised_as_average_precision(

@@ -75,19 +75,32 @@ class TriboUNet(nn.Module):
         """Input height and width must both be a multiple of this value."""
         return 2**self.depth
 
+    @property
+    def minimum_size(self) -> int:
+        """Smallest input side this network can process.
+
+        Divisibility alone is not sufficient. At exactly ``2**depth`` the bridge
+        sees a 1x1 feature map, and normalising a single value per group fails
+        deep inside ``torch.group_norm`` with a message that mentions neither the
+        image size nor this model. One more halving of headroom avoids it.
+        """
+        return 2 ** (self.depth + 1)
+
     def check_input_size(self, height: int, width: int) -> None:
         multiple = self.size_multiple
+        if min(height, width) < self.minimum_size:
+            raise ValueError(
+                f"Input {height}x{width} is too small for a depth-{self.depth} U-Net: "
+                f"both sides must be at least {self.minimum_size} pixels, otherwise the "
+                "bottleneck collapses to a single value per normalisation group. Use "
+                f"--depth {max(1, self.depth - 1)} for smaller inputs."
+            )
         if height % multiple or width % multiple:
             raise ValueError(
                 f"Input {height}x{width} is not compatible with a depth-{self.depth} U-Net. "
                 f"Both dimensions must be multiples of {multiple}; the nearest valid size is "
                 f"{max(multiple, round(height / multiple) * multiple)}x"
                 f"{max(multiple, round(width / multiple) * multiple)}."
-            )
-        if min(height, width) < multiple:
-            raise ValueError(
-                f"Input {height}x{width} is smaller than the {multiple}-pixel minimum for a "
-                f"depth-{self.depth} U-Net."
             )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

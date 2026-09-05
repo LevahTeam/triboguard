@@ -270,6 +270,7 @@ def summarise_image(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "area_pixels",
         "circularity",
         "aspect_ratio",
+        "solidity",
         "equivalent_diameter_pixels",
         "mean_intensity",
     ):

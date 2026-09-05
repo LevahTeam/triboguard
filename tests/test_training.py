@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -12,6 +13,7 @@ from conftest import build_dataset
 
 from tribovision.training import (
     ConfigError,
+    DivergenceError,
     TrainConfig,
     _run_epoch,
     build_datasets,
@@ -50,6 +52,9 @@ def config(tmp_path: Path, data: Path, **overrides: Any) -> TrainConfig:
         ({"image_size": 17}, "image_size"),
         ({"image_size": -32}, "image_size"),
         ({"image_size": 2}, "image_size"),
+        # Divisible by 2**depth but still too small: the bottleneck would be 1x1.
+        ({"image_size": 4, "depth": 2}, "image_size"),
+        ({"image_size": 8, "depth": 3}, "image_size"),
         ({"device": "tpu"}, "device"),
         ({"group_by": "plate"}, "group_by"),
     ],
@@ -155,7 +160,10 @@ def test_training_writes_portable_reproducible_metadata(
     tmp_path: Path, tiny_training_data: Path
 ) -> None:
     output = tmp_path / "run"
-    result = train(config(tmp_path, tiny_training_data, epochs=2), progress=False)
+    result = train(
+        config(tmp_path, tiny_training_data, epochs=25, learning_rate=5e-3, augment=False),
+        progress=False,
+    )
     persisted = json.loads((output / "metrics.json").read_text())
 
     assert persisted["checkpoint"] == result["checkpoint"]
@@ -168,8 +176,11 @@ def test_training_writes_portable_reproducible_metadata(
     assert persisted["datasets"]["train"]["content_sha256"]
     assert persisted["config"]["seed"] == 42
     for section in ("best_validation", "test", "validation"):
-        assert 0.0 <= persisted[section]["macro_dice"] <= 1.0
-        assert 0.0 <= persisted[section]["micro_iou"] <= 1.0
+        # A real floor, not `0 <= x <= 1`: this fixture is separable, so a working
+        # pipeline scores well above chance after two epochs.
+        assert persisted[section]["macro_dice"] > 0.3
+        assert 0.0 < persisted[section]["micro_iou"] <= 1.0
+        assert persisted[section]["samples"] == 2
 
 
 def test_the_same_seed_reproduces_the_same_numbers(
@@ -243,3 +254,115 @@ def test_more_wells_than_the_fixture_still_split_cleanly(tmp_path: Path) -> None
     )
     datasets = build_datasets(config(tmp_path, data, epochs=1))
     assert len(datasets["train"].records) == 3
+
+
+def test_every_recorded_loss_is_a_finite_number(tmp_path: Path, tiny_training_data: Path) -> None:
+    result = train(config(tmp_path, tiny_training_data, epochs=5), progress=False)
+    for row in result["history"]:
+        assert math.isfinite(row["train"]["loss"])
+        assert math.isfinite(row["val"]["loss"])
+
+
+def test_a_diverging_run_stops_instead_of_reporting_a_stale_checkpoint(
+    tmp_path: Path, tiny_training_data: Path
+) -> None:
+    """A NaN loss used to run to completion and report the last good checkpoint."""
+
+    class _Diverging(torch.nn.Module):
+        def check_input_size(self, height: int, width: int) -> None:
+            return None
+
+        def forward(self, x: torch.Tensor) -> torch.Tensor:
+            return torch.full_like(x, float("nan"))
+
+    loader = _Loader([_batch(2, True)])
+    with pytest.raises(DivergenceError, match="diverging"):
+        _run_epoch(_Diverging(), loader, torch.device("cpu"))
+
+
+ACCELERATORS = [
+    pytest.param(
+        "mps",
+        marks=pytest.mark.skipif(
+            not (getattr(torch.backends, "mps", None) and torch.backends.mps.is_available()),
+            reason="MPS not available",
+        ),
+    ),
+    pytest.param(
+        "cuda",
+        marks=pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA not available"),
+    ),
+]
+
+
+@pytest.mark.parametrize("device", ["cpu", *ACCELERATORS])
+def test_training_is_stable_on_every_device_this_machine_offers(
+    tmp_path: Path, tiny_training_data: Path, device: str
+) -> None:
+    """Every other test pins cpu, while the CLI default resolves to an accelerator.
+
+    Accelerator backends have their own numerics, and a run that diverges there
+    would otherwise reach a user without any test having exercised the path.
+    """
+    result = train(
+        TrainConfig(
+            data_dir=tiny_training_data,
+            output_dir=tmp_path / f"run-{device}",
+            epochs=6,
+            batch_size=2,
+            image_size=32,
+            base_channels=4,
+            depth=2,
+            learning_rate=5e-3,
+            device=device,
+        ),
+        progress=False,
+    )
+    assert result["device"].startswith(device)
+    for row in result["history"]:
+        assert math.isfinite(row["train"]["loss"]) and math.isfinite(row["val"]["loss"])
+    assert result["test"]["macro_dice"] > 0.0
+
+
+@pytest.mark.parametrize("device", ACCELERATORS)
+@pytest.mark.parametrize("seed", [42, 7])
+def test_an_accelerator_produces_the_same_numbers_as_the_cpu(
+    tmp_path: Path, tiny_training_data: Path, device: str, seed: int
+) -> None:
+    """Guards a silent data-corruption bug, not merely a performance path.
+
+    Transferring batches with ``non_blocking=True`` from unpinned host memory let
+    the copy race the freeing of the augmented tensors. On Apple's MPS backend the
+    masks arrived as NaN while the logits computed from the same batch were still
+    finite, so training quietly optimised against garbage. Every other test pinned
+    ``device="cpu"`` and none of them could see it.
+    """
+    shared = {
+        "epochs": 10,
+        "batch_size": 2,
+        "image_size": 32,
+        "base_channels": 4,
+        "depth": 2,
+        "learning_rate": 2e-3,
+        "seed": seed,
+    }
+    on_cpu = train(
+        TrainConfig(
+            data_dir=tiny_training_data, output_dir=tmp_path / "cpu", device="cpu", **shared
+        ),
+        progress=False,
+    )
+    on_device = train(
+        TrainConfig(
+            data_dir=tiny_training_data,
+            output_dir=tmp_path / device,
+            device=device,
+            **shared,
+        ),
+        progress=False,
+    )
+    assert on_device["test"]["macro_dice"] == pytest.approx(on_cpu["test"]["macro_dice"], abs=1e-3)
+    assert on_device["best_epoch"] == on_cpu["best_epoch"]
+    for row_cpu, row_device in zip(on_cpu["history"], on_device["history"], strict=True):
+        assert math.isfinite(row_device["train"]["loss"])
+        assert row_device["train"]["loss"] == pytest.approx(row_cpu["train"]["loss"], abs=1e-3)

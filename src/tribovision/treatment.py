@@ -54,16 +54,32 @@ OPTIONAL_COLUMNS = (
     "permission_status",
     "notes",
 )
-MORPHOLOGY_FEATURES = (
-    "objects",
-    "total_area_pixels",
-    "area_pixels_mean",
-    "area_pixels_median",
-    "circularity_mean",
-    "aspect_ratio_mean",
-    "equivalent_diameter_pixels_mean",
-    "mean_intensity_mean",
-)
+#: How much confluency each feature reflects, as opposed to cell shape.
+#:
+#: This distinction is the difference between a result and a tautology. While the
+#: segmenter is semantic, touching cells merge into one region, so an object's
+#: "area" is really a measure of how crowded the field is. A cytotoxic extract
+#: kills cells, cells detach, confluency falls, and "mean object area" falls with
+#: it — a beautiful dose response that says only "fewer cells at higher dose",
+#: which the viability assay already said. Shape features are scale- and
+#: density-invariant and are the ones that can answer the question actually asked.
+FEATURE_KINDS: dict[str, str] = {
+    "objects": "density",
+    "total_area_pixels": "density",
+    "area_pixels_mean": "density-contaminated",
+    "area_pixels_median": "density-contaminated",
+    "equivalent_diameter_pixels_mean": "density-contaminated",
+    "circularity_mean": "shape",
+    "aspect_ratio_mean": "shape",
+    "solidity_mean": "shape",
+    "mean_intensity_mean": "intensity",
+}
+MORPHOLOGY_FEATURES = tuple(FEATURE_KINDS)
+SHAPE_FEATURES = tuple(name for name, kind in FEATURE_KINDS.items() if kind == "shape")
+
+#: The single pre-specified confirmatory endpoint. Everything else is exploratory.
+#: It is a shape feature deliberately: see FEATURE_KINDS.
+PRIMARY_FEATURE = "circularity_mean"
 
 
 class TreatmentDataError(RuntimeError):
@@ -208,6 +224,20 @@ def _check_design(records: list[TreatmentRecord]) -> None:
             f"{len(thin)} condition(s) have fewer than two independent wells "
             f"(e.g. {thin[0]}), so within-condition variability is unestimated"
         )
+    if len(days) < 2:
+        problems.append(
+            "only one experiment day, so nothing can be validated on a day the model "
+            "did not see, and a day effect cannot be separated from a treatment effect"
+        )
+    vehicle = [
+        record for record in controls if record.control_type.casefold() in {"vehicle", "solvent"}
+    ]
+    if controls and not vehicle:
+        problems.append(
+            "no well is marked control_type='vehicle'. A zero-concentration well is not "
+            "a vehicle control unless it received the same solvent at the same final "
+            "concentration as the treated wells"
+        )
     if problems:
         raise TreatmentDataError(
             "This experimental design cannot support a dose-response claim: "
@@ -257,10 +287,18 @@ def four_parameter_logistic(
 def fit_dose_response(concentrations: np.ndarray, responses: np.ndarray) -> dict[str, Any]:
     """Fit a 4PL curve and report IC50 with a bootstrap confidence interval."""
     positive = concentrations > 0
-    if positive.sum() < 4 or len(np.unique(concentrations[positive])) < 3:
+    distinct = len(np.unique(concentrations[positive]))
+    # Four parameters fitted to four points has zero residual degrees of freedom,
+    # and three concentrations cannot constrain bottom, top, IC50 and slope at
+    # once. The earlier threshold would happily hand back an "IC50" from 4 points.
+    if distinct < 5 or positive.sum() < 8:
         return {
             "fitted": False,
-            "reason": "A 4PL fit needs at least three distinct non-zero concentrations.",
+            "reason": (
+                "A 4PL fit needs at least 5 distinct non-zero concentrations across at "
+                f"least 8 wells to constrain its four parameters; this design has "
+                f"{distinct} concentration(s) across {int(positive.sum())} well(s)."
+            ),
         }
     log_concentration = np.log10(concentrations[positive])
     values = responses[positive]
@@ -311,9 +349,14 @@ def fit_dose_response(concentrations: np.ndarray, responses: np.ndarray) -> dict
                 continue
             if np.isfinite(sample[2]) and sample[2] > 0:
                 ic50_samples.append(float(sample[2]))
+    # A CI built only from the resamples that happened to converge is biased
+    # narrow, because the awkward resamples — the ones that carry the uncertainty —
+    # are exactly the ones dropped. Report the rate and refuse below 80%.
+    attempts = 400
+    convergence = len(ic50_samples) / attempts
     interval = (
         [float(np.percentile(ic50_samples, 2.5)), float(np.percentile(ic50_samples, 97.5))]
-        if len(ic50_samples) >= 50
+        if convergence >= 0.8
         else None
     )
     in_range = bool(
@@ -329,6 +372,13 @@ def fit_dose_response(concentrations: np.ndarray, responses: np.ndarray) -> dict
         "hill_slope": float(parameters[3]),
         "r_squared": r_squared,
         "ic50_ci95": interval,
+        "bootstrap_convergence_rate": convergence,
+        "ic50_ci95_note": (
+            None
+            if interval is not None
+            else f"Only {convergence:.0%} of bootstrap resamples converged; an interval "
+            "built from those alone would be biased narrow, so none is reported."
+        ),
         "ic50_within_tested_range": in_range,
         "warning": None
         if in_range
@@ -368,8 +418,30 @@ def leave_one_day_out(
         }
     day_array = np.asarray(days)
 
-    def score(y: np.ndarray) -> tuple[float, float]:
-        predictions = np.zeros_like(y, dtype=float)
+    # Which wells can actually be predicted out-of-fold. A fold whose training
+    # side has fewer than two wells is skipped; those wells previously kept a
+    # prediction of 0.0 and entered R^2 as though 0.0 were a real estimate, which
+    # produced numbers like R^2 = -10.6 while still reporting evaluated: True.
+    scored = np.zeros(len(targets), dtype=bool)
+    for day in unique_days:
+        held_out = day_array == day
+        if held_out.sum() and (~held_out).sum() >= 2:
+            scored |= held_out
+    skipped = int((~scored).sum())
+    if scored.sum() < 3:
+        return {
+            "evaluated": False,
+            "reason": (
+                "Too few wells can be predicted out-of-fold. Every experiment day needs "
+                "at least two wells on the other days to train on."
+            ),
+            "wells_skipped": skipped,
+        }
+
+    day_means = {day: float(targets[day_array == day].mean()) for day in unique_days}
+
+    def score(y: np.ndarray) -> tuple[float, float, float]:
+        predictions = np.full(len(y), np.nan, dtype=float)
         for day in unique_days:
             test = day_array == day
             train = ~test
@@ -380,15 +452,30 @@ def leave_one_day_out(
             scale[scale < 1e-9] = 1.0
             coefficients = _ridge_fit((features[train] - mean) / scale, y[train])
             predictions[test] = _ridge_predict(coefficients, (features[test] - mean) / scale)
-        residual = y - predictions
-        total = y - y.mean()
+        actual = y[scored]
+        predicted = predictions[scored]
+        residual = actual - predicted
+        total = actual - actual.mean()
         r2 = (
             1.0 - float(residual @ residual) / float(total @ total) if total.any() else float("nan")
         )
+        # R^2 against the global mean is flattered by between-day differences the
+        # model can read straight off the features. Centring both sides on their
+        # own day's mean asks the harder question: does morphology explain
+        # variation *within* a day?
+        offsets = np.array([day_means[day] for day in day_array[scored]])
+        centred_actual = actual - offsets
+        centred_residual = centred_actual - (predicted - offsets)
+        centred_total = centred_actual - centred_actual.mean()
+        within_day_r2 = (
+            1.0 - float(centred_residual @ centred_residual) / float(centred_total @ centred_total)
+            if centred_total.any()
+            else float("nan")
+        )
         rmse = float(np.sqrt(np.mean(residual**2)))
-        return r2, rmse
+        return r2, rmse, within_day_r2
 
-    observed_r2, rmse = score(targets)
+    observed_r2, rmse, within_day_r2 = score(targets)
     rng = np.random.default_rng(seed)
     null = []
     for _ in range(permutations):
@@ -403,7 +490,11 @@ def leave_one_day_out(
     return {
         "evaluated": True,
         "held_out_days": unique_days,
+        "wells_scored": int(scored.sum()),
+        "wells_skipped": skipped,
         "r_squared": observed_r2,
+        "within_day_r_squared": within_day_r2,
+        "r_squared_percentile_in_null": float((null_array < observed_r2).mean()),
         "rmse": rmse,
         "permutation_p_value": p_value,
         "permutations": permutations,
@@ -411,8 +502,49 @@ def leave_one_day_out(
         "null_r_squared_p95": float(np.percentile(null_array, 95)),
         "interpretation": (
             "R^2 is measured on days excluded from fitting; the p-value compares it "
-            "against within-day label permutations."
+            "against within-day label permutations. Quote within_day_r_squared next to "
+            "r_squared: the plain R^2 is measured against the global mean, so part of it "
+            "comes free from between-day differences rather than from morphology."
         ),
+    }
+
+
+def stratified_spearman(
+    concentrations: np.ndarray,
+    values: np.ndarray,
+    days: np.ndarray,
+    *,
+    permutations: int = 2000,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """Spearman rho with a p-value from permuting dose labels *within* each day.
+
+    The pooled parametric p-value treats wells from different days as
+    exchangeable. If the concentration ladder is not perfectly balanced within
+    each day — and in a real experiment it never quite is — a day effect leaks
+    into the dose effect and the p-value is too small. Permuting concentration
+    only within a day destroys the dose relationship while keeping every
+    day-level difference intact, so what survives is dose and nothing else.
+    """
+    base = _safe_spearman(concentrations, values)
+    if base["spearman_rho"] is None:
+        return {**base, "p_value_day_stratified": None, "permutations": 0}
+    observed = abs(float(base["spearman_rho"]))
+    rng = np.random.default_rng(seed)
+    unique_days = np.unique(days)
+    at_least_as_extreme = 0
+    for _ in range(permutations):
+        shuffled = concentrations.copy()
+        for day in unique_days:
+            selection = days == day
+            shuffled[selection] = rng.permutation(shuffled[selection])
+        candidate = _safe_spearman(shuffled, values)["spearman_rho"]
+        if candidate is not None and abs(float(candidate)) >= observed:
+            at_least_as_extreme += 1
+    return {
+        **base,
+        "p_value_day_stratified": float((at_least_as_extreme + 1) / (permutations + 1)),
+        "permutations": permutations,
     }
 
 
@@ -429,6 +561,8 @@ def analyse(
     image_summaries: dict[Path, dict[str, Any]],
     *,
     features: tuple[str, ...] = MORPHOLOGY_FEATURES,
+    primary_feature: str = PRIMARY_FEATURE,
+    permutations: int = 2000,
 ) -> dict[str, Any]:
     """Turn per-image morphology into dose response and viability linkage."""
     rows: list[dict[str, Any]] = []
@@ -502,9 +636,12 @@ def analyse(
 
     dose_response: dict[str, Any] = {}
     p_values: list[float] = []
+    day_labels = np.array([str(row["experiment_day"]) for row in well_rows])
     for name in usable:
         feature = np.array([float(row[name]) for row in well_rows], dtype=float)
-        correlation = _safe_spearman(concentrations, feature)
+        correlation = stratified_spearman(
+            concentrations, feature, day_labels, permutations=permutations
+        )
         per_day: dict[str, Any] = {}
         for day in sorted({str(row["experiment_day"]) for row in well_rows}):
             selection = np.array([str(row["experiment_day"]) == day for row in well_rows])
@@ -515,19 +652,20 @@ def analyse(
                 }
         dose_response[name] = {
             **correlation,
+            "feature_kind": FEATURE_KINDS.get(name, "unclassified"),
             "wells": len(well_rows),
             "per_day": per_day,
             "fit": fit_dose_response(concentrations, feature),
         }
-        p_values.append(
-            float("nan") if correlation["p_value"] is None else float(correlation["p_value"])
-        )
+        headline = correlation.get("p_value_day_stratified")
+        p_values.append(float("nan") if headline is None else float(headline))
     for name, q_value in zip(usable, benjamini_hochberg(p_values), strict=True):
         dose_response[name]["q_value_bh"] = None if np.isnan(q_value) else q_value
         dose_response[name]["significant_at_q_0.05"] = bool(q_value < 0.05)
     for name in constant:
         dose_response[name] = {
             "constant": True,
+            "feature_kind": FEATURE_KINDS.get(name, "unclassified"),
             "note": "This feature took the same value in every well; no test was run.",
         }
 
@@ -541,7 +679,32 @@ def analyse(
         )
         targets = np.array([float(row["viability_fraction"]) for row in viability_rows])
         days = [str(row["experiment_day"]) for row in viability_rows]
-        viability["prediction"] = leave_one_day_out(matrix, targets, days)
+        # Eight correlated features into a ridge at 20-30 wells roughly halves the
+        # power to detect a real association. The confirmatory test therefore uses
+        # the single pre-specified endpoint; the multi-feature model is reported
+        # beside it, labelled exploratory.
+        viability["exploratory_prediction"] = leave_one_day_out(matrix, targets, days)
+        viability["prediction"] = viability["exploratory_prediction"]
+        if primary_feature in usable:
+            column = np.array(
+                [[float(row[primary_feature])] for row in viability_rows], dtype=float
+            )
+            viability["confirmatory_prediction"] = {
+                "feature": primary_feature,
+                "feature_kind": FEATURE_KINDS.get(primary_feature, "unclassified"),
+                "pre_specified": True,
+                **leave_one_day_out(column, targets, days),
+            }
+        else:
+            viability["confirmatory_prediction"] = {
+                "evaluated": False,
+                "feature": primary_feature,
+                "reason": (
+                    f"The pre-specified endpoint {primary_feature!r} was not measurable "
+                    "in every well, so no confirmatory test was run. Everything below is "
+                    "exploratory."
+                ),
+            }
         viability["per_feature_correlation"] = {
             name: _safe_spearman(matrix[:, index], targets) for index, name in enumerate(usable)
         }
@@ -565,9 +728,20 @@ def analyse(
         "concentrations_ug_per_ml": sorted({float(value) for value in concentrations}),
         "exposure_hours": sorted({float(row["exposure_hours"]) for row in well_rows}),
         "features_analysed": usable,
+        "feature_kinds": {name: FEATURE_KINDS.get(name, "unclassified") for name in usable},
+        "primary_feature": primary_feature,
+        "shape_features_available": [name for name in usable if FEATURE_KINDS.get(name) == "shape"],
         "well_level_rows": well_rows,
         "dose_response": dose_response,
         "viability_linkage": viability,
+        "confluency_caveat": (
+            "Features marked 'density' or 'density-contaminated' move with how crowded "
+            "the field is, not with cell shape. While the segmenter is semantic, "
+            "touching cells merge into one region, so a dose response in those features "
+            "may say only 'fewer cells at higher dose' — which the viability assay "
+            "already says. Conclusions about morphology should rest on the 'shape' "
+            "features, or on shape adjusted for total_area_pixels as a covariate."
+        ),
         "statistical_notes": [
             "The well is treated as the independent unit; fields within a well are averaged "
             "first so that imaging more fields cannot inflate the sample size.",
@@ -576,6 +750,14 @@ def analyse(
             "both raw p-values and q-values are reported.",
             "Morphology is evaluated as a predictor of viability, never as a substitute for "
             "it, and only on experiment days excluded from fitting.",
+            "The headline dose-response p-value comes from permuting concentration labels "
+            "within each experiment day, so a day effect cannot masquerade as a dose "
+            "effect; the parametric p-value is reported alongside as a descriptive.",
+            "One endpoint is pre-specified and tested on its own; the multi-feature model "
+            "is exploratory, because eight correlated predictors at 20-30 wells roughly "
+            "halves the power to detect a real association.",
+            "Leave-one-day-out R^2 is reported against the global mean and, separately, "
+            "within day. Only the within-day value is free of between-day variance.",
         ],
     }
 
@@ -624,6 +806,8 @@ def run_treatment_analysis(
     instance_method: str = "watershed_split",
     min_area: int = 20,
     background_radius: float = 7.0,
+    primary_feature: str = PRIMARY_FEATURE,
+    permutations: int = 2000,
 ) -> dict[str, Any]:
     """Segment every treatment image, then run the dose-response analysis.
 
@@ -699,7 +883,9 @@ def run_treatment_analysis(
             writer.writeheader()
             writer.writerows(feature_rows)
 
-    analysis = analyse(records, summaries)
+    analysis = analyse(
+        records, summaries, primary_feature=primary_feature, permutations=permutations
+    )
     report = {
         "manifest": provenance.relative_to_repo(Path(manifest_path)),
         "segmenter": segmenter,

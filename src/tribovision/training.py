@@ -99,14 +99,16 @@ class TrainConfig:
         if self.base_channels < 1:
             raise ConfigError(f"base_channels must be >= 1, got {self.base_channels}.")
         multiple = 2**self.depth
+        minimum = 2 ** (self.depth + 1)
         if (
             not isinstance(self.image_size, int)
             or isinstance(self.image_size, bool)
-            or self.image_size < multiple
+            or self.image_size < minimum
         ):
             raise ConfigError(
-                f"image_size must be an integer >= {multiple} for a depth-{self.depth} "
-                f"U-Net, got {self.image_size!r}."
+                f"image_size must be an integer >= {minimum} for a depth-{self.depth} "
+                f"U-Net, got {self.image_size!r}. Below that the bottleneck collapses to "
+                "one value per normalisation group."
             )
         if self.image_size % multiple:
             raise ConfigError(
@@ -206,6 +208,12 @@ def _augment(
         turns = int(torch.randint(0, 4, (), generator=generator).item())
         if turns:
             image, mask, keep = (torch.rot90(t, turns, (-2, -1)) for t in (image, mask, keep))
+        # Flips and quarter turns return non-contiguous views. Arithmetic on two
+        # non-contiguous operands returns garbage on Apple's MPS backend — values
+        # around 1e34, then NaN one step later — which silently corrupts training
+        # on the default device for anyone on Apple silicon. Materialising the
+        # views costs a copy of a single image and removes the failure entirely.
+        image, mask, keep = (t.contiguous() for t in (image, mask, keep))
         if photometric:
             image = _photometric(image, keep, generator)
         augmented_images.append(image)
@@ -222,13 +230,12 @@ def _photometric(
     image: torch.Tensor, valid: torch.Tensor, generator: torch.Generator
 ) -> torch.Tensor:
     """Perturb contrast, offset, noise and sharpness on one already-standardised image."""
-    device = image.device
     scale = 0.7 + 0.6 * torch.rand((), generator=generator).item()
     offset = (torch.rand((), generator=generator).item() - 0.5) * 0.6
     image = image * scale + offset
     if torch.rand((), generator=generator).item() < 0.5:
         sigma = 0.05 + 0.25 * torch.rand((), generator=generator).item()
-        noise = torch.randn(image.shape, generator=generator).to(device) * sigma
+        noise = torch.randn(image.shape, generator=generator) * sigma
         image = image + noise
     if torch.rand((), generator=generator).item() < 0.3:
         # A 3x3 box blur stands in for a softer objective or a defocused frame.
@@ -261,13 +268,23 @@ def _run_epoch(
     iou_sum = 0.0
 
     for images, masks, valid in loader:
-        images = images.to(device, non_blocking=True)
-        masks = masks.to(device, non_blocking=True)
-        valid = valid.to(device, non_blocking=True)
+        # Augment on the CPU, then transfer. Doing it on an accelerator was not
+        # merely slower: flips and quarter turns produce strided views, and Apple's
+        # MPS backend returned corrupt data for them — masks arriving as NaN while
+        # the logits were still finite. Transforming before the transfer sidesteps
+        # every backend view bug and moves the same number of bytes.
         if is_training and augment and generator is not None:
             images, masks, valid = _augment(
                 images, masks, valid, generator, photometric=photometric
             )
+        # A blocking copy on purpose. ``non_blocking=True`` only helps from pinned
+        # host memory, which this loader does not use; from ordinary memory it lets
+        # the transfer race the freeing of these temporaries, and the tensor that
+        # arrives on the device is garbage. It surfaced as masks full of NaN while
+        # the logits computed from the same batch were still finite.
+        images = images.to(device)
+        masks = masks.to(device)
+        valid = valid.to(device)
         if optimizer is not None:
             optimizer.zero_grad(set_to_none=True)
         with torch.set_grad_enabled(is_training):
