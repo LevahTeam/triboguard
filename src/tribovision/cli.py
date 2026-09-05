@@ -328,7 +328,7 @@ def main(argv: list[str] | None = None) -> int:
     from tribovision.data import DatasetError
     from tribovision.manifest import ManifestError
     from tribovision.predict import PredictionError
-    from tribovision.training import ConfigError
+    from tribovision.training import ConfigError, DivergenceError
     from tribovision.treatment import TreatmentDataError
 
     args = build_parser().parse_args(argv)
@@ -339,6 +339,7 @@ def main(argv: list[str] | None = None) -> int:
         ManifestError,
         DatasetError,
         ConfigError,
+        DivergenceError,
         PredictionError,
         TreatmentDataError,
     ) as exc:

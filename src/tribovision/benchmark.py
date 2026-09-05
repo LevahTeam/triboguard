@@ -24,7 +24,7 @@ from PIL import Image
 
 from tribovision import coco, evaluation, provenance
 from tribovision.baseline import segment_classical
-from tribovision.manifest import load_manifest
+from tribovision.manifest import acquisition_group, load_manifest, well_group
 from tribovision.morphology import label_objects
 from tribovision.predict import load_checkpoint, predict_mask
 
@@ -106,6 +106,8 @@ def compare(
             {
                 "image_id": record.image_id,
                 "well": record.well,
+                "acquisition_group": acquisition_group(record),
+                "well_group": well_group(record),
                 "neural_dice": neural["dice"],
                 "classical_dice": classical["dice"],
                 "neural_matching_50_95": neural_instances["mean"],
@@ -121,9 +123,16 @@ def compare(
         [row["neural_dice"] - row["classical_dice"] for row in per_image], dtype=float
     )
     wins = int(np.count_nonzero(differences > 0))
-    # Sign test: how surprising is this many wins under a coin-flip null?
     n = len(differences)
-    p_value = _sign_test_p_value(wins, n)
+    # A sign test over images would be pseudoreplication. LIVECell tiles one
+    # captured frame into several crops, and this manifest is a time-lapse of a
+    # single well, so the images are not independent trials. The reported p-value
+    # is therefore computed over acquisition groups: each field of view at each
+    # timestamp contributes one trial, decided by its mean Dice difference.
+    grouped = _group_differences(per_image, "acquisition_group")
+    group_wins = int(sum(1 for value in grouped.values() if value > 0))
+    p_value = _sign_test_p_value(group_wins, len(grouped))
+    image_level_p = _sign_test_p_value(wins, n)
     # The bar is the *stronger* of the two reference predictors, not the weaker.
     floor = max(classical_summary.get("macro_dice", 0.0), trivial_summary.get("macro_dice", 0.0))
     passed = bool(n > 0 and neural_summary["macro_dice"] > floor)
@@ -164,7 +173,19 @@ def compare(
         "dice_difference_mean": float(differences.mean()) if n else 0.0,
         "dice_difference_sd": float(differences.std(ddof=1)) if n > 1 else 0.0,
         "images_where_neural_wins": wins,
+        "independent_units": len(grouped),
+        "units_where_neural_wins": group_wins,
         "sign_test_p_value": p_value,
+        "sign_test_unit": "acquisition group (field of view at one timestamp)",
+        "sign_test_p_value_by_image_pseudoreplicated": image_level_p,
+        "independence_note": (
+            "LIVECell splits one captured frame into several crops and this manifest is "
+            "a time-lapse of one well, so images are correlated. The headline p-value "
+            "counts each acquisition group once. The per-image value is reported only to "
+            "show how much pseudoreplication would have inflated it, and must not be "
+            "quoted. Note also that all of these units come from a single well on a "
+            "single plate, so at the level of biological replication n = 1."
+        ),
         "verdict": (
             "neural beats every reference predictor"
             if passed
@@ -181,6 +202,16 @@ def compare(
             json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
         )
     return report
+
+
+def _group_differences(rows: list[dict[str, Any]], key: str) -> dict[str, float]:
+    """Average the per-image Dice difference within each independent unit."""
+    buckets: dict[str, list[float]] = {}
+    for row in rows:
+        buckets.setdefault(str(row[key]), []).append(
+            float(row["neural_dice"]) - float(row["classical_dice"])
+        )
+    return {name: float(np.mean(values)) for name, values in buckets.items()}
 
 
 def _sign_test_p_value(wins: int, trials: int) -> float:

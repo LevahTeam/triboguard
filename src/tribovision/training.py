@@ -15,6 +15,7 @@ Design decisions that follow directly from the audit:
 from __future__ import annotations
 
 import json
+import math
 import os
 import random
 from dataclasses import asdict, dataclass, replace
@@ -38,6 +39,17 @@ class ConfigError(ValueError):
     """Raised when a training configuration cannot produce a meaningful run."""
 
 
+class DivergenceError(RuntimeError):
+    """Raised when the loss stops being a finite number.
+
+    A diverged run does not look broken from the outside: the loop keeps going,
+    ``best_model.pt`` still holds whatever was saved before the blow-up, and
+    ``metrics.json`` reports a plausible score from that stale checkpoint. That is
+    the same "looks trained, is broken" shape as the BatchNorm bug this project
+    already had once, so it is made loud instead of silent.
+    """
+
+
 @dataclass(frozen=True)
 class TrainConfig:
     data_dir: Path
@@ -52,6 +64,7 @@ class TrainConfig:
     base_channels: int = 32
     depth: int = 3
     augment: bool = True
+    photometric_augment: bool = True
     weight_decay: float = 1e-4
     patience: int = 0
     group_by: str = "well"
@@ -163,16 +176,69 @@ def _augment(
     masks: torch.Tensor,
     valid: torch.Tensor,
     generator: torch.Generator,
+    *,
+    photometric: bool = True,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-    """Flips and quarter turns only: transforms that cannot change cell geometry."""
+    """Augment each sample independently.
+
+    Two things were wrong with the first version. It drew one transform per
+    *batch*, so four images received the same flip and the effective augmentation
+    diversity was a quarter of what the code appeared to provide. And it was
+    geometry-only, which left the model brittle to exactly the nuisance variables
+    that change between microscopes: a measured stress test showed it collapsing
+    to labelling every pixel foreground under moderate sensor noise, scoring the
+    trivial predictor's Dice while being completely uninformative.
+
+    Geometric transforms are restricted to flips and quarter turns, which cannot
+    change a cell's area, perimeter or shape. Photometric transforms perturb
+    contrast, offset, noise and blur — the things a different camera changes —
+    and are applied to the image only, never to the mask.
+    """
+    augmented_images = []
+    augmented_masks = []
+    augmented_valid = []
+    for index in range(images.shape[0]):
+        image, mask, keep = images[index], masks[index], valid[index]
+        if torch.rand((), generator=generator).item() < 0.5:
+            image, mask, keep = (t.flip(-1) for t in (image, mask, keep))
+        if torch.rand((), generator=generator).item() < 0.5:
+            image, mask, keep = (t.flip(-2) for t in (image, mask, keep))
+        turns = int(torch.randint(0, 4, (), generator=generator).item())
+        if turns:
+            image, mask, keep = (torch.rot90(t, turns, (-2, -1)) for t in (image, mask, keep))
+        if photometric:
+            image = _photometric(image, keep, generator)
+        augmented_images.append(image)
+        augmented_masks.append(mask)
+        augmented_valid.append(keep)
+    return (
+        torch.stack(augmented_images),
+        torch.stack(augmented_masks),
+        torch.stack(augmented_valid),
+    )
+
+
+def _photometric(
+    image: torch.Tensor, valid: torch.Tensor, generator: torch.Generator
+) -> torch.Tensor:
+    """Perturb contrast, offset, noise and sharpness on one already-standardised image."""
+    device = image.device
+    scale = 0.7 + 0.6 * torch.rand((), generator=generator).item()
+    offset = (torch.rand((), generator=generator).item() - 0.5) * 0.6
+    image = image * scale + offset
     if torch.rand((), generator=generator).item() < 0.5:
-        images, masks, valid = (t.flip(-1) for t in (images, masks, valid))
-    if torch.rand((), generator=generator).item() < 0.5:
-        images, masks, valid = (t.flip(-2) for t in (images, masks, valid))
-    turns = int(torch.randint(0, 4, (), generator=generator).item())
-    if turns:
-        images, masks, valid = (torch.rot90(t, turns, (-2, -1)) for t in (images, masks, valid))
-    return images, masks, valid
+        sigma = 0.05 + 0.25 * torch.rand((), generator=generator).item()
+        noise = torch.randn(image.shape, generator=generator).to(device) * sigma
+        image = image + noise
+    if torch.rand((), generator=generator).item() < 0.3:
+        # A 3x3 box blur stands in for a softer objective or a defocused frame.
+        blurred = torch.nn.functional.avg_pool2d(
+            image.unsqueeze(0), kernel_size=3, stride=1, padding=1
+        ).squeeze(0)
+        weight = torch.rand((), generator=generator).item()
+        image = (1 - weight) * image + weight * blurred
+    # Padding must stay exactly zero, or the model learns to read the border.
+    return image * valid
 
 
 def _run_epoch(
@@ -183,6 +249,7 @@ def _run_epoch(
     *,
     generator: torch.Generator | None = None,
     augment: bool = False,
+    photometric: bool = True,
 ) -> dict[str, float]:
     """One pass over *loader*, accumulating per-sample rather than per-batch."""
     is_training = optimizer is not None
@@ -198,7 +265,9 @@ def _run_epoch(
         masks = masks.to(device, non_blocking=True)
         valid = valid.to(device, non_blocking=True)
         if is_training and augment and generator is not None:
-            images, masks, valid = _augment(images, masks, valid, generator)
+            images, masks, valid = _augment(
+                images, masks, valid, generator, photometric=photometric
+            )
         if optimizer is not None:
             optimizer.zero_grad(set_to_none=True)
         with torch.set_grad_enabled(is_training):
@@ -210,7 +279,15 @@ def _run_epoch(
                 optimizer.step()
 
         batch = images.shape[0]
-        loss_total += float(loss.detach().item()) * batch
+        loss_value = float(loss.detach().item())
+        if not math.isfinite(loss_value):
+            raise DivergenceError(
+                f"Loss became {loss_value} during "
+                f"{'training' if is_training else 'evaluation'}. The run is diverging; "
+                "lower --learning-rate, or use --device cpu if this only happens on an "
+                "accelerator."
+            )
+        loss_total += loss_value * batch
         samples += batch
         with torch.no_grad():
             predicted = ((torch.sigmoid(logits.detach()) >= 0.5) & (valid > 0.5)).float()
@@ -333,6 +410,7 @@ def train(config: TrainConfig, *, progress: bool = True) -> dict[str, Any]:
             optimizer,
             generator=augment_generator,
             augment=config.augment,
+            photometric=config.photometric_augment,
         )
         with torch.no_grad():
             val_metrics = _run_epoch(model, loaders["val"], device)

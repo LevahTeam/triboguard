@@ -228,3 +228,117 @@ def build_synthetic_experiment(
         writer.writeheader()
         writer.writerows(rows)
     return manifest
+
+
+CROWDED_WIDTH = 64
+CROWDED_HEIGHT = 48
+
+
+def _crowded_frame(
+    rng: np.random.Generator, cells: list[tuple[int, int, int]]
+) -> tuple[np.ndarray, np.ndarray]:
+    """A textured, high-confluence frame: the case where a fixed rule struggles.
+
+    A flat background with bright squares is separable by a single threshold, so
+    the classical baseline scores a perfect 1.0 on it and no learned model can
+    ever clear the acceptance gate. That made the gate's pass branch untestable.
+    These frames add an illumination gradient, background texture, and cells whose
+    interiors are close to the background in intensity — so local contrast finds
+    edges rather than cells, exactly as it does on real phase-contrast images.
+    """
+    ys, xs = np.mgrid[0:CROWDED_HEIGHT, 0:CROWDED_WIDTH]
+    background = 90 + 40 * (xs / CROWDED_WIDTH) + 12 * np.sin(ys / 3.0)
+    background = background + rng.normal(0, 4, background.shape)
+    mask = np.zeros((CROWDED_HEIGHT, CROWDED_WIDTH), dtype=np.uint8)
+    image = background.copy()
+    for cy, cx, radius in cells:
+        blob = ((ys - cy) ** 2 + (xs - cx) ** 2) <= radius**2
+        rim = (((ys - cy) ** 2 + (xs - cx) ** 2) <= radius**2) & (
+            ((ys - cy) ** 2 + (xs - cx) ** 2) >= (radius - 1.5) ** 2
+        )
+        mask |= blob
+        # Interior barely differs from background; only the rim is high contrast.
+        image[blob] = background[blob] + 10
+        image[rim] = background[rim] + 70
+    return np.clip(image, 0, 255).astype(np.uint8), mask
+
+
+def build_crowded_dataset(root: Path, *, images_per_split: int = 3) -> Path:
+    """A dataset where all-foreground beats the classical rule, as on real data."""
+    wells = {"train": "A1", "val": "B1", "test": "C1"}
+    location_offset = {"train": 0, "val": 10, "test": 20}
+    (root / "annotations").mkdir(parents=True, exist_ok=True)
+    (root / "images" / "A172").mkdir(parents=True, exist_ok=True)
+    (root / "manifests").mkdir(parents=True, exist_ok=True)
+
+    rng = np.random.default_rng(20260905)
+    annotations: list[dict[str, Any]] = []
+    image_id = 0
+    for split in ("train", "val", "test"):
+        lines: list[str] = []
+        for index in range(images_per_split):
+            image_id += 1
+            cells = [
+                (12, 14, 9),
+                (12, 40, 10),
+                (34, 20, 10),
+                (34, 48, 9),
+                (24, 32, 8),
+            ]
+            pixels, mask = _crowded_frame(rng, cells)
+            location = location_offset[split] + index + 1
+            file_name = f"A172_Phase_{wells[split]}_{location}_01d00h00m_1.tif"
+            image_path = root / "images" / "A172" / file_name
+            Image.fromarray(pixels).save(image_path)
+
+            # One RLE annotation carrying the exact union mask.
+            from pycocotools import mask as mask_utils
+
+            encoded = mask_utils.encode(np.asfortranarray(mask))
+            annotation_id = image_id * 10
+            annotations.append(
+                {
+                    "id": annotation_id,
+                    "image_id": image_id,
+                    "category_id": 1,
+                    "segmentation": {
+                        "size": [CROWDED_HEIGHT, CROWDED_WIDTH],
+                        "counts": encoded["counts"].decode("ascii"),
+                    },
+                    "area": int(mask.sum()),
+                    "bbox": [0, 0, CROWDED_WIDTH, CROWDED_HEIGHT],
+                    "iscrowd": 0,
+                }
+            )
+            lines.append(
+                json.dumps(
+                    {
+                        "image_id": image_id,
+                        "image_path": str(image_path.relative_to(root)),
+                        "annotation_path": "annotations/source.json",
+                        "annotation_ids": [annotation_id],
+                        "width": CROWDED_WIDTH,
+                        "height": CROWDED_HEIGHT,
+                        "cell_type": "A172",
+                        "well": wells[split],
+                        "split": split,
+                        "official_split": split,
+                        "source_file_name": file_name,
+                        "image_sha256": sha256_file(image_path),
+                        "micrometers_per_pixel": None,
+                    },
+                    sort_keys=True,
+                )
+            )
+        (root / "manifests" / f"{split}.jsonl").write_text(
+            "\n".join(lines) + "\n", encoding="utf-8"
+        )
+    (root / "annotations" / "source.json").write_text(
+        json.dumps({"images": [], "annotations": annotations}), encoding="utf-8"
+    )
+    return root
+
+
+@pytest.fixture
+def crowded_training_data(tmp_path: Path) -> Path:
+    return build_crowded_dataset(tmp_path / "crowded")
