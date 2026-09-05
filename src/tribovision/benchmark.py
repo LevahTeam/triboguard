@@ -1,0 +1,163 @@
+"""Head-to-head evaluation of the trained model against the classical baseline.
+
+A learned segmenter is only worth reporting if it beats a fixed, transparent rule
+on images neither of them was tuned on. This module runs both on the same
+held-out manifest, reports the same metrics for each, and returns a pass/fail
+verdict so the comparison cannot quietly be skipped.
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from typing import Any
+
+import numpy as np
+import torch
+from PIL import Image
+
+from tribovision import coco, evaluation, provenance
+from tribovision.baseline import segment_classical
+from tribovision.manifest import load_manifest
+from tribovision.morphology import label_objects
+from tribovision.predict import load_checkpoint, predict_mask
+
+
+def _annotations_for(
+    record: Any, cache: dict[Path, dict[int, dict[str, Any]]]
+) -> list[dict[str, Any]]:
+    if record.annotation_path not in cache:
+        payload = json.loads(record.annotation_path.read_text(encoding="utf-8"))
+        cache[record.annotation_path] = {
+            int(annotation["id"]): annotation for annotation in payload.get("annotations", [])
+        }
+    index = cache[record.annotation_path]
+    return [index[annotation_id] for annotation_id in record.annotation_ids]
+
+
+def compare(
+    checkpoint: Path,
+    manifest_path: Path,
+    output_dir: Path | None = None,
+    *,
+    device: str = "auto",
+    threshold: float = 0.5,
+    max_images: int | None = None,
+    background_radius: float = 7.0,
+    min_area: int = 20,
+    verify_hashes: bool = True,
+) -> dict[str, Any]:
+    """Score both segmenters on the same held-out images and decide the verdict."""
+    from tribovision.training import resolve_device
+
+    torch_device = resolve_device(device)
+    model, payload = load_checkpoint(Path(checkpoint), torch_device)
+    preprocessing = payload.get("preprocessing") or {}
+    image_size = int(preprocessing.get("image_size") or 512)
+
+    records = load_manifest(Path(manifest_path), verify_hashes=verify_hashes)
+    if max_images is not None:
+        records = records[:max_images]
+    cache: dict[Path, dict[int, dict[str, Any]]] = {}
+
+    neural_rows: list[dict[str, Any]] = []
+    classical_rows: list[dict[str, Any]] = []
+    per_image: list[dict[str, Any]] = []
+
+    for record in records:
+        annotations = _annotations_for(record, cache)
+        true_labels = coco.label_image(annotations, record.width, record.height)
+        truth = (true_labels > 0).astype(np.uint8)
+        with Image.open(record.image_path) as handle:
+            image = handle.convert("L")
+
+        with torch.no_grad():
+            neural_mask, _ = predict_mask(
+                model, image, image_size=image_size, device=torch_device, threshold=threshold
+            )
+        classical_mask = segment_classical(
+            image, background_radius=background_radius, min_area=min_area
+        )
+
+        neural = evaluation.semantic_metrics(neural_mask, truth)
+        classical = evaluation.semantic_metrics(classical_mask, truth)
+        neural_instances = evaluation.matching_score(
+            label_objects(neural_mask, method="watershed_split", min_area=min_area), true_labels
+        )
+        classical_instances = evaluation.matching_score(
+            label_objects(classical_mask, method="watershed_split", min_area=min_area),
+            true_labels,
+        )
+        neural_rows.append(neural)
+        classical_rows.append(classical)
+        per_image.append(
+            {
+                "image_id": record.image_id,
+                "well": record.well,
+                "neural_dice": neural["dice"],
+                "classical_dice": classical["dice"],
+                "neural_matching_50_95": neural_instances["mean"],
+                "classical_matching_50_95": classical_instances["mean"],
+            }
+        )
+
+    neural_summary = evaluation.aggregate(neural_rows)
+    classical_summary = evaluation.aggregate(classical_rows)
+    differences = np.array(
+        [row["neural_dice"] - row["classical_dice"] for row in per_image], dtype=float
+    )
+    wins = int(np.count_nonzero(differences > 0))
+    # Sign test: how surprising is this many wins under a coin-flip null?
+    n = len(differences)
+    p_value = _sign_test_p_value(wins, n)
+    passed = bool(neural_summary["macro_dice"] > classical_summary["macro_dice"])
+
+    report: dict[str, Any] = {
+        "manifest": provenance.relative_to_repo(Path(manifest_path)),
+        "checkpoint": provenance.relative_to_repo(Path(checkpoint)),
+        "images": n,
+        "neural": {
+            **neural_summary,
+            "matching_score_50_95": float(
+                np.mean([row["neural_matching_50_95"] for row in per_image])
+            )
+            if per_image
+            else 0.0,
+        },
+        "classical": {
+            **classical_summary,
+            "matching_score_50_95": float(
+                np.mean([row["classical_matching_50_95"] for row in per_image])
+            )
+            if per_image
+            else 0.0,
+        },
+        "dice_difference_mean": float(differences.mean()) if n else 0.0,
+        "dice_difference_sd": float(differences.std(ddof=1)) if n > 1 else 0.0,
+        "images_where_neural_wins": wins,
+        "sign_test_p_value": p_value,
+        "verdict": "neural beats classical" if passed else "neural does NOT beat classical",
+        "passed": passed,
+        "per_image": per_image,
+        "environment": provenance.environment(),
+    }
+    if output_dir is not None:
+        output_dir = Path(output_dir).resolve()
+        output_dir.mkdir(parents=True, exist_ok=True)
+        (output_dir / "comparison.json").write_text(
+            json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+    return report
+
+
+def _sign_test_p_value(wins: int, trials: int) -> float:
+    """Two-sided exact binomial p-value for *wins* out of *trials* at p=0.5."""
+    if trials == 0:
+        return 1.0
+    from math import comb
+
+    def tail(k: int) -> float:
+        return sum(comb(trials, i) for i in range(k, trials + 1)) / 2**trials
+
+    extreme = max(wins, trials - wins)
+    return float(min(1.0, 2 * tail(extreme)))
