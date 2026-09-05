@@ -46,6 +46,12 @@ A real 40-epoch run now exists at `runs/baseline/`:
 | Validation (well B7, unseen) | 0.949 | 0.953 | 0.904 |
 | **Test (well C7, untouched)** | **0.952** | **0.957** | **0.910** |
 
+The comparison in the earlier draft of this response quoted only the classical
+baseline (0.425). That was a flattering choice: these frames average 59%
+foreground, so labelling every pixel a cell scores 0.710. `compare` now scores
+that trivial predictor too and passes only if the model beats the strongest
+reference. The honest margin is +0.242 Dice and +0.316 IoU.
+
 ### 1.3 No neural inference workflow exists
 **Fixed.** `tribovision predict` loads a checkpoint and analyses any image or
 directory, writing masks, overlays, per-object morphology and a report.

@@ -27,7 +27,7 @@ That is a real project. What it is not:
 
 | Claim | Evidence | Where |
 |---|---|---|
-| The segmenter beats a transparent non-learned rule on unseen data | Test Dice 0.952 vs 0.425 on held-out well C7; wins 60/60 images, sign test p = 1.7e-18 | `runs/comparison/comparison.json` |
+| The segmenter beats every non-learned reference on unseen data | Test Dice 0.952, against 0.710 for an all-foreground predictor and 0.425 for the classical rule, on held-out well C7; wins 60/60 images against the classical rule, sign test p = 1.7e-18 | `runs/comparison/comparison.json` |
 | The result is not from split leakage | Train = wells A7+D7, val = B7, test = C7; zero shared wells or acquisition groups, verified at load time | `tribovision verify`, `runs/baseline/metrics.json` → `split_check` |
 | The result is not a lucky seed | Three independent seeds reported with spread | `runs/seed_*/metrics.json`, `docs/RESULTS.md` |
 | Masks match the COCO reference exactly | Bit-identical to `pycocotools` on real LIVECell polygons | `tests/test_coco.py` |
@@ -53,6 +53,13 @@ In order, each step blocked by the one before it:
    leave-one-day-out prediction result — including if it is negative.
 
 ## Known limitations, stated rather than discovered
+
+**The trivial-predictor floor.** These frames average 59% foreground. A predictor
+that labels every pixel a cell scores 0.710 Dice, so quoting only the classical
+baseline's 0.425 would flatter the result. The real margin is +0.242 Dice and
++0.316 IoU over the trivial predictor. IoU is the more honest headline number for
+crowded frames, because Dice is generous to over-segmentation. Any future report
+of this project should quote both, and should quote the trivial floor alongside.
 
 **Instance separation.** The model is semantic. Instance matching (0.50:0.95) is
 0.049, which is better than the classical baseline's 0.007 but far from usable

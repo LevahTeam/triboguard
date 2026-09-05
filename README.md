@@ -24,13 +24,21 @@ effect. There is likewise no nanoparticle or nanorobot component of any kind.
 Trained on LIVECell A172 phase-contrast images, evaluated on a **held-out well
 the model never saw** (`C7`, 60 images):
 
-| Segmenter | Test Dice (macro) | Test IoU (macro) | Instance matching 0.50:0.95 |
+| Predictor | Test Dice (macro) | Test IoU (macro) | Instance matching 0.50:0.95 |
 |---|---|---|---|
+| Every pixel labelled cell — no learning at all | 0.710 | 0.593 | — |
 | Classical local-contrast + Otsu | 0.425 | 0.275 | 0.007 |
 | TriboVision U-Net | **0.952** | **0.909** | 0.049 |
 
-The neural model wins on 60 of 60 held-out images (exact sign test
-p = 1.7 × 10⁻¹⁸). Reproduce the comparison yourself:
+**Read the first row before the last one.** These frames average 59% foreground,
+so a predictor that labels every single pixel a cell already scores 0.710 Dice —
+much better than the classical rule. That trivial predictor, not the classical
+one, is the floor this model has to clear, and it clears it by +0.242 Dice. IoU
+separates them far more sharply (+0.316), which is why both are reported.
+
+Against the classical rule the model wins on 60 of 60 held-out images (exact sign
+test p = 1.7 × 10⁻¹⁸). `tribovision compare` scores all of these and passes only
+if the model beats the *strongest* reference. Reproduce it yourself:
 
 ```bash
 tribovision compare --checkpoint runs/baseline/best_model.pt

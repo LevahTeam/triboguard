@@ -1,9 +1,15 @@
-"""Head-to-head evaluation of the trained model against the classical baseline.
+"""Head-to-head evaluation of the trained model against reference predictors.
 
-A learned segmenter is only worth reporting if it beats a fixed, transparent rule
-on images neither of them was tuned on. This module runs both on the same
-held-out manifest, reports the same metrics for each, and returns a pass/fail
-verdict so the comparison cannot quietly be skipped.
+A learned segmenter is only worth reporting if it beats predictors that required
+no learning at all, on images none of them was tuned on.
+
+Two references are scored, not one, because the classical rule alone is a
+flattering comparison. LIVECell A172 frames average 59% foreground, so a
+predictor that simply labels **every pixel a cell** scores 0.710 macro Dice on
+this test set — far above the 0.425 of the local-contrast rule. Reporting only
+the classical number would make the model look better than it is. The trivial
+predictor is therefore the floor the verdict is measured against, and the report
+states the margin over it explicitly.
 """
 
 from __future__ import annotations
@@ -62,7 +68,10 @@ def compare(
 
     neural_rows: list[dict[str, Any]] = []
     classical_rows: list[dict[str, Any]] = []
+    all_foreground_rows: list[dict[str, Any]] = []
+    all_background_rows: list[dict[str, Any]] = []
     per_image: list[dict[str, Any]] = []
+    foreground_fractions: list[float] = []
 
     for record in records:
         annotations = _annotations_for(record, cache)
@@ -81,6 +90,9 @@ def compare(
 
         neural = evaluation.semantic_metrics(neural_mask, truth)
         classical = evaluation.semantic_metrics(classical_mask, truth)
+        all_foreground_rows.append(evaluation.semantic_metrics(np.ones_like(truth), truth))
+        all_background_rows.append(evaluation.semantic_metrics(np.zeros_like(truth), truth))
+        foreground_fractions.append(float(truth.mean()))
         neural_instances = evaluation.matching_score(
             label_objects(neural_mask, method="watershed_split", min_area=min_area), true_labels
         )
@@ -103,6 +115,8 @@ def compare(
 
     neural_summary = evaluation.aggregate(neural_rows)
     classical_summary = evaluation.aggregate(classical_rows)
+    trivial_summary = evaluation.aggregate(all_foreground_rows)
+    empty_summary = evaluation.aggregate(all_background_rows)
     differences = np.array(
         [row["neural_dice"] - row["classical_dice"] for row in per_image], dtype=float
     )
@@ -110,7 +124,9 @@ def compare(
     # Sign test: how surprising is this many wins under a coin-flip null?
     n = len(differences)
     p_value = _sign_test_p_value(wins, n)
-    passed = bool(neural_summary["macro_dice"] > classical_summary["macro_dice"])
+    # The bar is the *stronger* of the two reference predictors, not the weaker.
+    floor = max(classical_summary.get("macro_dice", 0.0), trivial_summary.get("macro_dice", 0.0))
+    passed = bool(n > 0 and neural_summary["macro_dice"] > floor)
 
     report: dict[str, Any] = {
         "manifest": provenance.relative_to_repo(Path(manifest_path)),
@@ -132,11 +148,28 @@ def compare(
             if per_image
             else 0.0,
         },
+        "all_foreground": trivial_summary,
+        "all_background": empty_summary,
+        "mean_foreground_fraction": (
+            float(np.mean(foreground_fractions)) if foreground_fractions else 0.0
+        ),
+        "reference_floor_macro_dice": floor,
+        "margin_over_reference_floor": (float(neural_summary["macro_dice"] - floor) if n else 0.0),
+        "reference_note": (
+            "all_foreground labels every pixel a cell. It requires no learning and "
+            "scores well whenever frames are crowded, so it — not the classical rule — "
+            "is the floor a learned segmenter has to clear. IoU separates them far more "
+            "sharply than Dice does."
+        ),
         "dice_difference_mean": float(differences.mean()) if n else 0.0,
         "dice_difference_sd": float(differences.std(ddof=1)) if n > 1 else 0.0,
         "images_where_neural_wins": wins,
         "sign_test_p_value": p_value,
-        "verdict": "neural beats classical" if passed else "neural does NOT beat classical",
+        "verdict": (
+            "neural beats every reference predictor"
+            if passed
+            else "neural does NOT clear the reference floor"
+        ),
         "passed": passed,
         "per_image": per_image,
         "environment": provenance.environment(),
