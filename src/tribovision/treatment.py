@@ -23,13 +23,14 @@ import csv
 import dataclasses
 import json
 import math
+import warnings
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 import numpy as np
-from scipy import optimize, stats
+from scipy import optimize, special, stats
 
 REQUIRED_COLUMNS = (
     "image_path",
@@ -243,10 +244,14 @@ def benjamini_hochberg(p_values: list[float]) -> list[float]:
 def four_parameter_logistic(
     concentration: np.ndarray, bottom: float, top: float, ic50: float, hill: float
 ) -> np.ndarray:
-    """Standard 4PL dose-response curve, fitted on log10 concentration."""
-    return bottom + (top - bottom) / (
-        1.0 + 10.0 ** ((math.log10(max(ic50, 1e-12)) - concentration) * hill)
-    )
+    """Standard 4PL dose-response curve, fitted on log10 concentration.
+
+    Written through ``expit`` rather than ``1 / (1 + 10**x)``. The direct form
+    overflows for the extreme parameter values an optimiser tries on its way to a
+    fit, which turns a normal search step into a numerical warning.
+    """
+    exponent = (math.log10(max(ic50, 1e-12)) - np.asarray(concentration, dtype=float)) * hill
+    return bottom + (top - bottom) * special.expit(-exponent * math.log(10.0))
 
 
 def fit_dose_response(concentrations: np.ndarray, responses: np.ndarray) -> dict[str, Any]:
@@ -265,12 +270,19 @@ def fit_dose_response(concentrations: np.ndarray, responses: np.ndarray) -> dict
         float(np.median(concentrations[positive])),
         1.0,
     ]
-    try:
-        parameters, _ = optimize.curve_fit(
-            four_parameter_logistic, log_concentration, values, p0=guess, maxfev=20000
-        )
-    except (RuntimeError, ValueError, TypeError) as exc:
-        return {"fitted": False, "reason": f"Curve fit did not converge: {exc}"}
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always", optimize.OptimizeWarning)
+        try:
+            parameters, _ = optimize.curve_fit(
+                four_parameter_logistic, log_concentration, values, p0=guess, maxfev=20000
+            )
+        except (RuntimeError, ValueError, TypeError) as exc:
+            return {"fitted": False, "reason": f"Curve fit did not converge: {exc}"}
+    # An unestimable covariance means the data barely constrain the parameters.
+    # That is a fact about the experiment, so it is reported rather than hidden.
+    covariance_estimated = not any(
+        issubclass(entry.category, optimize.OptimizeWarning) for entry in caught
+    )
 
     predicted = four_parameter_logistic(log_concentration, *parameters)
     residual = values - predicted
@@ -281,20 +293,24 @@ def fit_dose_response(concentrations: np.ndarray, responses: np.ndarray) -> dict
 
     rng = np.random.default_rng(0)
     ic50_samples: list[float] = []
-    for _ in range(400):
-        index = rng.integers(0, len(values), len(values))
-        try:
-            sample, _ = optimize.curve_fit(
-                four_parameter_logistic,
-                log_concentration[index],
-                values[index],
-                p0=parameters,
-                maxfev=8000,
-            )
+    with warnings.catch_warnings():
+        # Resamples that fail to converge are discarded below; the optimiser's
+        # advisory warnings about them are not findings about this project.
+        warnings.simplefilter("ignore", optimize.OptimizeWarning)
+        for _ in range(400):
+            index = rng.integers(0, len(values), len(values))
+            try:
+                sample, _ = optimize.curve_fit(
+                    four_parameter_logistic,
+                    log_concentration[index],
+                    values[index],
+                    p0=parameters,
+                    maxfev=8000,
+                )
+            except (RuntimeError, ValueError, TypeError):
+                continue
             if np.isfinite(sample[2]) and sample[2] > 0:
                 ic50_samples.append(float(sample[2]))
-        except (RuntimeError, ValueError, TypeError):
-            continue
     interval = (
         [float(np.percentile(ic50_samples, 2.5)), float(np.percentile(ic50_samples, 97.5))]
         if len(ic50_samples) >= 50
@@ -306,6 +322,7 @@ def fit_dose_response(concentrations: np.ndarray, responses: np.ndarray) -> dict
     )
     return {
         "fitted": True,
+        "covariance_estimated": covariance_estimated,
         "bottom": float(parameters[0]),
         "top": float(parameters[1]),
         "ic50_ug_per_ml": float(parameters[2]),
@@ -487,27 +504,26 @@ def analyse(
     p_values: list[float] = []
     for name in usable:
         feature = np.array([float(row[name]) for row in well_rows], dtype=float)
-        correlation = stats.spearmanr(concentrations, feature)
+        correlation = _safe_spearman(concentrations, feature)
         per_day: dict[str, Any] = {}
         for day in sorted({str(row["experiment_day"]) for row in well_rows}):
             selection = np.array([str(row["experiment_day"]) == day for row in well_rows])
-            if selection.sum() >= 3 and len(np.unique(concentrations[selection])) >= 2:
-                day_correlation = stats.spearmanr(concentrations[selection], feature[selection])
+            if selection.sum() >= 3:
                 per_day[day] = {
-                    "rho": float(day_correlation.statistic),
-                    "p_value": float(day_correlation.pvalue),
+                    **_safe_spearman(concentrations[selection], feature[selection]),
                     "wells": int(selection.sum()),
                 }
         dose_response[name] = {
-            "spearman_rho": float(correlation.statistic),
-            "p_value": float(correlation.pvalue),
+            **correlation,
             "wells": len(well_rows),
             "per_day": per_day,
             "fit": fit_dose_response(concentrations, feature),
         }
-        p_values.append(float(correlation.pvalue))
+        p_values.append(
+            float("nan") if correlation["p_value"] is None else float(correlation["p_value"])
+        )
     for name, q_value in zip(usable, benjamini_hochberg(p_values), strict=True):
-        dose_response[name]["q_value_bh"] = q_value
+        dose_response[name]["q_value_bh"] = None if np.isnan(q_value) else q_value
         dose_response[name]["significant_at_q_0.05"] = bool(q_value < 0.05)
     for name in constant:
         dose_response[name] = {
