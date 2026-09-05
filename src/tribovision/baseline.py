@@ -105,11 +105,13 @@ def run_baseline(
     output_dir.mkdir(parents=True, exist_ok=True)
     _clear_previous_artifacts(output_dir)
 
-    calibration = morphology.Calibration(
-        micrometers_per_pixel
-        if micrometers_per_pixel is not None
-        else records[0].micrometers_per_pixel
-    )
+    supplied = {record.micrometers_per_pixel for record in records}
+    if micrometers_per_pixel is None and len(supplied) > 1:
+        raise ValueError(
+            "This manifest mixes different micrometers_per_pixel values "
+            f"({sorted(v for v in supplied if v is not None)}). Pass an explicit "
+            "--micrometers-per-pixel, or split the manifest by calibration."
+        )
 
     annotation_cache: dict[Path, dict[int, dict[str, Any]]] = {}
     result_rows: list[dict[str, Any]] = []
@@ -162,6 +164,11 @@ def run_baseline(
                 **pixel_metrics,
             }
         )
+        calibration = morphology.Calibration(
+            micrometers_per_pixel
+            if micrometers_per_pixel is not None
+            else record.micrometers_per_pixel
+        )
         feature_rows.extend(
             morphology.measure(
                 predicted_labels,
@@ -191,7 +198,9 @@ def run_baseline(
             "background_radius": background_radius,
             "min_area": min_area,
             "instance_method": instance_method,
-            "micrometers_per_pixel": calibration.micrometers_per_pixel,
+            "micrometers_per_pixel": (
+                micrometers_per_pixel if micrometers_per_pixel is not None else next(iter(supplied))
+            ),
         },
         "manifest": provenance.relative_to_repo(manifest_path),
         "overall": {

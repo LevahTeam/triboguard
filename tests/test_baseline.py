@@ -128,3 +128,22 @@ def test_morphology_csv_records_the_instance_method(
     with (output / "morphology_features.csv").open() as handle:
         rows = list(csv.DictReader(handle))
     assert rows and all(row["instance_method"] == "watershed_split" for row in rows)
+
+
+def test_mixed_calibrations_are_refused_rather_than_silently_picking_one(
+    tiny_training_data: Path, tmp_path: Path
+) -> None:
+    """Using the first row's scale for every image would misreport the rest."""
+
+    def mutate(rows: list[dict]) -> list[dict]:
+        rows[0]["micrometers_per_pixel"] = 0.5
+        rows[1]["micrometers_per_pixel"] = 1.25
+        return rows
+
+    path = rewrite_manifest(tiny_training_data, "test", mutate)
+    with pytest.raises(ValueError, match="mixes different micrometers_per_pixel"):
+        run_baseline(path, tmp_path / "out", max_images=2)
+
+    # An explicit override resolves the ambiguity.
+    report = run_baseline(path, tmp_path / "out", max_images=2, micrometers_per_pixel=0.75)
+    assert report["parameters"]["micrometers_per_pixel"] == 0.75

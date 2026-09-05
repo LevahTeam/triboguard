@@ -207,14 +207,14 @@ def average_precision(
         cumulative_fp = np.cumsum(1.0 - hits)
         recalls = cumulative_tp / n_true
         precisions = cumulative_tp / np.maximum(cumulative_tp + cumulative_fp, 1e-12)
-        # 101-point interpolated precision, as in the COCO evaluator.
+        # 101-point interpolated precision, as in the COCO evaluator. Recall levels
+        # the predictions never reach contribute zero.
         precisions = np.maximum.accumulate(precisions[::-1])[::-1]
         grid = np.linspace(0.0, 1.0, 101)
         indices = np.searchsorted(recalls, grid, side="left")
-        sampled = np.where(
-            indices < len(precisions), precisions[np.minimum(indices, len(precisions) - 1)], 0.0
-        )
-        sampled[indices >= len(precisions)] = 0.0
+        sampled = np.zeros_like(grid)
+        reachable = indices < len(precisions)
+        sampled[reachable] = precisions[indices[reachable]]
         value = float(sampled.mean())
         results[f"at_{threshold:.2f}"] = value
         values.append(value)
