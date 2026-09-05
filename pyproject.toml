@@ -1,0 +1,73 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tribovision"
+version = "0.2.0"
+description = "A reproducible, auditable pipeline for label-free cell segmentation and treatment morphometry."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "TriboVision contributors" }]
+dependencies = [
+  "numpy>=1.24,<3",
+  "Pillow>=10,<12",
+  "remotezip>=0.12,<1",
+  "torch>=2.2,<3",
+  # Required, not optional: masks must be bit-identical to every other COCO tool.
+  "pycocotools>=2.0.7,<3",
+  # Connected components, distance transforms, convex hulls, and the statistics
+  # used by the dose-response analysis.
+  "scipy>=1.10,<2",
+]
+
+[project.optional-dependencies]
+# Retained so existing instructions keep working; RLE support is now always on.
+rle = ["pycocotools>=2.0.7,<3"]
+dev = [
+  "pytest>=8,<9",
+  "pytest-cov>=5,<7",
+  "ruff>=0.6,<1",
+  "mypy>=1.10,<2",
+]
+
+[project.scripts]
+tribovision = "tribovision.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-q --strict-markers"
+testpaths = ["tests"]
+filterwarnings = [
+  "error::RuntimeWarning",
+  # Upstream: pycocotools' C extension does not yet implement NumPy 2's __array__
+  # copy keyword. It is a deprecation in our dependency, not in this project.
+  "ignore:__array__ implementation doesn't accept a copy keyword:DeprecationWarning",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["tribovision"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+extend-exclude = ["web"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.10"
+files = ["src/tribovision"]
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_implicit_optional = true

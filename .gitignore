@@ -1,0 +1,23 @@
+.DS_Store
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+
+# Downloaded research data and generated model artifacts are intentionally local.
+data/
+runs/
+
+# The web front end is tracked in its own repository.
+web/
+
+# Source PDFs are third-party documents whose redistribution rights have not been
+# confirmed. Keep them out of version control until that is settled.
+*.pdf
