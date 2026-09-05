@@ -226,3 +226,52 @@ def test_full_profile_requires_confirmation(tmp_path: Path, capsys) -> None:
     code = main(["prepare-livecell", "--profile", "full", "--data-dir", str(tmp_path)])
     assert code == 1
     assert "--confirm-full-download" in capsys.readouterr().err
+
+
+def test_compare_exits_zero_when_the_model_actually_wins(tmp_path: Path, capsys) -> None:
+    """The success exit path — untested while every fixture made the gate unwinnable."""
+    from conftest import build_crowded_dataset
+
+    data = build_crowded_dataset(tmp_path / "crowded")
+    code, _ = run(
+        [
+            "train",
+            "--data-dir",
+            str(data),
+            "--output-dir",
+            str(tmp_path / "run"),
+            "--epochs",
+            "60",
+            "--batch-size",
+            "2",
+            "--image-size",
+            "64",
+            "--base-channels",
+            "8",
+            "--depth",
+            "2",
+            "--learning-rate",
+            "0.003",
+            "--device",
+            "cpu",
+        ],
+        capsys,
+    )
+    assert code == 0
+
+    code, payload = run(
+        [
+            "compare",
+            "--checkpoint",
+            str(tmp_path / "run" / "best_model.pt"),
+            "--manifest",
+            str(data / "manifests" / "test.jsonl"),
+            "--output-dir",
+            str(tmp_path / "cmp"),
+            "--device",
+            "cpu",
+        ],
+        capsys,
+    )
+    assert code == 0
+    assert payload["passed"] is True

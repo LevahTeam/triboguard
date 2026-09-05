@@ -96,6 +96,13 @@ def compare(
         neural_instances = evaluation.matching_score(
             label_objects(neural_mask, method="watershed_split", min_area=min_area), true_labels
         )
+        # The same instance step applied to the *perfect* mask. Whatever it scores
+        # is the ceiling any semantic segmenter can reach here, and reporting the
+        # model's instance number without it invites reading a representation
+        # limit as a model failure.
+        ceiling_instances = evaluation.matching_score(
+            label_objects(truth, method="watershed_split", min_area=min_area), true_labels
+        )
         classical_instances = evaluation.matching_score(
             label_objects(classical_mask, method="watershed_split", min_area=min_area),
             true_labels,
@@ -112,6 +119,8 @@ def compare(
                 "classical_dice": classical["dice"],
                 "neural_matching_50_95": neural_instances["mean"],
                 "classical_matching_50_95": classical_instances["mean"],
+                "ceiling_matching_50_95": ceiling_instances["mean"],
+                "true_instances": int(true_labels.max()),
             }
         )
 
@@ -156,6 +165,20 @@ def compare(
             )
             if per_image
             else 0.0,
+        },
+        "instance_ceiling": {
+            "matching_score_50_95": (
+                float(np.mean([row["ceiling_matching_50_95"] for row in per_image]))
+                if per_image
+                else 0.0
+            ),
+            "explanation": (
+                "The ground-truth mask itself, put through the same watershed instance "
+                "step. This is the highest instance score any semantic segmenter can "
+                "reach in this pipeline, so the model's instance number should be read "
+                "against it and not against 1.0. Raising it needs a model that predicts "
+                "instances directly, not more training of this one."
+            ),
         },
         "all_foreground": trivial_summary,
         "all_background": empty_summary,

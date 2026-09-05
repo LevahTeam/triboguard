@@ -42,7 +42,10 @@ where = ["src"]
 addopts = "-q --strict-markers"
 testpaths = ["tests"]
 filterwarnings = [
-  "error::RuntimeWarning",
+  # Every warning is an error. In a statistics pipeline a RuntimeWarning is a
+  # silent wrong number, and a ResourceWarning is a leaked file handle; neither
+  # should scroll past in a green run.
+  "error",
   # Upstream: pycocotools' C extension does not yet implement NumPy 2's __array__
   # copy keyword. It is a deprecation in our dependency, not in this project.
   "ignore:__array__ implementation doesn't accept a copy keyword:DeprecationWarning",

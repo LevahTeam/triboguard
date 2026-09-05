@@ -31,7 +31,7 @@ from tribovision.treatment import (
 
 def test_template_lists_every_required_column(tmp_path: Path) -> None:
     path = write_template(tmp_path / "template.csv")
-    with path.open() as handle:
+    with path.open(newline="", encoding="utf-8") as handle:
         header = next(csv.reader(handle))
     for column in (
         "experiment_day",
@@ -78,7 +78,8 @@ def test_a_sound_design_loads(tmp_path: Path) -> None:
 
 def test_viability_is_derived_from_absorbance_when_not_given(tmp_path: Path) -> None:
     manifest = build_synthetic_experiment(tmp_path, days=("d1", "d2"))
-    rows = list(csv.DictReader(manifest.open()))
+    with manifest.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
     for row in rows:
         row["viability_fraction"] = ""
         row["mts_absorbance"] = "0.8"
@@ -93,7 +94,8 @@ def test_viability_is_derived_from_absorbance_when_not_given(tmp_path: Path) -> 
 
 def test_image_paths_cannot_escape_the_manifest_directory(tmp_path: Path) -> None:
     manifest = build_synthetic_experiment(tmp_path)
-    rows = list(csv.DictReader(manifest.open()))
+    with manifest.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
     rows[0]["image_path"] = "../../../etc/passwd"
     with manifest.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
@@ -254,7 +256,8 @@ def test_end_to_end_analysis_does_not_invent_a_dose_response(tmp_path: Path) -> 
 
 def test_a_missing_image_is_reported_rather_than_silently_skipped(tmp_path: Path) -> None:
     manifest = build_synthetic_experiment(tmp_path / "gap")
-    rows = list(csv.DictReader(manifest.open()))
+    with manifest.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
     (tmp_path / "gap" / rows[0]["image_path"]).unlink()
     with pytest.raises(TreatmentDataError, match="is missing"):
         run_treatment_analysis(manifest, tmp_path / "out")
@@ -289,7 +292,8 @@ def test_a_single_experiment_day_is_refused(tmp_path: Path) -> None:
 
 def test_a_zero_dose_well_is_not_automatically_a_vehicle_control(tmp_path: Path) -> None:
     manifest = build_synthetic_experiment(tmp_path)
-    rows = list(csv.DictReader(manifest.open()))
+    with manifest.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
     for row in rows:
         if row["control_type"] == "vehicle":
             row["control_type"] = "untreated"

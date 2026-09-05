@@ -196,3 +196,16 @@ def test_sign_test_is_symmetric_about_half() -> None:
     """Without the two-sided correction, a total loss would look unremarkable."""
     for wins in range(11):
         assert _sign_test_p_value(wins, 10) == pytest.approx(_sign_test_p_value(10 - wins, 10))
+
+
+def test_the_instance_ceiling_is_reported_alongside_the_instance_score(
+    crowded: tuple[Path, Path],
+) -> None:
+    """0.05 against a ceiling of 0.12 is a different statement from 0.05 out of 1.0."""
+    checkpoint, data = crowded
+    report = compare(checkpoint, data / "manifests" / "test.jsonl", None, device="cpu")
+    ceiling = report["instance_ceiling"]["matching_score_50_95"]
+    assert 0.0 <= ceiling <= 1.0
+    # The ground truth cannot do worse than the model at separating its own cells.
+    assert ceiling >= report["neural"]["matching_score_50_95"] - 1e-9
+    assert "predicts instances directly" in report["instance_ceiling"]["explanation"]
