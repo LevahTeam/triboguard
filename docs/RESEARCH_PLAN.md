@@ -83,6 +83,26 @@ death requires a death-specific assay.
 leave-one-day-out test has very little power. A negative result at that size is
 uninformative, not evidence of absence. Plan for 3+ days.
 
+## An observation from running the pipeline on synthetic data
+
+Running `analyze-treatment` over one synthetic experiment twice — once with the
+classical baseline and once with the LIVECell-trained U-Net — gives the same
+dose-response answer (area falls with concentration, rho = -0.93, q = 6e-9, IC50
+fitted with R^2 = 0.93) but very different answers on the viability question. The
+classical path reached R^2 > 0.5 with p < 0.05; the neural path returned
+R^2 = -1.67 with p = 0.42, meaning worse than predicting the mean.
+
+That is not a bug, and it is worth understanding before the real experiment. The
+U-Net was trained on A172 phase-contrast microscopy; the synthetic frames look
+nothing like it, so its features on them are poor, and the leave-one-day-out test
+correctly declines to claim transfer it cannot support. Two lessons follow:
+
+1. Step 3 of the plan — fine-tuning on the project's own annotated frames — is
+   not optional polish. The segmenter's domain match materially changes the
+   downstream statistical conclusion.
+2. The pipeline fails in the safe direction. A domain-mismatched model produced a
+   negative result rather than a confident wrong one.
+
 ## Statistical commitments made in advance
 
 - The **well** is the unit of analysis. Fields within a well are averaged first.
