@@ -1,0 +1,207 @@
+# Point-by-point response to the audit
+
+Every item from the audit, with what was done and where to check it. Items marked
+**Owner action** cannot be closed by code.
+
+## 1. Critical problems
+
+### 1.1 The project does not yet solve its intended problem
+**Partly addressed; the remaining part is data collection.**
+
+The missing half was not merely acknowledged — it was built. `treatment.py`
+defines the treatment manifest schema (day, plate, well, field, cell line,
+treatment, concentration, exposure, control type, replicate, viability), runs
+segmentation and per-cell morphometry over it, and produces a day-blocked
+dose-response and viability-linkage analysis. `tribovision treatment-template`
+emits the schema; `tribovision analyze-treatment` runs it.
+
+The pipeline is validated end to end against synthetic experiments with a planted
+dose response (which it recovers) and with none (which it correctly declines to
+find) — `tests/test_treatment.py`.
+
+What remains is collecting real images. The protocol is
+[EXPERIMENT_PROTOCOL.md](EXPERIMENT_PROTOCOL.md). **Owner action.**
+
+Nanotechnology terminology is not used anywhere and should not be added; there is
+no nanoparticle data, model, or simulation in the project.
+
+### 1.2 The neural model is effectively nonfunctional
+**Fixed, and the cause was diagnosed rather than worked around.**
+
+The saved checkpoint was loaded and evaluated twice on the same validation
+images: 0.001 Dice in `model.eval()`, 0.739 in `model.train()`. The network had
+learned; `BatchNorm2d` running statistics, after one epoch at batch size 4, did
+not match the batch statistics it was trained with, so evaluation mode predicted
+background everywhere.
+
+`GroupNorm` replaces it — per-sample statistics, so training and evaluation are
+identical by construction. `tests/test_model.py::test_train_and_eval_modes_agree_exactly`
+asserts bit equality, and a second test asserts that a single-image prediction is
+unchanged by what else is in the batch.
+
+A real 40-epoch run now exists at `runs/baseline/`:
+
+| Split | Macro Dice | Micro Dice | Macro IoU |
+|---|---|---|---|
+| Validation (well B7, unseen) | 0.949 | 0.953 | 0.904 |
+| **Test (well C7, untouched)** | **0.952** | **0.957** | **0.910** |
+
+### 1.3 No neural inference workflow exists
+**Fixed.** `tribovision predict` loads a checkpoint and analyses any image or
+directory, writing masks, overlays, per-object morphology and a report.
+Predictions are un-letterboxed to the native grid before measurement. Round-trip
+coverage in `tests/test_predict.py`: train → save → load → new image → mask,
+overlay, CSV.
+
+`tribovision compare` was added as the acceptance gate — it scores both
+segmenters on the same held-out manifest and exits non-zero if the learned model
+does not win.
+
+### 1.4 The existing scientific material cannot serve as a training dataset
+**Acknowledged, and the gap is now specified rather than left implicit.**
+
+The PDFs remain what they are: summary figures without raw images, replicate
+counts, calibration, labels, or machine-readable assay values. They are not used
+as training data anywhere. `EXPERIMENT_PROTOCOL.md` specifies exactly what a
+usable dataset must contain, and `_check_design` refuses manifests that fall
+short.
+
+The RAW 264.7 description is corrected in the README: ATCC classifies it as a
+macrophage/monocyte line derived from an Abelson murine-leukaemia-virus-induced
+tumour, not a conventional leukaemia model.
+
+## 2. High-impact improvements
+
+### 2.1 Fix validation leakage — **fixed**
+`splits.py` re-partitions the official train+val pool by whole group, leaving the
+official test split untouched. Default grouping is **well**. Current splits:
+train A7+D7 (79 images), val B7 (41), test C7 (60) — zero shared wells, zero
+shared acquisition groups.
+
+The guard is no longer filename-based. `manifest.check_group_leakage` compares
+acquisition groups (cell type, well, field, timestamp — deliberately ignoring the
+crop index, since crops of one field are one observation). `build_datasets`
+refuses to train on leaking splits; `tribovision verify` exits non-zero.
+`tests/test_manifest.py` proves detection works when *no file name is shared*.
+
+### 2.2 Preserve image geometry — **fixed**
+`geometry.py` letterboxes: one scale factor for both axes, padding tracked
+explicitly, a validity mask returned with every sample so no loss or metric is
+computed on invented pixels, and an exact inverse so predictions return to the
+native grid before morphometry. `micrometers_per_pixel` is carried through
+manifests and printed only when supplied.
+
+### 2.3 Use correct COCO polygon rasterization — **fixed**
+`pycocotools` is now a required dependency and does the rasterisation.
+`tests/test_coco.py` asserts bit-identical output on real polygons. The
+previously measured bias (0.9416 mean IoU, 0.8312 minimum, +45 px/instance) was
+reproduced against the old Pillow path before it was replaced.
+
+### 2.4 Validate training configuration before creating artifacts — **fixed**
+`TrainConfig.__post_init__` validates epochs, batch size, learning rate, weight
+decay, workers, seed, patience, depth, base channels, device and image size —
+including that image size is a multiple of 2^depth, with the nearest valid size
+in the message. 23 parametrised cases in `tests/test_training.py` confirm nothing
+is written to disk when a config is rejected. The 17×17 crash is now a clear
+`ValueError` from `TriboUNet.check_input_size`.
+
+### 2.5 Secure the classical baseline's manifest handling — **fixed**
+Both consumers now use one loader, `manifest.load_manifest`, with one containment
+resolver. Output filenames go through `manifest.safe_output_name`, which rejects
+anything outside `[A-Za-z0-9._-]{1,128}`. Both attacks are covered in
+`tests/test_baseline.py`.
+
+### 2.6 Actually enforce provenance metadata — **fixed**
+Loading verifies image SHA-256, that a record's split matches the manifest it
+lives in, that every referenced annotation exists and belongs to the stated
+image, that no annotation ID is duplicated within a record or the source file,
+and that no image ID or annotation is claimed twice. Nine tests in
+`tests/test_manifest.py`.
+
+### 2.7 Do not describe current morphology as per-cell biological measurement — **fixed**
+Every morphology row records `instance_method`. Reports state that connected
+components merge touching cells and that rows are predicted regions.
+A marker-controlled watershed splitter is available and is the default for
+`predict`. Units stay in pixels unless a calibration is supplied, and the
+digitised-disc circularity reference (0.59) is printed so 0.59 is not misread as
+"ragged".
+
+### 2.8 Create a real experimental and authorship record — **fixed**
+The repository is now committed, in stages that reflect the actual work.
+
+## 3. Medium-priority improvements
+
+| Item | Status |
+|---|---|
+| "Instance AP" is not AP | **Fixed** — renamed `matching_score_50_95`, documented as the DSB2018 metric; a real COCO-style `average_precision` exists for scored predictors |
+| Epoch metrics average batches equally | **Fixed** — accumulated per sample; a test with a 4+1 split asserts 0.8 rather than 0.5 |
+| Eager COCO loading, masks re-rasterised every epoch | **Fixed** — masks cached bit-packed on disk and in memory; a read-only cache degrades gracefully |
+| Instance evaluation is O(P×T×H×W) | **Fixed** — single-pass `np.bincount` contingency table; the 10-image baseline went from ~2.5 min to ~5 s |
+| Incomplete reproducibility metadata | **Fixed** — `provenance.py` records git revision and dirty flag, dependency versions, Python, platform, accelerators, seeds, dataset content hashes and full config in every report |
+| Absolute paths leaking the username | **Fixed** — `relative_to_repo` everywhere; a test asserts no `/Users/` or `/home/` in `metrics.json` |
+| Install instructions use broad ranges, not the lock | **Fixed** — `uv sync --locked` documented |
+| No ZIP expansion or ratio limit, no explicit remote timeout | **Fixed** — 64 MB per-member cap, 200× compression-ratio cap, streaming cap, explicit timeout on both HTTP and remote-ZIP access; six tests including a real bomb |
+| PDF ownership and accidental inclusion | **Fixed mechanically** — both PDFs are git-ignored so they cannot be committed accidentally. Their redistribution status is **owner action** |
+| No deployment or model registry | Accepted — this is a local research CLI |
+
+## 4. Minor cleanup
+
+| Item | Status |
+|---|---|
+| `ruff format --check` fails on 11 files | **Fixed** — clean |
+| Second standalone CLI in `baseline.py` | **Fixed** — removed; one entry point |
+| Stale `tribovision.egg-info` | **Fixed** — removed and git-ignored |
+| pycocotools NumPy deprecation warning | **Documented** — a targeted `filterwarnings` entry in `pyproject.toml` names it as upstream; all other `RuntimeWarning`s are now errors |
+| README lacks consolidated developer commands | **Fixed** — "Developer commands" section |
+| Baseline reruns leave stale artifacts | **Fixed** — prior artifacts cleared, with a test |
+
+## 5. Missing tests
+
+All rows below now have coverage. Suite: **282 tests, 91% coverage** (was 27 tests,
+71%, with CLI at 0%; CLI is now 94%).
+
+| Priority | Coverage | Where |
+|---|---|---|
+| Critical | Performance acceptance gate | `tests/test_benchmark.py` — including a case that must *fail* the gate |
+| Critical | Checkpoint → new image → mask/overlay round trip | `tests/test_predict.py` |
+| Critical | Treatment pipeline with day-separated evaluation | `tests/test_treatment.py` — synthetic, blinded by construction |
+| High | Well/acquisition-group leakage rejection | `tests/test_manifest.py`, `tests/test_cli.py` |
+| High | Odd/small dimensions, all invalid configs | `tests/test_model.py`, `tests/test_training.py` |
+| High | Baseline path traversal and output filenames | `tests/test_baseline.py` |
+| High | Hash, wrong-image annotation, split mismatch, duplicates | `tests/test_manifest.py` |
+| High | Pixel equivalence with pycocotools | `tests/test_coco.py` |
+| High | Corrupt/oversized ZIP members, bombs, timeouts | `tests/test_livecell.py` |
+| Medium | Uneven final batch aggregation | `tests/test_training.py` |
+| Medium | Determinism across seeds/workers | `tests/test_training.py` |
+| Medium | Tiny-dataset overfitting | `tests/test_training.py` |
+| Medium | CLI commands and error translation | `tests/test_cli.py` |
+| Medium | Empty images/masks, malformed manifests, RLE edge cases | `tests/test_dataset.py`, `tests/test_coco.py`, `tests/test_manifest.py` |
+| Scientific | Morphology accuracy and calibrated units | `tests/test_morphology.py` — known squares, discs, L-shapes |
+| Scientific | Repeated seeds, CIs, external-well testing | `docs/RESULTS.md`, `tests/test_treatment.py` |
+
+## Bug found while writing those tests
+
+Benjamini-Hochberg propagated a single non-finite p-value through
+`np.minimum.accumulate`, turning **every** q-value in the family into NaN. A
+morphology feature that happened to be constant across wells was enough to
+trigger it, and the failure was silent — the report would have shown `NaN`
+significance for every feature. Fixed by correcting only finite p-values, and by
+excluding zero-variance features from the family entirely.
+
+## Diagnostics
+
+| Check | Before | After |
+|---|---|---|
+| Tests | 27 passed | 282 passed |
+| Coverage | 71% (CLI 0%) | 91% (CLI 94%) |
+| `ruff check` | pass | pass |
+| `ruff format --check` | **11 files would change** | pass |
+| `mypy` | 3 errors, not configured | configured in `pyproject.toml`, 0 errors |
+| Baseline runtime (10 images) | ~2.5 min | ~5 s |
+
+## Still open — owner action
+
+1. Collect Tribonema imaging data and the paired viability assay.
+2. Confirm redistribution rights for the two PDFs (git-ignored in the meantime).
+3. Obtain institutional biosafety / SRC approval before experimentation.
+4. Keep a dated logbook from the first culture session.
