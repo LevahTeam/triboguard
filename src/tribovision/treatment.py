@@ -1067,6 +1067,105 @@ def write_template(path: Path) -> Path:
     return path
 
 
+def plan_experiment(
+    path: Path,
+    *,
+    days: tuple[str, ...] = ("day-1", "day-2", "day-3"),
+    concentrations: tuple[float, ...] = (0.0, 12.5, 25.0, 50.0, 100.0, 200.0),
+    exposure_hours: tuple[float, ...] = (0.0, 6.0, 12.0, 24.0, 48.0),
+    wells_per_condition: int = 3,
+    fields: int = 2,
+    cell_line: str = "RAW264.7",
+    treatment: str = "Tribonema extract",
+    positive_control: bool = True,
+) -> dict[str, Any]:
+    """Write every row an experiment will need, with the image paths left blank.
+
+    This is a collection checklist, not a template. Each row is one image that has
+    to exist for the analysis to run, so the file doubles as the plan you hand a
+    mentor and the manifest you fill in at the bench.
+
+    The default design is checked against everything the analysis enforces: a
+    vehicle control, at least two experiment days, at least two independent wells
+    per condition, five distinct non-zero concentrations across at least eight
+    wells so an IC50 is identifiable, and at least four exposure times so a
+    half-time is.
+    """
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    rows: list[dict[str, Any]] = []
+    for day in days:
+        well_number = 0
+        arms: list[tuple[str, float, str]] = [
+            (treatment, concentration, "vehicle" if concentration == 0 else "treated")
+            for concentration in concentrations
+        ]
+        if positive_control:
+            arms.append(("positive control", float("nan"), "positive"))
+        for arm, concentration, control_type in arms:
+            for replicate in range(1, wells_per_condition + 1):
+                well_number += 1
+                well = f"{chr(ord('A') + (well_number - 1) // 12)}{(well_number - 1) % 12 + 1:02d}"
+                for exposure in exposure_hours:
+                    for field in range(1, fields + 1):
+                        rows.append(
+                            {
+                                "image_path": "",
+                                "experiment_day": day,
+                                "plate_id": f"plate-{day}",
+                                "well_id": well,
+                                "field": str(field),
+                                "cell_line": cell_line,
+                                "treatment": arm,
+                                "concentration_ug_per_ml": (
+                                    "" if math.isnan(concentration) else concentration
+                                ),
+                                "exposure_hours": exposure,
+                                "control_type": control_type,
+                                "replicate": str(replicate),
+                                "viability_fraction": "",
+                                "mts_absorbance": "",
+                                "mts_blank_absorbance": "",
+                                "micrometers_per_pixel": "",
+                                "operator": "",
+                                "permission_status": "",
+                                "notes": "",
+                            }
+                        )
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(TEMPLATE_HEADER))
+        writer.writeheader()
+        writer.writerows(rows)
+
+    analysis_wells = len(days) * len(concentrations) * wells_per_condition
+    non_zero_wells = len(days) * (len(concentrations) - 1) * wells_per_condition
+    return {
+        "manifest": str(path),
+        "rows_to_fill": len(rows),
+        "images_to_capture": len(rows),
+        "analysis_wells": analysis_wells,
+        "non_zero_concentration_wells": non_zero_wells,
+        "experiment_days": list(days),
+        "concentrations_ug_per_ml": list(concentrations),
+        "exposure_hours": list(exposure_hours),
+        "fields_per_well": fields,
+        "requirements_met": {
+            "vehicle_control": 0.0 in concentrations,
+            "two_or_more_days": len(days) >= 2,
+            "two_or_more_wells_per_condition": wells_per_condition >= 2,
+            "ic50_identifiable": len([c for c in concentrations if c > 0]) >= 5
+            and non_zero_wells >= 8,
+            "half_time_identifiable": len(set(exposure_hours)) >= 4,
+        },
+        "note": (
+            "An 'experiment day' is one independent biological replicate - a plate "
+            "seeded on its own date - not an imaging session. A plate followed for 48 "
+            "hours spans several calendar days but is one experiment day, and every row "
+            "for it carries the same experiment_day label."
+        ),
+    }
+
+
 def run_treatment_analysis(
     manifest_path: Path,
     output_dir: Path,

@@ -152,6 +152,21 @@ def _add_treatment(subparsers: Any) -> None:
         help="Write an empty treatment manifest with every required column.",
     )
     template.add_argument("--output", type=Path, default=Path("data/treatment/manifest.csv"))
+    template.add_argument(
+        "--plan",
+        action="store_true",
+        help="Emit every row the planned experiment needs, not just a header.",
+    )
+    template.add_argument("--days", nargs="+", default=["day-1", "day-2", "day-3"])
+    template.add_argument(
+        "--concentrations", nargs="+", type=float, default=[0.0, 12.5, 25.0, 50.0, 100.0, 200.0]
+    )
+    template.add_argument(
+        "--exposure-hours", nargs="+", type=float, default=[0.0, 6.0, 12.0, 24.0, 48.0]
+    )
+    template.add_argument("--wells-per-condition", type=int, default=3)
+    template.add_argument("--fields", type=int, default=2)
+    template.add_argument("--cell-line", default="RAW264.7")
 
     analyse = subparsers.add_parser(
         "analyze-treatment",
@@ -340,13 +355,26 @@ def _run(args: argparse.Namespace) -> int:
         return 0
 
     if args.command == "treatment-template":
-        from tribovision.treatment import write_template
+        from tribovision.treatment import plan_experiment, write_template
 
+        if args.plan:
+            summary = plan_experiment(
+                args.output,
+                days=tuple(args.days),
+                concentrations=tuple(args.concentrations),
+                exposure_hours=tuple(args.exposure_hours),
+                wells_per_condition=args.wells_per_condition,
+                fields=args.fields,
+                cell_line=args.cell_line,
+            )
+            _print(summary)
+            return 0 if all(summary["requirements_met"].values()) else 1
         path = write_template(args.output)
         _print(
             {
                 "template": str(path),
                 "next_step": "fill one row per image, then run analyze-treatment",
+                "hint": "add --plan to emit every row the experiment needs",
             }
         )
         return 0

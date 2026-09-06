@@ -154,7 +154,26 @@ reagent-only-plus-extract control to check for that interference.
 
 ## 6. Manifest columns
 
-Generate the template with `tribovision treatment-template`.
+Generate the collection checklist — every row the analysis will need, with the
+image paths blank — and check the design in one command:
+
+```bash
+tribovision treatment-template --plan --output data/treatment/manifest.csv
+```
+
+It prints whether each enforced requirement is met and exits non-zero if any is
+not, so an inadequate design fails before you book bench time rather than after.
+A copy of the default plan is committed at
+[planned_experiment.csv](planned_experiment.csv): 3 experiment days, 6
+concentrations, 5 exposure times, 3 wells per condition, 2 fields per well — 54
+analysis wells and 630 images.
+
+Note what an "experiment day" means: one independent biological replicate, a
+plate seeded on its own date. A plate followed for 48 hours spans several
+calendar days but is **one** experiment day, and every row for it carries the
+same `experiment_day` label. Getting this wrong turns three replicates into one.
+
+For a header-only template instead, drop `--plan`.
 
 **Required**
 

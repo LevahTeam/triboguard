@@ -15,8 +15,10 @@ from pathlib import Path
 import numpy as np
 import pytest
 from conftest import build_synthetic_experiment
+from PIL import Image
 
 from tribovision.treatment import (
+    REQUIRED_COLUMNS,
     TreatmentDataError,
     benjamini_hochberg,
     exponential_approach,
@@ -25,6 +27,7 @@ from tribovision.treatment import (
     four_parameter_logistic,
     leave_one_day_out,
     load_treatment_manifest,
+    plan_experiment,
     run_treatment_analysis,
     stratified_spearman,
     write_template,
@@ -610,3 +613,62 @@ def test_the_rate_of_change_itself_is_tested_against_dose(tmp_path: Path) -> Non
     assert dose["evaluated"] is True
     assert "rate of change itself" in dose["question"]
     assert dose["spearman_rho"] is not None
+
+
+# ------------------------------------------------------------ planning a study
+
+
+def test_the_planner_emits_a_design_that_satisfies_every_enforced_requirement(
+    tmp_path: Path,
+) -> None:
+    summary = plan_experiment(tmp_path / "plan.csv")
+    assert all(summary["requirements_met"].values()), summary["requirements_met"]
+    assert summary["rows_to_fill"] == summary["images_to_capture"]
+    with (tmp_path / "plan.csv").open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    assert len(rows) == summary["rows_to_fill"]
+    # Image paths are blank on purpose: this is a collection checklist.
+    assert all(row["image_path"] == "" for row in rows)
+    assert all(row["viability_fraction"] == "" for row in rows)
+    # Every column the analysis requires is present.
+    for column in REQUIRED_COLUMNS:
+        assert column in rows[0]
+
+
+def test_a_planned_design_passes_the_design_check_once_filled_in(tmp_path: Path) -> None:
+    """The planner and the validator must agree, or the plan is worthless."""
+    path = tmp_path / "plan.csv"
+    plan_experiment(path, fields=1, wells_per_condition=2)
+    with path.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    images = tmp_path / "images"
+    images.mkdir()
+    filled = []
+    for index, row in enumerate(rows):
+        if row["control_type"] == "positive":
+            continue  # positive controls have no concentration and are not analysed
+        name = f"img{index}.png"
+        Image.fromarray(np.full((32, 32), 128, dtype=np.uint8)).save(images / name)
+        filled.append({**row, "image_path": f"images/{name}", "viability_fraction": "0.5"})
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(filled[0]))
+        writer.writeheader()
+        writer.writerows(filled)
+    records = load_treatment_manifest(path)
+    assert len(records) == len(filled)
+
+
+def test_an_inadequate_plan_is_reported_as_inadequate(tmp_path: Path) -> None:
+    summary = plan_experiment(
+        tmp_path / "thin.csv",
+        days=("only-day",),
+        concentrations=(0.0, 100.0),
+        exposure_hours=(24.0,),
+        wells_per_condition=1,
+    )
+    met = summary["requirements_met"]
+    assert met["vehicle_control"] is True
+    assert met["two_or_more_days"] is False
+    assert met["two_or_more_wells_per_condition"] is False
+    assert met["ic50_identifiable"] is False
+    assert met["half_time_identifiable"] is False
