@@ -1,0 +1,689 @@
+{
+  "cellpose": {
+    "bias": -0.23615392420621753,
+    "evaluated": true,
+    "images": 60,
+    "limits_of_agreement": [
+      -0.5339125591516464,
+      0.06160471073921134
+    ],
+    "mean_absolute_error": 0.24000724046383504,
+    "note": "A segmenter can be useless for the absolute value of q and still fine for a trend, because a constant bias cancels when conditions are compared. Both are reported because the two claims need different accuracy.",
+    "predicted_unjammed": 56,
+    "spearman_rho": 0.7674353987218674,
+    "true_unjammed": 56,
+    "usable_for_absolute_q": false,
+    "usable_for_trends": true,
+    "verdict_agreement": 1.0
+  },
+  "classical": {
+    "bias": 1.8050847524223912,
+    "evaluated": true,
+    "images": 60,
+    "limits_of_agreement": [
+      0.7140537070085107,
+      2.8961157978362717
+    ],
+    "mean_absolute_error": 1.8050847524223912,
+    "note": "A segmenter can be useless for the absolute value of q and still fine for a trend, because a constant bias cancels when conditions are compared. Both are reported because the two claims need different accuracy.",
+    "predicted_unjammed": 60,
+    "spearman_rho": -0.1166729185013749,
+    "true_unjammed": 56,
+    "usable_for_absolute_q": false,
+    "usable_for_trends": false,
+    "verdict_agreement": 0.9333333333333333
+  },
+  "images": [
+    {
+      "cellpose": 4.1765745484454655,
+      "classical": 7.346727099086873,
+      "hours": 60.0,
+      "image_id": 236764,
+      "truth_polygon": 4.127556880092123,
+      "truth_raster": 4.072159957840301,
+      "truth_raster_uncorrected": 5.1848350908093455,
+      "unet": 5.368649049181626
+    },
+    {
+      "cellpose": 4.2965899527036875,
+      "classical": 6.692034815356459,
+      "hours": 56.0,
+      "image_id": 237486,
+      "truth_polygon": 4.531907703238401,
+      "truth_raster": 4.449299780111387,
+      "truth_raster_uncorrected": 5.665024426419282,
+      "unet": 4.939699806291144
+    },
+    {
+      "cellpose": 4.500119206493488,
+      "classical": 6.288217895336978,
+      "hours": 24.0,
+      "image_id": 237950,
+      "truth_polygon": 4.841692141756478,
+      "truth_raster": 4.758651226053731,
+      "truth_raster_uncorrected": 6.058902920614076,
+      "unet": 4.6263277916678085
+    },
+    {
+      "cellpose": 4.241408339715149,
+      "classical": 6.971608079710065,
+      "hours": 60.0,
+      "image_id": 238270,
+      "truth_polygon": 4.358315304374846,
+      "truth_raster": 4.306541253464506,
+      "truth_raster_uncorrected": 5.483258624944343,
+      "unet": 5.283996509774724
+    },
+    {
+      "cellpose": 4.266438102426152,
+      "classical": 7.1431597775743265,
+      "hours": 56.0,
+      "image_id": 238650,
+      "truth_polygon": 4.423948917490754,
+      "truth_raster": 4.452902894356775,
+      "truth_raster_uncorrected": 5.66961205396071,
+      "unet": 5.271060395968303
+    },
+    {
+      "cellpose": 4.5788191085274725,
+      "classical": 6.882969633423846,
+      "hours": 44.0,
+      "image_id": 240468,
+      "truth_polygon": 4.748507732936289,
+      "truth_raster": 4.694435256346004,
+      "truth_raster_uncorrected": 5.977140608578684,
+      "unet": 4.771386116427227
+    },
+    {
+      "cellpose": 4.168106119911565,
+      "classical": 6.949294050470782,
+      "hours": 68.0,
+      "image_id": 241612,
+      "truth_polygon": 4.213387179564847,
+      "truth_raster": 4.117847178800059,
+      "truth_raster_uncorrected": 5.243005867224361,
+      "unet": 5.485028219831068
+    },
+    {
+      "cellpose": 4.365444580149576,
+      "classical": 6.5349077302724865,
+      "hours": 48.0,
+      "image_id": 242134,
+      "truth_polygon": 4.593508418469654,
+      "truth_raster": 4.454031971844136,
+      "truth_raster_uncorrected": 5.671049640066687,
+      "unet": 4.696102882231044
+    },
+    {
+      "cellpose": 4.144762944091474,
+      "classical": 7.114099610354865,
+      "hours": 72.0,
+      "image_id": 243303,
+      "truth_polygon": 4.268370517062947,
+      "truth_raster": 4.1855499659430375,
+      "truth_raster_uncorrected": 5.32920773310359,
+      "unet": 5.275585107233422
+    },
+    {
+      "cellpose": 4.525449545748312,
+      "classical": 5.937052058618629,
+      "hours": 28.0,
+      "image_id": 244264,
+      "truth_polygon": 4.979579029755293,
+      "truth_raster": 4.827203669715357,
+      "truth_raster_uncorrected": 6.146186602772288,
+      "unet": 4.800734461867782
+    },
+    {
+      "cellpose": 4.464531385390101,
+      "classical": 5.9102164692724575,
+      "hours": 24.0,
+      "image_id": 244429,
+      "truth_polygon": 4.511415590830952,
+      "truth_raster": 4.42973678934687,
+      "truth_raster_uncorrected": 5.64011605296461,
+      "unet": 4.470646363319937
+    },
+    {
+      "cellpose": 4.295544183331367,
+      "classical": 5.775158547776601,
+      "hours": 16.0,
+      "image_id": 244963,
+      "truth_polygon": 4.686980077323051,
+      "truth_raster": 4.508186373920359,
+      "truth_raster_uncorrected": 5.740001166311622,
+      "unet": 4.445405870793242
+    },
+    {
+      "cellpose": 3.6452146427516268,
+      "classical": 5.268611048280544,
+      "hours": 0.0,
+      "image_id": 245241,
+      "truth_polygon": 3.685782499538602,
+      "truth_raster": 3.643455074720149,
+      "truth_raster_uncorrected": 4.638991080599701,
+      "unet": 3.815212676697993
+    },
+    {
+      "cellpose": 4.409719090828959,
+      "classical": 6.582075510077825,
+      "hours": 40.0,
+      "image_id": 245333,
+      "truth_polygon": 4.813128535608133,
+      "truth_raster": 4.760451393833068,
+      "truth_raster_uncorrected": 6.0611949654178865,
+      "unet": 4.655289148168316
+    },
+    {
+      "cellpose": 3.7196183357131676,
+      "classical": 5.154226809027359,
+      "hours": 0.0,
+      "image_id": 245573,
+      "truth_polygon": 3.778011834071998,
+      "truth_raster": 3.728167564109463,
+      "truth_raster_uncorrected": 4.746850372023134,
+      "unet": 3.8989499902709257
+    },
+    {
+      "cellpose": 4.560788029684269,
+      "classical": 6.027261967490391,
+      "hours": 28.0,
+      "image_id": 245908,
+      "truth_polygon": 4.869101995461189,
+      "truth_raster": 4.806558702112887,
+      "truth_raster_uncorrected": 6.119900613621046,
+      "unet": 4.6389875195076336
+    },
+    {
+      "cellpose": 4.510650447242037,
+      "classical": 6.1979884353575425,
+      "hours": 24.0,
+      "image_id": 246042,
+      "truth_polygon": 4.521153886641976,
+      "truth_raster": 4.442173413970734,
+      "truth_raster_uncorrected": 5.655950855238743,
+      "unet": 4.577133889927705
+    },
+    {
+      "cellpose": 4.336340201324637,
+      "classical": 6.780069855464592,
+      "hours": 52.0,
+      "image_id": 246194,
+      "truth_polygon": 4.597034230251799,
+      "truth_raster": 4.512709268969353,
+      "truth_raster_uncorrected": 5.745759895144688,
+      "unet": 5.039399530339665
+    },
+    {
+      "cellpose": 4.480141311788776,
+      "classical": 6.136259291782145,
+      "hours": 32.0,
+      "image_id": 246506,
+      "truth_polygon": 4.7436902899773425,
+      "truth_raster": 4.866234558146342,
+      "truth_raster_uncorrected": 6.195882273388765,
+      "unet": 4.552527327728733
+    },
+    {
+      "cellpose": 4.499005789478329,
+      "classical": 6.239778913062208,
+      "hours": 40.0,
+      "image_id": 247128,
+      "truth_polygon": 4.765495427128922,
+      "truth_raster": 4.6928960778805715,
+      "truth_raster_uncorrected": 5.97518086569009,
+      "unet": 4.736678500216322
+    },
+    {
+      "cellpose": 4.485818957664178,
+      "classical": 5.6946202836543796,
+      "hours": 8.0,
+      "image_id": 247343,
+      "truth_polygon": 4.861499142837614,
+      "truth_raster": 4.7576473276293765,
+      "truth_raster_uncorrected": 6.057624717441291,
+      "unet": 4.301575815965351
+    },
+    {
+      "cellpose": 4.273824083416729,
+      "classical": 5.756059087928723,
+      "hours": 4.0,
+      "image_id": 247561,
+      "truth_polygon": 4.421372626825708,
+      "truth_raster": 4.263824061078774,
+      "truth_raster_uncorrected": 5.42886940635877,
+      "unet": 4.232198516546508
+    },
+    {
+      "cellpose": 4.550822954471158,
+      "classical": 6.583213988814692,
+      "hours": 44.0,
+      "image_id": 247645,
+      "truth_polygon": 4.8871267959784905,
+      "truth_raster": 4.749607032426079,
+      "truth_raster_uncorrected": 6.047387495637108,
+      "unet": 4.672174943143887
+    },
+    {
+      "cellpose": 3.665352700090031,
+      "classical": 5.045115489019675,
+      "hours": 0.0,
+      "image_id": 248158,
+      "truth_polygon": 3.801660818974799,
+      "truth_raster": 3.7442388323083193,
+      "truth_raster_uncorrected": 4.767312946227961,
+      "unet": 3.895574890451343
+    },
+    {
+      "cellpose": 4.37737550747395,
+      "classical": 6.140385641107323,
+      "hours": 20.0,
+      "image_id": 249162,
+      "truth_polygon": 4.60906483281721,
+      "truth_raster": 4.468359186860614,
+      "truth_raster_uncorrected": 5.689291616791591,
+      "unet": 4.606376460726574
+    },
+    {
+      "cellpose": 4.178016846916793,
+      "classical": 7.042804042777415,
+      "hours": 64.0,
+      "image_id": 249265,
+      "truth_polygon": 4.516696621528803,
+      "truth_raster": 4.4434223703062985,
+      "truth_raster_uncorrected": 5.657541075834829,
+      "unet": 5.164686358965519
+    },
+    {
+      "cellpose": 4.4305270771337195,
+      "classical": 6.692034815356459,
+      "hours": 56.0,
+      "image_id": 249664,
+      "truth_polygon": 4.602663976170421,
+      "truth_raster": 4.4677653468391885,
+      "truth_raster_uncorrected": 5.688535516193064,
+      "unet": 4.948952203172268
+    },
+    {
+      "cellpose": 4.232719039660731,
+      "classical": 7.051525149569566,
+      "hours": 56.0,
+      "image_id": 250018,
+      "truth_polygon": 4.486442653009643,
+      "truth_raster": 4.417177032591956,
+      "truth_raster_uncorrected": 5.624124473991999,
+      "unet": 4.89414124287409
+    },
+    {
+      "cellpose": 4.564545178399754,
+      "classical": 6.023505581539119,
+      "hours": 20.0,
+      "image_id": 250360,
+      "truth_polygon": 4.537407679002373,
+      "truth_raster": 4.419682346484041,
+      "truth_raster_uncorrected": 5.627314338711377,
+      "unet": 4.470914023411537
+    },
+    {
+      "cellpose": 4.369328309839507,
+      "classical": 6.523752764606407,
+      "hours": 48.0,
+      "image_id": 251601,
+      "truth_polygon": 4.68760977717897,
+      "truth_raster": 4.685739168286059,
+      "truth_raster_uncorrected": 5.966068405376262,
+      "unet": 4.806413422885792
+    },
+    {
+      "cellpose": 4.415482111877297,
+      "classical": 6.0513394460290435,
+      "hours": 20.0,
+      "image_id": 251879,
+      "truth_polygon": 4.788882656698948,
+      "truth_raster": 4.719273409154524,
+      "truth_raster_uncorrected": 6.008765526952665,
+      "unet": 4.46174101854613
+    },
+    {
+      "cellpose": 4.116904295072596,
+      "classical": 6.858102345723752,
+      "hours": 72.0,
+      "image_id": 252356,
+      "truth_polygon": 4.688669790226605,
+      "truth_raster": 4.593464742309045,
+      "truth_raster_uncorrected": 5.848580957254592,
+      "unet": 5.403627587385862
+    },
+    {
+      "cellpose": 4.3495463407290895,
+      "classical": 5.865784364202652,
+      "hours": 12.0,
+      "image_id": 252742,
+      "truth_polygon": 4.527600611950953,
+      "truth_raster": 4.397160070290617,
+      "truth_raster_uncorrected": 5.598638086024462,
+      "unet": 4.5733497495138415
+    },
+    {
+      "cellpose": 4.383380833454732,
+      "classical": 6.257198609615211,
+      "hours": 32.0,
+      "image_id": 253652,
+      "truth_polygon": 4.709024896785566,
+      "truth_raster": 4.591050237625147,
+      "truth_raster_uncorrected": 5.845506714410103,
+      "unet": 4.680871505404239
+    },
+    {
+      "cellpose": 4.531140532101185,
+      "classical": 6.436472800390524,
+      "hours": 40.0,
+      "image_id": 253832,
+      "truth_polygon": 4.901367138132821,
+      "truth_raster": 4.826250526448431,
+      "truth_raster_uncorrected": 6.144973023073039,
+      "unet": 4.563422376335112
+    },
+    {
+      "cellpose": 4.199376341593537,
+      "classical": 7.012377752154976,
+      "hours": 72.0,
+      "image_id": 254054,
+      "truth_polygon": 4.7723426035009755,
+      "truth_raster": 4.677800554475373,
+      "truth_raster_uncorrected": 5.955960648342114,
+      "unet": 5.4851501251956725
+    },
+    {
+      "cellpose": 4.495370595638482,
+      "classical": 6.289726858490161,
+      "hours": 32.0,
+      "image_id": 254422,
+      "truth_polygon": 4.899730476966541,
+      "truth_raster": 4.774212553572555,
+      "truth_raster_uncorrected": 6.078716218179618,
+      "unet": 4.719152025250873
+    },
+    {
+      "cellpose": 4.191119251507795,
+      "classical": 5.689770781370465,
+      "hours": 4.0,
+      "image_id": 254590,
+      "truth_polygon": 4.510167531470927,
+      "truth_raster": 4.288313259813293,
+      "truth_raster_uncorrected": 5.46005002260644,
+      "unet": 4.189657545325124
+    },
+    {
+      "cellpose": 4.585558263824243,
+      "classical": 6.234665775606674,
+      "hours": 40.0,
+      "image_id": 255101,
+      "truth_polygon": 4.946296370572472,
+      "truth_raster": 4.789371986816951,
+      "truth_raster_uncorrected": 6.098017808062156,
+      "unet": 4.815553790401536
+    },
+    {
+      "cellpose": 4.477847142999992,
+      "classical": 6.309310930500023,
+      "hours": 24.0,
+      "image_id": 255326,
+      "truth_polygon": 4.873623100133299,
+      "truth_raster": 4.765638003672983,
+      "truth_raster_uncorrected": 6.067798762169179,
+      "unet": 4.753801310497798
+    },
+    {
+      "cellpose": 4.6588564068411005,
+      "classical": 6.246333462595788,
+      "hours": 36.0,
+      "image_id": 255461,
+      "truth_polygon": 5.063748303645239,
+      "truth_raster": 4.849416991148305,
+      "truth_raster_uncorrected": 6.174469482040632,
+      "unet": 4.495335923469685
+    },
+    {
+      "cellpose": 4.532802954025776,
+      "classical": 6.005380631851422,
+      "hours": 20.0,
+      "image_id": 256900,
+      "truth_polygon": 4.82216600530739,
+      "truth_raster": 4.729772755534115,
+      "truth_raster_uncorrected": 6.022133709957033,
+      "unet": 4.39540952457199
+    },
+    {
+      "cellpose": 4.2021850058964185,
+      "classical": 7.19441680130824,
+      "hours": 64.0,
+      "image_id": 257198,
+      "truth_polygon": 4.20246713127165,
+      "truth_raster": 4.1602364281543185,
+      "truth_raster_uncorrected": 5.296977535773845,
+      "unet": 5.239869708191852
+    },
+    {
+      "cellpose": 3.697360242477444,
+      "classical": 5.23446973185192,
+      "hours": 0.0,
+      "image_id": 258188,
+      "truth_polygon": 3.7342445018969146,
+      "truth_raster": 3.712504017041593,
+      "truth_raster_uncorrected": 4.726906924485501,
+      "unet": 3.91701115455933
+    },
+    {
+      "cellpose": 4.3843918015301675,
+      "classical": 6.413882371509726,
+      "hours": 52.0,
+      "image_id": 258811,
+      "truth_polygon": 4.5886942935717325,
+      "truth_raster": 4.6228985098399145,
+      "truth_raster_uncorrected": 5.886057194025436,
+      "unet": 4.793798204216311
+    },
+    {
+      "cellpose": 4.499909004186186,
+      "classical": 6.50000144925213,
+      "hours": 40.0,
+      "image_id": 259294,
+      "truth_polygon": 4.822216519654338,
+      "truth_raster": 4.746704049484362,
+      "truth_raster_uncorrected": 6.043691302958022,
+      "unet": 4.722336166168828
+    },
+    {
+      "cellpose": 4.5809490336726455,
+      "classical": 6.259544736372209,
+      "hours": 36.0,
+      "image_id": 260493,
+      "truth_polygon": 4.78769527360037,
+      "truth_raster": 4.746007755364154,
+      "truth_raster_uncorrected": 6.042804753749406,
+      "unet": 4.736742641045092
+    },
+    {
+      "cellpose": 4.308703936082771,
+      "classical": 6.857882484001118,
+      "hours": 64.0,
+      "image_id": 260681,
+      "truth_polygon": 4.313727520988731,
+      "truth_raster": 4.208416398126668,
+      "truth_raster_uncorrected": 5.358322178806792,
+      "unet": 5.039124677610014
+    },
+    {
+      "cellpose": 4.238256108429957,
+      "classical": 6.926914121996195,
+      "hours": 72.0,
+      "image_id": 261008,
+      "truth_polygon": 4.791729937882387,
+      "truth_raster": 4.6883301437372955,
+      "truth_raster_uncorrected": 5.9693673377802146,
+      "unet": 5.08398829120482
+    },
+    {
+      "cellpose": 4.490568066493188,
+      "classical": 6.017177842542042,
+      "hours": 20.0,
+      "image_id": 262845,
+      "truth_polygon": 4.451123746515387,
+      "truth_raster": 4.324384704874007,
+      "truth_raster_uncorrected": 5.505977612893482,
+      "unet": 4.6760676194609525
+    },
+    {
+      "cellpose": 4.1726202629938065,
+      "classical": 6.731022804058783,
+      "hours": 72.0,
+      "image_id": 262994,
+      "truth_polygon": 4.277649863315555,
+      "truth_raster": 4.179154143702968,
+      "truth_raster_uncorrected": 5.321064319306437,
+      "unet": 5.121400465260006
+    },
+    {
+      "cellpose": 4.498902180952985,
+      "classical": 6.283185307179586,
+      "hours": 28.0,
+      "image_id": 263411,
+      "truth_polygon": 4.644877355574472,
+      "truth_raster": 4.709842431168525,
+      "truth_raster_uncorrected": 5.996757632835364,
+      "unet": 4.784159615402962
+    },
+    {
+      "cellpose": 4.2643486863623385,
+      "classical": 7.183773661291641,
+      "hours": 64.0,
+      "image_id": 263973,
+      "truth_polygon": 4.486654102593172,
+      "truth_raster": 4.554973272665691,
+      "truth_raster_uncorrected": 5.799572095969699,
+      "unet": 5.008886085168448
+    },
+    {
+      "cellpose": 4.424749759835464,
+      "classical": 6.753893404604376,
+      "hours": 44.0,
+      "image_id": 265009,
+      "truth_polygon": 4.742895834483397,
+      "truth_raster": 4.58612400338632,
+      "truth_raster_uncorrected": 5.839234438170601,
+      "unet": 4.673477215281339
+    },
+    {
+      "cellpose": 4.611825593288632,
+      "classical": 6.362555004675327,
+      "hours": 32.0,
+      "image_id": 265337,
+      "truth_polygon": 4.854994914137566,
+      "truth_raster": 4.8437597693804975,
+      "truth_raster_uncorrected": 6.167266483572522,
+      "unet": 4.823350832274491
+    },
+    {
+      "cellpose": 4.565896650975275,
+      "classical": 6.6100295311791575,
+      "hours": 36.0,
+      "image_id": 265520,
+      "truth_polygon": 4.744516730255742,
+      "truth_raster": 4.764186414310805,
+      "truth_raster_uncorrected": 6.065950541190537,
+      "unet": 4.7284075238734005
+    },
+    {
+      "cellpose": 4.4296722364222045,
+      "classical": 6.332855529193204,
+      "hours": 44.0,
+      "image_id": 266756,
+      "truth_polygon": 4.798315422369126,
+      "truth_raster": 4.658172200583081,
+      "truth_raster_uncorrected": 5.930969051968395,
+      "unet": 4.65657653454995
+    },
+    {
+      "cellpose": 4.259739577822813,
+      "classical": 6.987457292428024,
+      "hours": 60.0,
+      "image_id": 267058,
+      "truth_polygon": 4.421889171112605,
+      "truth_raster": 4.410328117960535,
+      "truth_raster_uncorrected": 5.61540416504476,
+      "unet": 5.3003658655165875
+    },
+    {
+      "cellpose": 4.323804328443625,
+      "classical": 6.530450591367953,
+      "hours": 52.0,
+      "image_id": 267726,
+      "truth_polygon": 4.620756746502423,
+      "truth_raster": 4.535442999369999,
+      "truth_raster_uncorrected": 5.774705379690139,
+      "unet": 4.9880633975575615
+    },
+    {
+      "cellpose": 4.402696295458062,
+      "classical": 6.161170094005421,
+      "hours": 28.0,
+      "image_id": 268096,
+      "truth_polygon": 4.51861414715809,
+      "truth_raster": 4.350986073040236,
+      "truth_raster_uncorrected": 5.539847526786783,
+      "unet": 4.509087365574255
+    }
+  ],
+  "truth_raster": {
+    "bias": -0.08076607024711528,
+    "evaluated": true,
+    "images": 60,
+    "limits_of_agreement": [
+      -0.2099435004631764,
+      0.04841135996894584
+    ],
+    "mean_absolute_error": 0.09205461661460987,
+    "note": "A segmenter can be useless for the absolute value of q and still fine for a trend, because a constant bias cancels when conditions are compared. Both are reported because the two claims need different accuracy.",
+    "predicted_unjammed": 56,
+    "spearman_rho": 0.9508196721311477,
+    "true_unjammed": 56,
+    "usable_for_absolute_q": true,
+    "usable_for_trends": true,
+    "verdict_agreement": 1.0
+  },
+  "truth_raster_uncorrected": {
+    "bias": 1.148496888689381,
+    "evaluated": true,
+    "images": 60,
+    "limits_of_agreement": [
+      0.9427400587327964,
+      1.3542537186459653
+    ],
+    "mean_absolute_error": 1.148496888689381,
+    "note": "A segmenter can be useless for the absolute value of q and still fine for a trend, because a constant bias cancels when conditions are compared. Both are reported because the two claims need different accuracy.",
+    "predicted_unjammed": 60,
+    "spearman_rho": 0.9508196721311477,
+    "true_unjammed": 56,
+    "usable_for_absolute_q": false,
+    "usable_for_trends": true,
+    "verdict_agreement": 0.9333333333333333
+  },
+  "unet": {
+    "bias": 0.16507998443710883,
+    "evaluated": true,
+    "images": 60,
+    "limits_of_agreement": [
+      -0.7032527132884955,
+      1.0334126821627132
+    ],
+    "mean_absolute_error": 0.3376482992718126,
+    "note": "A segmenter can be useless for the absolute value of q and still fine for a trend, because a constant bias cancels when conditions are compared. Both are reported because the two claims need different accuracy.",
+    "predicted_unjammed": 60,
+    "spearman_rho": -0.11536537927202005,
+    "true_unjammed": 56,
+    "usable_for_absolute_q": false,
+    "usable_for_trends": false,
+    "verdict_agreement": 0.9333333333333333
+  }
+}

@@ -339,6 +339,7 @@ PUBLISHED = (
     "seed_3/metrics.json",
     "instance_benchmark/instance_benchmark.json",
     "mechanics/mechanics.json",
+    "mechanics/segmenter_agreement.json",
 )
 
 
