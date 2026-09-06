@@ -62,7 +62,7 @@ Cellpose specifically, not StarDist, whose star-convex polygons cannot represent
 a ruffled adherent cell. See [docs/RESEARCH_PLAN.md](docs/RESEARCH_PLAN.md) for
 the measured ceilings, the brittleness stress test, and what remains to be done.
 
-Across four seeds the test Dice is 0.9536 ± 0.0019, and training at 768 pixels
+Across four seeds the test Dice is 0.9514 ± 0.0007, and training at 768 pixels
 instead of 512 adds +0.005 — the full table, the resolution ablation and each
 run's code revision are in [docs/RESULTS.md](docs/RESULTS.md), generated from the
 run artifacts rather than typed by hand. Those artifacts are committed under

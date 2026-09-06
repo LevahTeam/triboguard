@@ -59,12 +59,12 @@ Independent runs differing only in random seed, same splits, same data.
 
 | Run | Seed | Best epoch | Validation Dice | Test Dice | Code revision |
 |---|---|---|---|---|---|
-| `seed_1` | 1 | 12 | 0.9464 | 0.9525 | `7a5f0f9d` (dirty) |
-| `seed_2` | 2 | 20 | 0.9481 | 0.9548 | `afa034bb` |
-| `seed_3` | 3 | 19 | 0.9461 | 0.9557 | `c7cd9af9` |
+| `seed_1` | 1 | 38 | 0.9481 | 0.9523 | `c60ef886` |
+| `seed_2` | 2 | 40 | 0.9467 | 0.9510 | `9e380d17` |
+| `seed_3` | 3 | 28 | 0.9489 | 0.9507 | `9e380d17` |
 | `baseline` | 42 | 36 | 0.9482 | 0.9515 | `f428dd52` |
 
-Test Dice across 4 seeds: **0.9536 ± 0.0019** (mean ± SD), range 0.9515–0.9557.
+Test Dice across 4 seeds: **0.9514 ± 0.0007** (mean ± SD), range 0.9507–0.9523.
 
 The spread is the honest uncertainty on the headline number, and it is two orders of magnitude smaller than the 0.24 margin over the trivial-predictor floor — so the comparison does not depend on a lucky seed.
 

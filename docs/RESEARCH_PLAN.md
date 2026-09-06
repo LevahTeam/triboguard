@@ -29,7 +29,7 @@ That is a real project. What it is not:
 |---|---|---|
 | The segmenter beats every non-learned reference on unseen data | Test Dice 0.952, against 0.710 for an all-foreground predictor and 0.425 for the classical rule, on held-out well C7; wins 60/60 images against the classical rule, sign test p = 1.7e-18 | `runs/comparison/comparison.json` |
 | The result is not from split leakage | Train = wells A7+D7, val = B7, test = C7; zero shared wells or acquisition groups, verified at load time | `tribovision verify`, `runs/baseline/metrics.json` → `split_check` |
-| The result is not a lucky seed | Three independent seeds reported with spread | `runs/seed_*/metrics.json`, `docs/RESULTS.md` |
+| The result is not a lucky seed | Four seeds: 0.9514 ± 0.0007 test Dice, range 0.9507-0.9523 | `results/seed_*__metrics.json`, `docs/RESULTS.md` |
 | Masks match the COCO reference exactly | Bit-identical to `pycocotools` on real LIVECell polygons | `tests/test_coco.py` |
 | The learning pipeline can learn | Tiny-dataset overfitting test reaches >0.9 train Dice | `tests/test_training.py` |
 | The statistics find real effects and reject noise | Synthetic dose response recovered; null experiment yields q > 0.05 | `tests/test_treatment.py` |
