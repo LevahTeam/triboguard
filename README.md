@@ -28,8 +28,8 @@ the model never saw** (`C7`, 60 images):
 |---|---|---|---|
 | Every pixel labelled cell — no learning at all | 0.710 | 0.593 | — |
 | Classical local-contrast + Otsu | 0.425 | 0.275 | 0.007 |
-| TriboVision U-Net | **0.952** | **0.909** | 0.049 |
-| *The ground-truth mask itself, same instance step* | *1.000* | *1.000* | *0.118* |
+| TriboVision U-Net | **0.951** | **0.907** | 0.046 |
+| *The ground-truth mask itself, same instance step* | *1.000* | *1.000* | *0.168* |
 
 **Read the first row before the last one.** These frames average 59% foreground,
 so a predictor that labels every single pixel a cell already scores 0.710 Dice —
@@ -38,9 +38,9 @@ one, is the floor this model has to clear, and it clears it by +0.242 Dice. IoU
 separates them far more sharply (+0.316), which is why both are reported.
 
 **And read the last row before the instance column.** Putting the *perfect* mask
-through the same instance step scores 0.118, because 382 annotated cells in one
-crowded frame merge into one predicted region. So 0.049 sits against a ceiling of
-0.118, not against 1.0. That is a limit of representing cells as a binary
+through the same instance step scores 0.168, because 382 annotated cells in one
+crowded frame merge into a handful of predicted regions. So 0.046 sits against a
+ceiling of 0.168, not against 1.0. That is a limit of representing cells as a binary
 foreground mask at 59% confluence — not something more training fixes.
 
 Against the classical rule the model wins on every held-out image. The sign test
@@ -62,8 +62,11 @@ Cellpose specifically, not StarDist, whose star-convex polygons cannot represent
 a ruffled adherent cell. See [docs/RESEARCH_PLAN.md](docs/RESEARCH_PLAN.md) for
 the measured ceilings, the brittleness stress test, and what remains to be done.
 
-Published run artifacts are in [results/](results/) so these numbers are available
-without retraining. `docs/RESULTS.md` is generated from them, not typed by hand.
+Across four seeds the test Dice is 0.9536 ± 0.0019, and training at 768 pixels
+instead of 512 adds +0.005 — the full table, the resolution ablation and each
+run's code revision are in [docs/RESULTS.md](docs/RESULTS.md), generated from the
+run artifacts rather than typed by hand. Those artifacts are committed under
+[results/](results/), so the numbers are available without retraining anything.
 
 ## What was wrong before, and what fixed it
 
