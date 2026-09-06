@@ -36,6 +36,7 @@ def test_every_command_is_registered() -> None:
         "predict",
         "compare",
         "instance-benchmark",
+        "mechanics",
         "treatment-template",
         "analyze-treatment",
     }
