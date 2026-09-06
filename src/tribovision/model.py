@@ -43,7 +43,13 @@ class DoubleConv(nn.Sequential):
 class TriboUNet(nn.Module):
     """U-Net with ``depth`` pooling stages and batch-size-independent normalisation."""
 
-    def __init__(self, base_channels: int = 32, depth: int = 3, in_channels: int = 1) -> None:
+    def __init__(
+        self,
+        base_channels: int = 32,
+        depth: int = 3,
+        in_channels: int = 1,
+        out_channels: int = 1,
+    ) -> None:
         super().__init__()
         if base_channels < 1:
             raise ValueError(f"base_channels must be at least 1, got {base_channels}.")
@@ -68,7 +74,10 @@ class TriboUNet(nn.Module):
             self.ups.append(nn.ConvTranspose2d(previous, width, kernel_size=2, stride=2))
             self.decoders.append(DoubleConv(width * 2, width))
             previous = width
-        self.output = nn.Conv2d(previous, 1, kernel_size=1)
+        if out_channels < 1:
+            raise ValueError(f"out_channels must be at least 1, got {out_channels}.")
+        self.out_channels = out_channels
+        self.output = nn.Conv2d(previous, out_channels, kernel_size=1)
 
     @property
     def size_multiple(self) -> int:
