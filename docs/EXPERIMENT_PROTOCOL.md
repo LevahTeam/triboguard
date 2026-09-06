@@ -10,8 +10,18 @@ tell exactly which claims the design can and cannot support.
 automatically from phase-contrast images, track the loss of viability caused by
 Tribonema extract?
 
-**Primary hypothesis.** Mean per-cell area at a fixed exposure time decreases
+**Primary hypothesis.** Mean cell circularity at a fixed exposure time changes
 monotonically with Tribonema extract concentration.
+
+This endpoint was deliberately changed from "mean per-cell area". While the
+segmenter is semantic, touching cells merge into one predicted region, so an
+object's *area* is largely a measure of how crowded the field is. A cytotoxic
+extract kills cells, cells detach, confluency falls, and mean object area falls
+with it — a clean dose response that says only "fewer cells at higher dose",
+which the viability assay already said. Circularity and aspect ratio are
+scale- and density-invariant, so they can answer the question actually asked.
+`treatment.py` labels every feature by kind and refuses to let a density feature
+be the confirmatory endpoint by accident.
 
 **Secondary hypothesis.** A model fitted to morphology features on one set of
 experiment days predicts MTS viability on a day it never saw, better than chance.
@@ -31,7 +41,27 @@ The analysis refuses manifests that cannot support the claim. Concretely:
 | At least one zero-concentration (vehicle) control | Without it, "cells changed" cannot be separated from "cells were cultured" | `_check_design` |
 | At least two distinct concentrations | One point is not a dose response | `_check_design` |
 | At least two independent wells per condition | Otherwise within-condition variability is unestimated and every p-value is fiction | `_check_design` |
-| At least two experiment days | Leave-one-day-out is the only honest test of transfer | `leave_one_day_out` |
+| At least two experiment days | Leave-one-day-out is the only honest test of transfer | `_check_design` |
+| A well marked `control_type='vehicle'` | A zero-dose well is not a vehicle control unless it got the same solvent at the same final concentration | `_check_design` |
+| Five distinct non-zero concentrations and eight wells, before any IC50 is fitted | Four parameters fitted to four points has zero residual degrees of freedom | `fit_dose_response` |
+
+### Power: plan for more than the minimum
+
+The enforced minimum lets the analysis run; it does not give it a real chance of
+detecting an effect. Simulated power for the leave-one-day-out viability test, at
+a within-day correlation of rho between morphology and viability:
+
+| Design | rho = 0.5 | rho = 0.7 | rho = 0.85 |
+|---|---|---|---|
+| 2 days, 20 wells | 0.15 | 0.39 | 0.77 |
+| 3 days, 30 wells | 0.31 | 0.65 | 0.92 |
+| 3 days, 45 wells | 0.45 | 0.89 | 1.00 |
+| **4 days, 60 wells** | **0.66** | **0.98** | **1.00** |
+
+At 3 days and 30 wells a moderate real effect is missed two times in three.
+**Plan for 3-4 experiment days and 45-60 wells**, and commit to that number in the
+logbook before collecting anything. A negative result below that size is
+uninformative, and saying so afterwards is not the same as saying so in advance.
 
 Recommended, beyond the enforced minimum:
 
@@ -116,12 +146,28 @@ Generate the template with `tribovision treatment-template`.
 ## 7. What the analysis reports
 
 - Per-well morphology summaries (fields averaged first).
-- Spearman correlation of each feature against concentration, overall and
-  per experiment day, with Benjamini-Hochberg q-values across features.
+- Spearman correlation of each feature against concentration, with a p-value
+  obtained by permuting concentration labels **within each experiment day** — so a
+  day effect cannot masquerade as a dose effect — and Benjamini-Hochberg q-values
+  across features. The pooled parametric p-value is reported alongside, as a
+  descriptive only.
+- Each feature labelled `shape`, `density`, `density-contaminated` or `intensity`,
+  so a reader can tell which results are about morphology and which are about
+  confluency.
 - 4-parameter-logistic dose-response fits with bootstrap IC50 confidence
   intervals, flagged when the IC50 falls outside the tested range.
 - Leave-one-day-out ridge prediction of viability from morphology, with a
-  within-day label-permutation null and an exact permutation p-value.
+  within-day label-permutation null and an exact permutation p-value. Two are
+  reported: a **confirmatory** model using the single pre-specified endpoint, and
+  an **exploratory** one using every available feature. Eight correlated
+  predictors at 20-30 wells roughly halves the power, which is why the
+  confirmatory test is the one that counts.
+- R^2 both against the global mean and **within day**. Only the within-day figure
+  is free of between-day batch variance; the plain R^2 can look excellent while
+  explaining nothing about which well within a day is healthier.
+- Bootstrap IC50 intervals with the resample convergence rate. Below 80%
+  convergence no interval is reported, because one built from only the
+  well-behaved resamples is biased narrow.
 
 ## 8. What the analysis will not report
 
