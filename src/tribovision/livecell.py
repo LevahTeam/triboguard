@@ -49,6 +49,8 @@ FULL_ANNOTATION_URLS = {
 _WELL_PATTERN = re.compile(r"^[^_]+_Phase_([A-H]\d{1,2})_", re.IGNORECASE)
 
 DOWNLOAD_TIMEOUT_SECONDS = 120
+#: Selective ZIP extraction is resumable, so a transient timeout is retried.
+REMOTE_ATTEMPTS = 5
 #: A single LIVECell frame is under a megabyte; 64 MB is generous but bounded.
 MAX_MEMBER_BYTES = 64 * 1024 * 1024
 #: A decompression bomb inflates far more than a TIFF ever does.
@@ -434,6 +436,7 @@ def _write_manifests(
     seed: int,
     group_by: str,
     micrometers_per_pixel: float | None,
+    caps: dict[str, int],
 ) -> dict[str, Any]:
     manifests_dir = root / "manifests"
     manifests_dir.mkdir(parents=True, exist_ok=True)
@@ -528,6 +531,7 @@ def _write_manifests(
             ),
         },
         "selection": "deterministic hash-ranked sample within each official split",
+        "selection_caps": caps,
         "seed": seed,
         "images": counts,
         "cell_types": dict(sorted(cell_counts.items())),
@@ -556,16 +560,27 @@ def prepare_demo(
     root: Path,
     *,
     cell_types: Iterable[str] = ("A172",),
-    max_images: int = 60,
+    max_images: int | dict[str, int] = 60,
     seed: int = 42,
     images_zip: Path | None = None,
     group_by: str = "well",
     val_fraction: float = 0.3,
     micrometers_per_pixel: float | None = None,
 ) -> dict[str, Any]:
-    """Prepare deterministic, leakage-free samples from official LIVECell splits."""
-    if max_images < 1:
-        raise PreparationError("max_images must be at least 1.")
+    """Prepare deterministic, leakage-free samples from official LIVECell splits.
+
+    ``max_images`` may be a single cap or a per-official-split mapping. The mapping
+    exists so that a training set can be grown while the held-out split is held
+    byte-identical: a scaling experiment that also changes what it is measured on
+    answers nothing.
+    """
+    caps = (
+        {split: int(max_images) for split in ("train", "val", "test")}
+        if isinstance(max_images, int)
+        else {split: int(max_images.get(split, 60)) for split in ("train", "val", "test")}
+    )
+    if any(value < 1 for value in caps.values()):
+        raise PreparationError("max_images must be at least 1 for every split.")
     if group_by not in ("well", "acquisition"):
         raise PreparationError(f"group_by must be 'well' or 'acquisition', got {group_by!r}.")
     if not 0.0 < val_fraction < 1.0:
@@ -599,7 +614,7 @@ def prepare_demo(
                 validator=_valid_coco_json,
             )
             coco = _load_coco(annotation_path)
-            selected = _select_images(coco, [cell_type], max_images, seed)
+            selected = _select_images(coco, [cell_type], caps[split], seed)
             selections.append((split, annotation_path, source_url, coco, selected))
             all_selected.extend((split, image) for image in selected)
 
@@ -641,7 +656,26 @@ def prepare_demo(
         if images_zip:
             extracted.update(_extract_local_members(images_zip.resolve(), missing, image_root))
         else:
-            extracted.update(_extract_remote_members(IMAGES_URL, missing, image_root))
+            # Selective extraction over HTTP ranges is long-running and a single
+            # read timeout used to lose the whole batch. Each image is written
+            # atomically, so a retry resumes: recompute what is still missing and
+            # only give up when an attempt makes no progress at all.
+            for attempt in range(1, REMOTE_ATTEMPTS + 1):
+                try:
+                    extracted.update(_extract_remote_members(IMAGES_URL, missing, image_root))
+                    break
+                except PreparationError:
+                    extracted, still_missing = _existing_images(selected_flat, image_root)
+                    if attempt == REMOTE_ATTEMPTS or len(still_missing) >= len(missing):
+                        raise PreparationError(
+                            f"Could not fetch {len(still_missing)} of "
+                            f"{len(selected_flat)} images after {attempt} attempt(s). "
+                            f"{len(extracted)} are already on disk and will be reused, "
+                            "so simply re-running resumes where this stopped. For a "
+                            "large subset, download the official images.zip once and "
+                            "pass --images-zip instead."
+                        ) from None
+                    missing = still_missing
     image_paths = {
         (split, PurePosixPath(str(image["file_name"])).name.casefold()): extracted[
             PurePosixPath(str(image["file_name"])).name.casefold()
@@ -649,7 +683,7 @@ def prepare_demo(
         for split, image in all_selected
     }
     result = _write_manifests(
-        root, selections, image_paths, assignment, seed, group_by, micrometers_per_pixel
+        root, selections, image_paths, assignment, seed, group_by, micrometers_per_pixel, caps
     )
     result["split_report"] = summarise(assignment, group_of)
     return result

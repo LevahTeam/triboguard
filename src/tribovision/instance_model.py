@@ -151,6 +151,10 @@ class InstanceConfig:
     device: str = "auto"
     boundary_weight: float = 3.0
     patience: int = 12
+    #: Cap on training images, for measuring how the result scales with data.
+    #: Validation and test are never subsampled, so every point on a scaling
+    #: curve is scored on exactly the same held-out images.
+    train_limit: int | None = None
 
 
 def _class_weights(boundary_weight: float, device: torch.device) -> torch.Tensor:
@@ -225,10 +229,23 @@ def train_instance_model(config: InstanceConfig, *, progress: bool = True) -> di
         split: ThreeClassDataset(manifests / f"{split}.jsonl", image_size=config.image_size)
         for split in ("train", "val", "test")
     }
+    train_dataset: Any = datasets["train"]
+    if config.train_limit is not None:
+        available = len(datasets["train"])
+        if config.train_limit < 1:
+            raise ValueError(f"train_limit must be at least 1, got {config.train_limit}.")
+        if config.train_limit < available:
+            # A fixed permutation, so a smaller run is a subset of a larger one and
+            # the curve is not confounded by which images each point happened to see.
+            order = np.random.default_rng(0).permutation(available)
+            train_dataset = torch.utils.data.Subset(
+                datasets["train"], sorted(int(i) for i in order[: config.train_limit])
+            )
+
     generator = torch.Generator().manual_seed(config.seed)
     loaders = {
         "train": DataLoader(
-            datasets["train"], batch_size=config.batch_size, shuffle=True, generator=generator
+            train_dataset, batch_size=config.batch_size, shuffle=True, generator=generator
         ),
         **{
             split: DataLoader(datasets[split], batch_size=config.batch_size)
@@ -298,6 +315,8 @@ def train_instance_model(config: InstanceConfig, *, progress: bool = True) -> di
             "output_dir": provenance.relative_to_repo(output_dir),
         },
         "device": str(device),
+        "training_images": len(train_dataset),
+        "training_images_available": len(datasets["train"]),
         "best_epoch": best_epoch,
         "best_validation": checkpoint["val_metrics"],
         "test": test_metrics,

@@ -392,4 +392,74 @@ def test_writing_leaking_manifests_is_refused(tmp_path: Path, coco_payload: dict
             42,
             "well",
             None,
+            {"train": 10, "val": 10, "test": 10},
         )
+
+
+def test_per_split_caps_hold_the_test_set_fixed_while_training_grows(
+    tmp_path: Path, coco_payload: dict
+) -> None:
+    """A scaling experiment that also changes its held-out set answers nothing."""
+    root, archive = _fake_source(tmp_path, coco_payload)
+    small = prepare_demo(
+        root,
+        cell_types=["A172"],
+        max_images={"train": 2, "val": 2, "test": 2},
+        seed=42,
+        images_zip=archive,
+    )
+    test_manifest = (root / "manifests" / "test.jsonl").read_text()
+    large = prepare_demo(
+        root,
+        cell_types=["A172"],
+        max_images={"train": 20, "val": 20, "test": 2},
+        seed=42,
+        images_zip=archive,
+    )
+    # The training pool grew; the held-out split is byte-identical.
+    assert large["counts"]["train"] > small["counts"]["train"]
+    assert (root / "manifests" / "test.jsonl").read_text() == test_manifest
+    assert large["summary"]["selection_caps"]["test"] == 2
+
+
+def test_an_invalid_per_split_cap_is_rejected(tmp_path: Path) -> None:
+    with pytest.raises(PreparationError, match="at least 1 for every split"):
+        prepare_demo(tmp_path / "d", cell_types=["A172"], max_images={"train": 0})
+
+
+def test_a_transient_remote_failure_is_retried_and_resumes(
+    tmp_path: Path, coco_payload: dict, monkeypatch
+) -> None:
+    """Each image is written atomically, so a retry must not restart from zero."""
+    root, archive = _fake_source(tmp_path, coco_payload)
+    attempts: list[int] = []
+    real = _extract_local_members
+
+    def flaky(url: str, selected: list, image_root: Path) -> dict:
+        attempts.append(len(selected))
+        # Extract half, then fail, the way a read timeout mid-batch behaves.
+        real(archive, selected[: max(1, len(selected) // 2)], image_root)
+        if len(attempts) < 3:
+            raise PreparationError("simulated read timeout")
+        return real(archive, selected, image_root)
+
+    monkeypatch.setattr("tribovision.livecell._extract_remote_members", flaky)
+    result = prepare_demo(root, cell_types=["A172"], max_images=10, seed=42)
+    assert len(attempts) == 3
+    # Each attempt asked for strictly fewer images than the last: it resumed.
+    assert attempts == sorted(attempts, reverse=True)
+    assert attempts[-1] < attempts[0]
+    assert result["counts"]["train"] > 0
+
+
+def test_a_remote_failure_that_makes_no_progress_gives_up_with_advice(
+    tmp_path: Path, coco_payload: dict, monkeypatch
+) -> None:
+    root, _ = _fake_source(tmp_path, coco_payload)
+
+    def always_fails(url: str, selected: list, image_root: Path) -> dict:
+        raise PreparationError("simulated outage")
+
+    monkeypatch.setattr("tribovision.livecell._extract_remote_members", always_fails)
+    with pytest.raises(PreparationError, match="re-running resumes|--images-zip"):
+        prepare_demo(root, cell_types=["A172"], max_images=10, seed=42)

@@ -158,3 +158,65 @@ def test_the_pipeline_can_learn_a_tiny_three_class_dataset(
     import json
 
     assert "/Users/" not in json.dumps(result["config"])
+
+
+def test_the_training_set_can_be_capped_without_touching_the_held_out_splits(
+    tmp_path: Path, tiny_training_data: Path
+) -> None:
+    """Every point on a scaling curve must be scored on the same held-out images."""
+    result = train_instance_model(
+        InstanceConfig(
+            data_dir=tiny_training_data,
+            output_dir=tmp_path / "run",
+            epochs=2,
+            batch_size=1,
+            image_size=32,
+            base_channels=4,
+            depth=2,
+            device="cpu",
+            train_limit=1,
+        ),
+        progress=False,
+    )
+    assert result["training_images"] == 1
+    assert result["training_images_available"] == 2
+    # Validation and test are untouched by the cap.
+    assert result["test"]["samples"] == 2
+    assert result["best_validation"]["samples"] == 2
+
+
+def test_a_cap_above_the_available_images_is_a_no_op(
+    tmp_path: Path, tiny_training_data: Path
+) -> None:
+    result = train_instance_model(
+        InstanceConfig(
+            data_dir=tiny_training_data,
+            output_dir=tmp_path / "run",
+            epochs=1,
+            batch_size=1,
+            image_size=32,
+            base_channels=4,
+            depth=2,
+            device="cpu",
+            train_limit=999,
+        ),
+        progress=False,
+    )
+    assert result["training_images"] == result["training_images_available"] == 2
+
+
+def test_an_invalid_cap_is_rejected(tmp_path: Path, tiny_training_data: Path) -> None:
+    with pytest.raises(ValueError, match="train_limit"):
+        train_instance_model(
+            InstanceConfig(
+                data_dir=tiny_training_data,
+                output_dir=tmp_path / "run",
+                epochs=1,
+                image_size=32,
+                base_channels=4,
+                depth=2,
+                device="cpu",
+                train_limit=0,
+            ),
+            progress=False,
+        )
