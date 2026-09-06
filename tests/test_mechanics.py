@@ -353,3 +353,107 @@ def test_the_trajectory_note_warns_against_quoting_a_single_well(tmp_path: Path)
     )
     assert "not replicated" in result["note"]
     assert result["wells_measured"] == 1
+
+
+# --------------------------------------------- recovering q from a segmentation
+
+
+def _disc_labels(radius: float, count: int, shape: tuple[int, int] | None = None) -> np.ndarray:
+    """Non-overlapping discs of a known radius, spaced so they cannot merge."""
+    step = int(2 * radius) + 8
+    height = int(2 * radius) + 8
+    width = step * count + 8
+    if shape is not None:
+        height, width = max(height, shape[0]), max(width, shape[1])
+    labels = np.zeros((height, width), dtype=np.int32)
+    ys, xs = np.mgrid[0:height, 0:width]
+    for index in range(count):
+        cx = 4 + int(radius) + step * index
+        labels[((ys - height // 2) ** 2 + (xs - cx) ** 2) <= radius**2] = index + 1
+    assert labels.max() == count, "discs must not merge"
+    return labels
+
+
+def test_measuring_a_label_image_recovers_the_disc_shape_index() -> None:
+    """A segmenter returns rasters, so q must survive the round trip through one."""
+    values = mechanics.measure_labels(_disc_labels(45.0, 3))
+    assert len(values) == 3
+    # 1% residual at this size, per the documented scaling; still below q*.
+    assert float(np.median(values)) == pytest.approx(CIRCLE_SHAPE_INDEX, rel=0.02)
+    assert float(np.median(values)) < JAMMING_THRESHOLD
+
+
+def test_the_correction_converges_but_leaves_a_size_dependent_residual() -> None:
+    """Characterised, not hidden: small objects stay biased after correction."""
+    residuals = []
+    for radius in (12, 30, 70, 150):
+        labels = _disc_labels(float(radius), 1)
+        measured = float(np.median(mechanics.measure_labels(labels, min_area_pixels=10)))
+        residuals.append(measured / CIRCLE_SHAPE_INDEX - 1.0)
+    # Always an overestimate, and monotonically smaller as the object grows.
+    assert all(value > 0 for value in residuals)
+    assert residuals == sorted(residuals, reverse=True)
+    assert residuals[0] > 0.03 and residuals[-1] < 0.01
+
+
+def test_the_residual_estimate_tracks_the_measured_bias() -> None:
+    for radius in (12, 30, 70):
+        area = math.pi * radius**2
+        labels = _disc_labels(float(radius), 1)
+        measured = float(np.median(mechanics.measure_labels(labels, min_area_pixels=10)))
+        actual = measured / CIRCLE_SHAPE_INDEX - 1.0
+        estimate = mechanics.discretisation_residual(area)
+        assert 0.3 * estimate < actual < 3.0 * estimate
+
+
+def test_a_cell_too_close_to_the_threshold_is_flagged_as_unresolvable() -> None:
+    """Near q*, a small cell's verdict is decided by discretisation, not biology."""
+    assert mechanics.resolvable_near_threshold(area_pixels=40_000, q=4.6) is True
+    assert mechanics.resolvable_near_threshold(area_pixels=300, q=3.82) is False
+    with pytest.raises(MechanicsError):
+        mechanics.discretisation_residual(0)
+
+
+def test_without_the_correction_the_same_discs_read_as_fluid() -> None:
+    """The trap, restated on a label image: the correction is not optional."""
+    uncorrected = mechanics.measure_labels(_disc_labels(45.0, 3), correct=False)
+    assert float(np.median(uncorrected)) > JAMMING_THRESHOLD
+
+
+def test_small_objects_and_empty_label_images_are_handled() -> None:
+    assert mechanics.measure_labels(np.zeros((20, 20), dtype=np.int32)) == []
+    assert mechanics.measure_labels(_disc_labels(2.0, 2), min_area_pixels=50.0) == []
+
+
+def test_agreement_separates_absolute_accuracy_from_trend_accuracy() -> None:
+    """A constant offset ruins the absolute value and leaves the trend intact."""
+    truth = [3.7, 3.9, 4.1, 4.3, 4.5, 4.7]
+    offset = [value + 0.6 for value in truth]
+    result = mechanics.agreement(truth, offset)
+    assert result["bias"] == pytest.approx(0.6)
+    assert result["spearman_rho"] == pytest.approx(1.0)
+    assert result["usable_for_absolute_q"] is False
+    assert result["usable_for_trends"] is True
+    # It also moves images to the wrong side of the transition.
+    assert result["verdict_agreement"] < 1.0
+
+
+def test_agreement_recognises_a_faithful_segmenter() -> None:
+    truth = [3.7, 3.9, 4.1, 4.3, 4.5, 4.7]
+    close = [value + 0.01 for value in truth]
+    result = mechanics.agreement(truth, close)
+    assert result["usable_for_absolute_q"] is True
+    assert result["usable_for_trends"] is True
+    assert result["verdict_agreement"] == 1.0
+
+
+def test_agreement_rejects_a_segmenter_that_scrambles_the_ordering() -> None:
+    truth = [3.7, 3.9, 4.1, 4.3, 4.5, 4.7]
+    scrambled = [4.2, 3.8, 4.6, 3.9, 4.4, 4.0]
+    result = mechanics.agreement(truth, scrambled)
+    assert result["usable_for_trends"] is False
+
+
+def test_agreement_needs_paired_images() -> None:
+    assert mechanics.agreement([3.9], [4.0])["evaluated"] is False
+    assert mechanics.agreement([], [])["evaluated"] is False

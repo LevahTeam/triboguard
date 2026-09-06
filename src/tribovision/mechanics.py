@@ -41,6 +41,17 @@ CIRCLE_SHAPE_INDEX = 2.0 * math.sqrt(math.pi)
 HEXAGON_SHAPE_INDEX = math.sqrt(8.0 * math.sqrt(3.0))
 #: Ratio by which a pixel-edge ("crack") perimeter exceeds a smooth boundary.
 CRACK_PERIMETER_FACTOR = 4.0 / math.pi
+#: Measured residual of the crack-perimeter correction, as a fraction, against
+#: discs of known area. The correction is asymptotic, so a residual remains and it
+#: scales roughly as 1/radius: about 8% at 80 px of area, 2.5% at 1,300 px, 1% at
+#: 6,000 px and 0.3% at 70,000 px. For a typical cultured cell of a few thousand
+#: pixels that is 1-3%, which is 0.04-0.11 in q - comparable to the distance from
+#: the rigidity transition itself. No second correction is applied for it, because
+#: fitting one to discs would not transfer to ruffled cells; it is reported
+#: instead, and near the threshold a raster measurement should not be trusted
+#: without polygon outlines to check it against.
+DISCRETISATION_RESIDUAL_SCALE = 0.5
+
 #: Confluence above which crowding, rather than post-plating spreading, dominates.
 #:
 #: A monolayer does two different things over a time-lapse. Freshly seeded cells
@@ -104,6 +115,24 @@ def corrected_pixel_shape_index(
     whose boundary is genuinely wrong.
     """
     return shape_index(area_pixels, crack_perimeter / factor)
+
+
+def discretisation_residual(area_pixels: float) -> float:
+    """Estimated fractional overestimate left by the crack-perimeter correction.
+
+    Empirical, fitted to discs, and quoted as an uncertainty rather than applied
+    as a second correction. Use it to decide whether a measurement is close enough
+    to q* that the raster route cannot settle the question.
+    """
+    if area_pixels <= 0:
+        raise MechanicsError(f"Area must be positive, got {area_pixels}.")
+    radius = math.sqrt(area_pixels / math.pi)
+    return float(DISCRETISATION_RESIDUAL_SCALE / max(radius, 1e-9))
+
+
+def resolvable_near_threshold(area_pixels: float, q: float) -> bool:
+    """Is this cell far enough from q* that discretisation cannot flip the verdict?"""
+    return abs(q - JAMMING_THRESHOLD) > q * discretisation_residual(area_pixels)
 
 
 def parse_hours(file_name: str) -> float | None:
@@ -499,3 +528,90 @@ def time_course(
             "quoting it."
         ),
     }
+
+
+def measure_labels(
+    labels: np.ndarray, *, min_area_pixels: float = 50.0, correct: bool = True
+) -> list[float]:
+    """Shape index of every object in a label image, from its raster boundary.
+
+    Predictions arrive as rasters, not polygons, so the pixel-edge perimeter has
+    to be corrected before q means anything. ``correct=False`` exists to show what
+    happens without it, which is the point of the discretisation warning at the
+    top of this module.
+    """
+    from scipy import ndimage
+
+    from tribovision.morphology import crack_perimeter
+
+    array = np.asarray(labels)
+    count = int(array.max())
+    if count == 0:
+        return []
+    values: list[float] = []
+    for index, window in enumerate(ndimage.find_objects(array), start=1):
+        if window is None:
+            continue
+        component = array[window] == index
+        area = float(np.count_nonzero(component))
+        if area < min_area_pixels:
+            continue
+        perimeter = float(crack_perimeter(component))
+        if perimeter <= 0:
+            continue
+        try:
+            values.append(
+                corrected_pixel_shape_index(area, perimeter)
+                if correct
+                else shape_index(area, perimeter)
+            )
+        except MechanicsError:
+            continue
+    return values
+
+
+def agreement(true_values: Sequence[float], predicted_values: Sequence[float]) -> dict[str, Any]:
+    """Compare two per-image median shape indices across a set of images."""
+    from scipy import stats
+
+    truth = np.asarray(true_values, dtype=float)
+    predicted = np.asarray(predicted_values, dtype=float)
+    keep = np.isfinite(truth) & np.isfinite(predicted)
+    truth, predicted = truth[keep], predicted[keep]
+    if truth.size < 3:
+        return {"evaluated": False, "reason": "Fewer than three paired images."}
+    difference = predicted - truth
+    result: dict[str, Any] = {
+        "evaluated": True,
+        "images": int(truth.size),
+        "bias": float(difference.mean()),
+        "mean_absolute_error": float(np.abs(difference).mean()),
+        "limits_of_agreement": [
+            float(difference.mean() - 1.96 * difference.std(ddof=1)),
+            float(difference.mean() + 1.96 * difference.std(ddof=1)),
+        ],
+        # Does it get the *ordering* right, which is what a trend needs?
+        "spearman_rho": (
+            float(stats.spearmanr(truth, predicted).statistic)
+            if float(np.std(truth)) > 1e-12 and float(np.std(predicted)) > 1e-12
+            else None
+        ),
+    }
+    # Does it put each image on the correct side of the rigidity transition?
+    true_side = truth > JAMMING_THRESHOLD
+    predicted_side = predicted > JAMMING_THRESHOLD
+    result["verdict_agreement"] = float(np.mean(true_side == predicted_side))
+    result["true_unjammed"] = int(true_side.sum())
+    result["predicted_unjammed"] = int(predicted_side.sum())
+    result["usable_for_absolute_q"] = bool(
+        abs(result["bias"]) < 0.1 and result["verdict_agreement"] >= 0.9
+    )
+    result["usable_for_trends"] = bool(
+        result["spearman_rho"] is not None and result["spearman_rho"] > 0.7
+    )
+    result["note"] = (
+        "A segmenter can be useless for the absolute value of q and still fine for "
+        "a trend, because a constant bias cancels when conditions are compared. "
+        "Both are reported because the two claims need different accuracy."
+    )
+    return result
