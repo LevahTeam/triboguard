@@ -11,6 +11,7 @@ Model weights, overlays and downloaded data are intentionally not here: they are
 - `classical_baseline__per_image_metrics.csv`
 - `comparison__comparison.json`
 - `instance_benchmark__instance_benchmark.json`
+- `mechanics__mechanics.json`
 - `seed_1__metrics.json`
 - `seed_2__metrics.json`
 - `seed_3__metrics.json`

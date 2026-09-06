@@ -146,6 +146,24 @@ def _add_instance_benchmark(subparsers: Any) -> None:
     parser.add_argument("--no-cellpose", action="store_true")
 
 
+def _add_mechanics(subparsers: Any) -> None:
+    parser = subparsers.add_parser(
+        "mechanics",
+        help="Measure the tissue shape index q = P/sqrt(A) and the jamming state.",
+    )
+    parser.add_argument("--data-dir", type=Path, default=Path("data/livecell"))
+    parser.add_argument(
+        "--cell-types",
+        nargs="+",
+        choices=CELL_TYPES,
+        default=list(CELL_TYPES),
+        help="Cell types to measure (default: all available).",
+    )
+    parser.add_argument("--split", choices=("train", "val", "test"), default="test")
+    parser.add_argument("--output-dir", type=Path, default=Path("runs/mechanics"))
+    parser.add_argument("--min-area", type=float, default=50.0)
+
+
 def _add_treatment(subparsers: Any) -> None:
     template = subparsers.add_parser(
         "treatment-template",
@@ -209,6 +227,7 @@ def build_parser() -> argparse.ArgumentParser:
     _add_predict(subparsers)
     _add_compare(subparsers)
     _add_instance_benchmark(subparsers)
+    _add_mechanics(subparsers)
     _add_treatment(subparsers)
     return parser
 
@@ -351,6 +370,57 @@ def _run(args: argparse.Namespace) -> int:
         )
         _print(
             {key: value for key, value in report.items() if key not in ("per_image", "environment")}
+        )
+        return 0
+
+    if args.command == "mechanics":
+        import json as _json
+
+        from tribovision import mechanics
+
+        results = {}
+        for cell_type in args.cell_types:
+            path = Path(args.data_dir) / "annotations" / cell_type.casefold() / f"{args.split}.json"
+            if not path.is_file():
+                continue
+            measured = mechanics.measure_annotation_file(
+                path, cell_type=cell_type, min_area_pixels=args.min_area
+            )
+            measured["density"] = mechanics.density_relationship(measured["images"])
+            measured["interpretation"] = mechanics.interpret(measured["summary"])
+            results[cell_type] = measured
+        if not results:
+            raise ValueError(
+                f"No {args.split} annotations found under {args.data_dir}. "
+                "Run prepare-livecell, or download the annotation files first."
+            )
+        output_dir = Path(args.output_dir).resolve()
+        output_dir.mkdir(parents=True, exist_ok=True)
+        report = {
+            "split": args.split,
+            "jamming_threshold": mechanics.JAMMING_THRESHOLD,
+            "circle_shape_index": mechanics.CIRCLE_SHAPE_INDEX,
+            "hexagon_shape_index": mechanics.HEXAGON_SHAPE_INDEX,
+            "cell_types": results,
+            "environment": __import__(
+                "tribovision.provenance", fromlist=["environment"]
+            ).environment(),
+        }
+        (output_dir / "mechanics.json").write_text(
+            _json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+        _print(
+            {
+                name: {
+                    **value["summary"],
+                    "density": {
+                        k: v
+                        for k, v in value["density"].items()
+                        if k in ("spearman_rho", "p_value", "supports_hypothesis", "fields")
+                    },
+                }
+                for name, value in results.items()
+            }
         )
         return 0
 

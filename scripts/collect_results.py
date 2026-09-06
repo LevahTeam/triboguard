@@ -338,6 +338,7 @@ PUBLISHED = (
     "seed_2/metrics.json",
     "seed_3/metrics.json",
     "instance_benchmark/instance_benchmark.json",
+    "mechanics/mechanics.json",
 )
 
 
