@@ -41,6 +41,14 @@ CIRCLE_SHAPE_INDEX = 2.0 * math.sqrt(math.pi)
 HEXAGON_SHAPE_INDEX = math.sqrt(8.0 * math.sqrt(3.0))
 #: Ratio by which a pixel-edge ("crack") perimeter exceeds a smooth boundary.
 CRACK_PERIMETER_FACTOR = 4.0 / math.pi
+#: Confluence above which crowding, rather than post-plating spreading, dominates.
+#:
+#: A monolayer does two different things over a time-lapse. Freshly seeded cells
+#: are round and sparse; as they attach and spread the shape index *rises*. Only
+#: once the field fills does crowding take over and drive it back down. Pooling
+#: the two regimes cancels the second against the first and hides the jamming
+#: signature entirely, so trajectories are reported split at this confluence.
+CROWDING_CONFLUENCE = 0.5
 
 _TIMESTAMP = re.compile(r"_(\d+)d(\d+)h(\d+)m_")
 
@@ -244,6 +252,21 @@ def measure_annotation_file(
     }
 
 
+def _guarded_spearman(x: np.ndarray, y: np.ndarray) -> dict[str, Any]:
+    """Spearman that reports an undefined correlation instead of warning.
+
+    A trajectory whose shape index never moves is a real possibility - a fully
+    jammed monolayer, or a synthetic control - and a correlation is genuinely
+    undefined there rather than merely weak.
+    """
+    from scipy import stats
+
+    if float(np.std(x)) < 1e-12 or float(np.std(y)) < 1e-12:
+        return {"spearman_rho": None, "p_value": None, "note": "input had no variance"}
+    result = stats.spearmanr(x, y)
+    return {"spearman_rho": float(result.statistic), "p_value": float(result.pvalue)}
+
+
 def _partial_spearman(x: np.ndarray, y: np.ndarray, control: np.ndarray) -> dict[str, Any]:
     """Spearman correlation of x and y after removing what *control* explains.
 
@@ -319,3 +342,160 @@ def density_relationship(rows: list[dict[str, Any]]) -> dict[str, Any]:
             return report
     report["supports_hypothesis"] = bool(by_count.statistic < 0 and by_count.pvalue < 0.05)
     return report
+
+
+def time_course(
+    paths: list[Any],
+    *,
+    cell_type: str,
+    min_area_pixels: float = 50.0,
+    min_timepoints: int = 6,
+    crowding_confluence: float = CROWDING_CONFLUENCE,
+) -> dict[str, Any]:
+    """Follow the mechanical state of each well as its monolayer fills in.
+
+    LIVECell is a time-lapse: the same wells are imaged repeatedly, and the
+    timestamp is in the file name. That makes the strongest available test of the
+    jamming hypothesis possible — *within* a well, does the shape index fall as
+    the monolayer crowds? A within-well trajectory removes every between-well
+    confound at once, which the cross-sectional correlation cannot.
+
+    Each well contributes one trajectory. Wells are the unit; fields imaged at the
+    same timestamp are averaged first, so imaging more fields cannot inflate n.
+    """
+    import json
+    from collections import defaultdict
+    from pathlib import Path
+
+    from tribovision.manifest import parse_file_name
+
+    # (well, hours) -> shape indices and areas pooled across fields
+    grouped_q: dict[tuple[str, float], list[float]] = defaultdict(list)
+    grouped_area: dict[tuple[str, float], list[float]] = defaultdict(list)
+    frame_area: dict[tuple[str, float], float] = {}
+    fields_seen: dict[tuple[str, float], set[int]] = defaultdict(set)
+
+    for path in paths:
+        payload = json.loads(Path(path).read_text(encoding="utf-8"))
+        images = {}
+        for image in payload.get("images", []):
+            file_name = str(image.get("file_name", ""))
+            hours = parse_hours(file_name)
+            parts = parse_file_name(file_name)
+            if hours is None or parts is None:
+                continue
+            images[int(image["id"])] = (
+                parts["well"],
+                hours,
+                float(image.get("width", 0)) * float(image.get("height", 0)),
+            )
+        for annotation in payload.get("annotations", []):
+            meta = images.get(int(annotation.get("image_id", -1)))
+            if meta is None:
+                continue
+            segmentation = annotation.get("segmentation")
+            if not isinstance(segmentation, list) or not segmentation:
+                continue
+            ring = segmentation[0] if isinstance(segmentation[0], list) else segmentation
+            if not isinstance(ring, list) or len(ring) < 6:
+                continue
+            try:
+                area, perimeter = polygon_area_perimeter(ring)
+                if area < min_area_pixels:
+                    continue
+                q = shape_index(area, perimeter)
+            except MechanicsError:
+                continue
+            well, hours, image_area = meta
+            key = (well, hours)
+            grouped_q[key].append(q)
+            grouped_area[key].append(area)
+            frame_area[key] = image_area
+            fields_seen[key].add(int(annotation["image_id"]))
+
+    trajectories: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for (well, hours), values in sorted(grouped_q.items()):
+        if len(values) < 10:
+            continue
+        fields = max(1, len(fields_seen[(well, hours)]))
+        total_frame_area = frame_area[(well, hours)] * fields
+        trajectories[well].append(
+            {
+                "hours": hours,
+                "cells": len(values),
+                "fields": fields,
+                "median_q": float(np.median(values)),
+                "confluence": float(sum(grouped_area[(well, hours)]) / total_frame_area),
+            }
+        )
+
+    wells: dict[str, Any] = {}
+    for well, points in trajectories.items():
+        if len(points) < min_timepoints:
+            continue
+        points.sort(key=lambda row: row["hours"])
+        timeline = np.array([row["hours"] for row in points], dtype=float)
+        shape = np.array([row["median_q"] for row in points], dtype=float)
+        confluence = np.array([row["confluence"] for row in points], dtype=float)
+        against_time = _guarded_spearman(timeline, shape)
+        against_confluence = _guarded_spearman(confluence, shape)
+        crowded = confluence >= crowding_confluence
+        crowded_result: dict[str, Any] = {
+            "reached": bool(crowded.sum() >= 5),
+            "timepoints": int(crowded.sum()),
+            "threshold": crowding_confluence,
+        }
+        if crowded_result["reached"]:
+            restricted = _guarded_spearman(confluence[crowded], shape[crowded])
+            crowded_result.update(restricted)
+            crowded_result["jams"] = bool(
+                restricted["spearman_rho"] is not None
+                and restricted["spearman_rho"] < 0
+                and restricted["p_value"] < 0.05
+            )
+        else:
+            crowded_result["note"] = (
+                "This well never crowds enough for jamming to be the dominant process, "
+                "so its trajectory measures post-plating spreading instead. A positive "
+                "correlation here is not evidence against jamming."
+            )
+        wells[well] = {
+            "timepoints": len(points),
+            "hours_range": [float(timeline.min()), float(timeline.max())],
+            "confluence_range": [float(confluence.min()), float(confluence.max())],
+            "q_start": float(shape[0]),
+            "q_end": float(shape[-1]),
+            "q_change": float(shape[-1] - shape[0]),
+            "crossed_transition": bool(
+                (shape[0] > JAMMING_THRESHOLD) != (shape[-1] > JAMMING_THRESHOLD)
+            ),
+            "vs_time": against_time,
+            "vs_confluence": against_confluence,
+            "crowded_regime": crowded_result,
+            "jams_as_it_crowds": bool(crowded_result.get("jams", False)),
+            "trajectory": points,
+        }
+
+    reached = [w for w, v in wells.items() if v["crowded_regime"]["reached"]]
+    jamming = [w for w in reached if wells[w]["jams_as_it_crowds"]]
+    return {
+        "cell_type": cell_type,
+        "wells": wells,
+        "wells_measured": len(wells),
+        "wells_reaching_crowded_regime": len(reached),
+        "wells_that_jam_as_they_crowd": len(jamming),
+        "consistent": bool(reached) and len(jamming) in (0, len(reached)),
+        "verdict": (
+            "no well had enough timepoints"
+            if not wells
+            else f"{len(jamming)} of {len(reached)} wells that reach confluence "
+            f"{CROWDING_CONFLUENCE} jam as they crowd "
+            f"({len(wells) - len(reached)} well(s) never crowd that far)"
+        ),
+        "note": (
+            "Each well is one trajectory and the unit of analysis; fields imaged at "
+            "the same timestamp are averaged first. A well-level result from a single "
+            "well is descriptive, not replicated - check wells_measured before "
+            "quoting it."
+        ),
+    }

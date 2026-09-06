@@ -162,6 +162,16 @@ def _add_mechanics(subparsers: Any) -> None:
     parser.add_argument("--split", choices=("train", "val", "test"), default="test")
     parser.add_argument("--output-dir", type=Path, default=Path("runs/mechanics"))
     parser.add_argument("--min-area", type=float, default=50.0)
+    parser.add_argument(
+        "--time-course",
+        action="store_true",
+        help="Follow each well's mechanical state over the time-lapse.",
+    )
+    parser.add_argument(
+        "--all-splits",
+        action="store_true",
+        help="Pool train, val and test annotations for more wells.",
+    )
 
 
 def _add_treatment(subparsers: Any) -> None:
@@ -388,6 +398,17 @@ def _run(args: argparse.Namespace) -> int:
             )
             measured["density"] = mechanics.density_relationship(measured["images"])
             measured["interpretation"] = mechanics.interpret(measured["summary"])
+            if args.time_course:
+                wanted = ("train", "val", "test") if args.all_splits else (args.split,)
+                sources = [
+                    Path(args.data_dir) / "annotations" / cell_type.casefold() / f"{name}.json"
+                    for name in wanted
+                ]
+                measured["time_course"] = mechanics.time_course(
+                    [source for source in sources if source.is_file()],
+                    cell_type=cell_type,
+                    min_area_pixels=args.min_area,
+                )
             results[cell_type] = measured
         if not results:
             raise ValueError(
@@ -413,11 +434,11 @@ def _run(args: argparse.Namespace) -> int:
             {
                 name: {
                     **value["summary"],
-                    "density": {
-                        k: v
-                        for k, v in value["density"].items()
-                        if k in ("spearman_rho", "p_value", "supports_hypothesis", "fields")
-                    },
+                    **(
+                        {"time_course": value["time_course"]["verdict"]}
+                        if "time_course" in value
+                        else {}
+                    ),
                 }
                 for name, value in results.items()
             }

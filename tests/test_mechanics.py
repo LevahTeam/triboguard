@@ -266,3 +266,90 @@ def test_a_correlation_driven_purely_by_cell_size_does_not_survive_the_control()
     assert result["by_confluence"]["p_value"] < 0.05
     # Once cell size is removed, the residual association is gone.
     assert result["survives_size_control"] is False
+
+
+# ------------------------------------------------------------- time trajectories
+
+
+def _timelapse(tmp_path: Path, points: list[tuple[float, float, int]]) -> Path:
+    """Build a COCO file whose cells have a prescribed shape index at each hour.
+
+    Each timepoint is realised as `count` regular polygons; more sides means a
+    lower shape index, so a trajectory can be planted exactly.
+    """
+    images, annotations = [], []
+    for index, (hours, sides, count) in enumerate(points, start=1):
+        days, rest = divmod(int(hours), 24)
+        images.append(
+            {
+                "id": index,
+                "file_name": f"A172_Phase_C7_1_{days:02d}d{rest:02d}h00m_1.tif",
+                "width": 704,
+                "height": 520,
+            }
+        )
+        for cell in range(count):
+            annotations.append(
+                {
+                    "id": index * 1000 + cell,
+                    "image_id": index,
+                    "segmentation": [_regular_polygon(sides, radius=40.0)],
+                }
+            )
+    path = tmp_path / f"tl{len(points)}.json"
+    path.write_text(json.dumps({"images": images, "annotations": annotations}), encoding="utf-8")
+    return path
+
+
+def test_a_trajectory_is_followed_within_a_well(tmp_path: Path) -> None:
+    points = [(h, 6, 40) for h in range(0, 72, 6)]
+    result = mechanics.time_course([_timelapse(tmp_path, points)], cell_type="A172")
+    assert result["wells_measured"] == 1
+    well = result["wells"]["C7"]
+    assert well["timepoints"] == len(points)
+    assert well["hours_range"] == [0.0, 66.0]
+    assert well["q_start"] == pytest.approx(HEXAGON_SHAPE_INDEX, rel=1e-3)
+
+
+def test_crossing_the_rigidity_transition_is_detected(tmp_path: Path) -> None:
+    """Start as hexagons (jammed) and end as squares (fluid)."""
+    points = [(h, 6, 30) for h in range(0, 36, 6)] + [(h, 4, 30) for h in range(36, 72, 6)]
+    well = mechanics.time_course([_timelapse(tmp_path, points)], cell_type="A172")["wells"]["C7"]
+    assert well["q_start"] < JAMMING_THRESHOLD < well["q_end"]
+    assert well["crossed_transition"] is True
+    assert well["q_change"] > 0
+
+
+def test_a_well_that_never_crowds_is_excluded_rather_than_counted_against_jamming(
+    tmp_path: Path,
+) -> None:
+    """The finding that made the regime split necessary.
+
+    Post-plating spreading raises the shape index while confluence is still low.
+    Pooling that with the later crowding phase cancels the jamming signature, and
+    counting a sparse well as a counter-example is simply wrong.
+    """
+    # Twelve small cells: enough to be measured, far too few to crowd the field.
+    sparse = [(h, 6 - min(2, h // 24), 12) for h in range(0, 72, 6)]
+    result = mechanics.time_course([_timelapse(tmp_path, sparse)], cell_type="A172")
+    well = result["wells"]["C7"]
+    assert well["crowded_regime"]["reached"] is False
+    assert "not evidence against jamming" in well["crowded_regime"]["note"]
+    assert well["jams_as_it_crowds"] is False
+    assert "never crowd that far" in result["verdict"]
+
+
+def test_wells_with_too_few_timepoints_are_dropped(tmp_path: Path) -> None:
+    result = mechanics.time_course(
+        [_timelapse(tmp_path, [(0, 6, 30), (6, 6, 30)])], cell_type="A172"
+    )
+    assert result["wells_measured"] == 0
+    assert result["verdict"] == "no well had enough timepoints"
+
+
+def test_the_trajectory_note_warns_against_quoting_a_single_well(tmp_path: Path) -> None:
+    result = mechanics.time_course(
+        [_timelapse(tmp_path, [(h, 6, 30) for h in range(0, 60, 6)])], cell_type="A172"
+    )
+    assert "not replicated" in result["note"]
+    assert result["wells_measured"] == 1

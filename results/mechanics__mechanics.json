@@ -1564,6 +1564,685 @@
           4.552811414542626
         ],
         "state": "unjammed (fluid-like)"
+      },
+      "time_course": {
+        "cell_type": "A172",
+        "consistent": true,
+        "note": "Each well is one trajectory and the unit of analysis; fields imaged at the same timestamp are averaged first. A well-level result from a single well is descriptive, not replicated - check wells_measured before quoting it.",
+        "verdict": "4 of 4 wells that reach confluence 0.5 jam as they crowd (0 well(s) never crowd that far)",
+        "wells": {
+          "A7": {
+            "confluence_range": [
+              0.11308943034992165,
+              0.9480704410408982
+            ],
+            "crossed_transition": true,
+            "crowded_regime": {
+              "jams": true,
+              "p_value": 5.484052998513666e-05,
+              "reached": true,
+              "spearman_rho": -0.9393939393939393,
+              "threshold": 0.5,
+              "timepoints": 10
+            },
+            "hours_range": [
+              0.0,
+              72.0
+            ],
+            "jams_as_it_crowds": true,
+            "q_change": 0.6494011604587078,
+            "q_end": 4.417515917588075,
+            "q_start": 3.768114757129367,
+            "timepoints": 19,
+            "trajectory": [
+              {
+                "cells": 581,
+                "confluence": 0.11308943034992165,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.768114757129367
+              },
+              {
+                "cells": 626,
+                "confluence": 0.160207311345882,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 4.067368371582502
+              },
+              {
+                "cells": 588,
+                "confluence": 0.21991560826868836,
+                "fields": 8,
+                "hours": 8.0,
+                "median_q": 4.422919817275739
+              },
+              {
+                "cells": 687,
+                "confluence": 0.2919221940218025,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 4.618073631628794
+              },
+              {
+                "cells": 743,
+                "confluence": 0.36061893809072526,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 4.710217512169421
+              },
+              {
+                "cells": 844,
+                "confluence": 0.4166439991258691,
+                "fields": 8,
+                "hours": 20.0,
+                "median_q": 4.6721507076053195
+              },
+              {
+                "cells": 1085,
+                "confluence": 0.4836725988342738,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 4.666943981846757
+              },
+              {
+                "cells": 1011,
+                "confluence": 0.4570865167791191,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 4.708006530649151
+              },
+              {
+                "cells": 1064,
+                "confluence": 0.47497398488717757,
+                "fields": 8,
+                "hours": 32.0,
+                "median_q": 4.902939499040362
+              },
+              {
+                "cells": 1166,
+                "confluence": 0.5312481672721799,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 4.972268459943697
+              },
+              {
+                "cells": 1569,
+                "confluence": 0.5975751668180435,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 4.865312454503089
+              },
+              {
+                "cells": 1700,
+                "confluence": 0.6465956256146179,
+                "fields": 8,
+                "hours": 44.0,
+                "median_q": 4.904687267973465
+              },
+              {
+                "cells": 1964,
+                "confluence": 0.732259647993607,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 4.886805677940308
+              },
+              {
+                "cells": 2203,
+                "confluence": 0.8012776369577742,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 4.769494043172919
+              },
+              {
+                "cells": 2424,
+                "confluence": 0.8477798943707623,
+                "fields": 8,
+                "hours": 56.0,
+                "median_q": 4.562785624276031
+              },
+              {
+                "cells": 2742,
+                "confluence": 0.8729890419102263,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 4.6461806248303805
+              },
+              {
+                "cells": 2810,
+                "confluence": 0.9167081361485285,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 4.48484377133761
+              },
+              {
+                "cells": 3465,
+                "confluence": 0.9480704410408982,
+                "fields": 8,
+                "hours": 68.0,
+                "median_q": 4.46331509885268
+              },
+              {
+                "cells": 3826,
+                "confluence": 0.9449985452291844,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 4.417515917588075
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.6420435738344661,
+              "spearman_rho": 0.11403508771929824
+            },
+            "vs_time": {
+              "p_value": 0.6063502472896753,
+              "spearman_rho": 0.12631578947368421
+            }
+          },
+          "B7": {
+            "confluence_range": [
+              0.10795581860522087,
+              0.9813832068468686
+            ],
+            "crossed_transition": true,
+            "crowded_regime": {
+              "jams": true,
+              "p_value": 0.0060999233136969115,
+              "reached": true,
+              "spearman_rho": -0.7939393939393938,
+              "threshold": 0.5,
+              "timepoints": 10
+            },
+            "hours_range": [
+              0.0,
+              72.0
+            ],
+            "jams_as_it_crowds": true,
+            "q_change": 0.7524384096828909,
+            "q_end": 4.462465461785078,
+            "q_start": 3.7100270521021868,
+            "timepoints": 19,
+            "trajectory": [
+              {
+                "cells": 613,
+                "confluence": 0.10795581860522087,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.7100270521021868
+              },
+              {
+                "cells": 604,
+                "confluence": 0.15161495853023355,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 4.157662224213416
+              },
+              {
+                "cells": 691,
+                "confluence": 0.24218657202661004,
+                "fields": 8,
+                "hours": 8.0,
+                "median_q": 4.58683449902359
+              },
+              {
+                "cells": 708,
+                "confluence": 0.2996421199259719,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 4.6494505558447
+              },
+              {
+                "cells": 706,
+                "confluence": 0.3498805121489856,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 4.7118559977446015
+              },
+              {
+                "cells": 860,
+                "confluence": 0.4122187966428134,
+                "fields": 8,
+                "hours": 20.0,
+                "median_q": 4.700515668554503
+              },
+              {
+                "cells": 1055,
+                "confluence": 0.46610513878455634,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 4.751679220971872
+              },
+              {
+                "cells": 1235,
+                "confluence": 0.48579984187198944,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 4.706953339118177
+              },
+              {
+                "cells": 1247,
+                "confluence": 0.47050577474527183,
+                "fields": 8,
+                "hours": 32.0,
+                "median_q": 4.715738414932582
+              },
+              {
+                "cells": 1378,
+                "confluence": 0.540038974831326,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 4.63622384264642
+              },
+              {
+                "cells": 1367,
+                "confluence": 0.6097715531611899,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 4.8609442300808645
+              },
+              {
+                "cells": 1701,
+                "confluence": 0.638410181142102,
+                "fields": 8,
+                "hours": 44.0,
+                "median_q": 4.700196990240899
+              },
+              {
+                "cells": 2002,
+                "confluence": 0.7071537050473826,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 4.686338877099649
+              },
+              {
+                "cells": 2264,
+                "confluence": 0.7804797692102897,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 4.6137855474583125
+              },
+              {
+                "cells": 3016,
+                "confluence": 0.8422225251311176,
+                "fields": 8,
+                "hours": 56.0,
+                "median_q": 4.683911591351674
+              },
+              {
+                "cells": 2957,
+                "confluence": 0.9697548948146664,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 4.388375536127043
+              },
+              {
+                "cells": 3612,
+                "confluence": 0.9813832068468686,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 4.498110400899695
+              },
+              {
+                "cells": 3919,
+                "confluence": 0.9267486495438253,
+                "fields": 8,
+                "hours": 68.0,
+                "median_q": 4.554155149107135
+              },
+              {
+                "cells": 4260,
+                "confluence": 0.9003214876188164,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 4.462465461785078
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.6164660517594382,
+              "spearman_rho": -0.12280701754385966
+            },
+            "vs_time": {
+              "p_value": 0.6368959292043223,
+              "spearman_rho": -0.11578947368421051
+            }
+          },
+          "C7": {
+            "confluence_range": [
+              0.15914252163120052,
+              0.9378549086094581
+            ],
+            "crossed_transition": true,
+            "crowded_regime": {
+              "jams": true,
+              "p_value": 0.00023345817037873163,
+              "reached": true,
+              "spearman_rho": -0.8909090909090911,
+              "threshold": 0.5,
+              "timepoints": 11
+            },
+            "hours_range": [
+              0.0,
+              72.0
+            ],
+            "jams_as_it_crowds": true,
+            "q_change": 0.6942001844803998,
+            "q_end": 4.466501482990739,
+            "q_start": 3.7723012985103392,
+            "timepoints": 19,
+            "trajectory": [
+              {
+                "cells": 883,
+                "confluence": 0.15914252163120052,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.7723012985103392
+              },
+              {
+                "cells": 669,
+                "confluence": 0.16014939572634135,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 4.332500822719628
+              },
+              {
+                "cells": 566,
+                "confluence": 0.20205420244550296,
+                "fields": 8,
+                "hours": 8.0,
+                "median_q": 4.779939451966408
+              },
+              {
+                "cells": 646,
+                "confluence": 0.2698771232210137,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 4.8014558768574425
+              },
+              {
+                "cells": 692,
+                "confluence": 0.35017027220825425,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 4.798139366265815
+              },
+              {
+                "cells": 880,
+                "confluence": 0.4240304107879332,
+                "fields": 8,
+                "hours": 20.0,
+                "median_q": 4.70067050146244
+              },
+              {
+                "cells": 987,
+                "confluence": 0.44725105332167797,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 4.745622566981309
+              },
+              {
+                "cells": 1119,
+                "confluence": 0.4665605234511632,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 4.77014027204269
+              },
+              {
+                "cells": 1289,
+                "confluence": 0.5074162638630886,
+                "fields": 8,
+                "hours": 32.0,
+                "median_q": 4.793755542975229
+              },
+              {
+                "cells": 1478,
+                "confluence": 0.568575489595853,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 4.804775620200672
+              },
+              {
+                "cells": 1793,
+                "confluence": 0.5813885980694218,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 4.80071089983092
+              },
+              {
+                "cells": 2014,
+                "confluence": 0.6060655222731413,
+                "fields": 8,
+                "hours": 44.0,
+                "median_q": 4.799047553246561
+              },
+              {
+                "cells": 2354,
+                "confluence": 0.7296724613813838,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 4.681369195638204
+              },
+              {
+                "cells": 2492,
+                "confluence": 0.84321155664404,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 4.541090869004812
+              },
+              {
+                "cells": 2640,
+                "confluence": 0.8941798327039131,
+                "fields": 8,
+                "hours": 56.0,
+                "median_q": 4.506964537880803
+              },
+              {
+                "cells": 2959,
+                "confluence": 0.8986851147802405,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 4.284807568205341
+              },
+              {
+                "cells": 3131,
+                "confluence": 0.9378549086094581,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 4.411420206986337
+              },
+              {
+                "cells": 3207,
+                "confluence": 0.9361756853693234,
+                "fields": 8,
+                "hours": 68.0,
+                "median_q": 4.4230960902199605
+              },
+              {
+                "cells": 3143,
+                "confluence": 0.9341675891710781,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 4.466501482990739
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.2932678555994544,
+              "spearman_rho": -0.2543859649122807
+            },
+            "vs_time": {
+              "p_value": 0.307238696098784,
+              "spearman_rho": -0.24736842105263157
+            }
+          },
+          "D7": {
+            "confluence_range": [
+              0.10735094156331965,
+              0.9549637511267974
+            ],
+            "crossed_transition": true,
+            "crowded_regime": {
+              "jams": true,
+              "p_value": 0.021665923367532435,
+              "reached": true,
+              "spearman_rho": -0.709090909090909,
+              "threshold": 0.5,
+              "timepoints": 10
+            },
+            "hours_range": [
+              0.0,
+              72.0
+            ],
+            "jams_as_it_crowds": true,
+            "q_change": 0.7644366444829904,
+            "q_end": 4.522353722323819,
+            "q_start": 3.757917077840829,
+            "timepoints": 19,
+            "trajectory": [
+              {
+                "cells": 588,
+                "confluence": 0.10735094156331965,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.757917077840829
+              },
+              {
+                "cells": 609,
+                "confluence": 0.16693604749986593,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 4.218788330699361
+              },
+              {
+                "cells": 645,
+                "confluence": 0.19839074459475764,
+                "fields": 8,
+                "hours": 8.0,
+                "median_q": 4.592247879532667
+              },
+              {
+                "cells": 730,
+                "confluence": 0.2539605518431838,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 4.6892224584899385
+              },
+              {
+                "cells": 794,
+                "confluence": 0.32021952822812405,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 4.673460224811983
+              },
+              {
+                "cells": 931,
+                "confluence": 0.4472054405628546,
+                "fields": 8,
+                "hours": 20.0,
+                "median_q": 4.768055746250392
+              },
+              {
+                "cells": 905,
+                "confluence": 0.39752607657478883,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 4.739391641685846
+              },
+              {
+                "cells": 1193,
+                "confluence": 0.4516903840349029,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 4.730692583170206
+              },
+              {
+                "cells": 1239,
+                "confluence": 0.43373427258045355,
+                "fields": 8,
+                "hours": 32.0,
+                "median_q": 4.791143037997942
+              },
+              {
+                "cells": 1409,
+                "confluence": 0.521496489496831,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 4.756416751624957
+              },
+              {
+                "cells": 1664,
+                "confluence": 0.608718949870917,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 4.751092827664472
+              },
+              {
+                "cells": 1791,
+                "confluence": 0.5854629182145913,
+                "fields": 8,
+                "hours": 44.0,
+                "median_q": 4.6461423146204455
+              },
+              {
+                "cells": 2179,
+                "confluence": 0.7145435059788886,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 4.613923729011497
+              },
+              {
+                "cells": 2220,
+                "confluence": 0.8155605388678782,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 4.546354981585385
+              },
+              {
+                "cells": 2505,
+                "confluence": 0.8796518792340523,
+                "fields": 8,
+                "hours": 56.0,
+                "median_q": 4.554699315496749
+              },
+              {
+                "cells": 3304,
+                "confluence": 0.8305607825475075,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 4.351105691246973
+              },
+              {
+                "cells": 3202,
+                "confluence": 0.8885805852033721,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 4.547545241196546
+              },
+              {
+                "cells": 3503,
+                "confluence": 0.9549637511267974,
+                "fields": 8,
+                "hours": 68.0,
+                "median_q": 4.55416564805499
+              },
+              {
+                "cells": 4050,
+                "confluence": 0.953075938558505,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 4.522353722323819
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.4725078411455852,
+              "spearman_rho": -0.1754385964912281
+            },
+            "vs_time": {
+              "p_value": 0.42861312244412497,
+              "spearman_rho": -0.19298245614035087
+            }
+          }
+        },
+        "wells_measured": 4,
+        "wells_reaching_crowded_regime": 4,
+        "wells_that_jam_as_they_crowd": 4
       }
     },
     "BT474": {
@@ -3290,6 +3969,733 @@
           4.15476250700095
         ],
         "state": "unjammed (fluid-like)"
+      },
+      "time_course": {
+        "cell_type": "BT474",
+        "consistent": false,
+        "note": "Each well is one trajectory and the unit of analysis; fields imaged at the same timestamp are averaged first. A well-level result from a single well is descriptive, not replicated - check wells_measured before quoting it.",
+        "verdict": "0 of 0 wells that reach confluence 0.5 jam as they crowd (4 well(s) never crowd that far)",
+        "wells": {
+          "A3": {
+            "confluence_range": [
+              0.10153609596946024,
+              0.3224796133870976
+            ],
+            "crossed_transition": true,
+            "crowded_regime": {
+              "note": "This well never crowds enough for jamming to be the dominant process, so its trajectory measures post-plating spreading instead. A positive correlation here is not evidence against jamming.",
+              "reached": false,
+              "threshold": 0.5,
+              "timepoints": 0
+            },
+            "hours_range": [
+              0.0,
+              120.0
+            ],
+            "jams_as_it_crowds": false,
+            "q_change": 0.4730611229734123,
+            "q_end": 4.198779694409497,
+            "q_start": 3.7257185714360848,
+            "timepoints": 21,
+            "trajectory": [
+              {
+                "cells": 1073,
+                "confluence": 0.10153609596946024,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.7257185714360848
+              },
+              {
+                "cells": 1040,
+                "confluence": 0.11915129317703442,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 3.7862189297733733
+              },
+              {
+                "cells": 1033,
+                "confluence": 0.14590126039731796,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 3.9392846157988273
+              },
+              {
+                "cells": 1210,
+                "confluence": 0.15494462509901927,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 4.14709906812103
+              },
+              {
+                "cells": 1068,
+                "confluence": 0.170453662980085,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 4.141567438955018
+              },
+              {
+                "cells": 1042,
+                "confluence": 0.17755096500423165,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 4.1234866014671745
+              },
+              {
+                "cells": 1268,
+                "confluence": 0.19741886218517388,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 4.136296892284266
+              },
+              {
+                "cells": 1221,
+                "confluence": 0.20478870788147538,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 4.186973644070795
+              },
+              {
+                "cells": 1306,
+                "confluence": 0.22267649426013408,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 4.149884100416141
+              },
+              {
+                "cells": 1266,
+                "confluence": 0.2207072879903439,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 4.15214048308788
+              },
+              {
+                "cells": 1214,
+                "confluence": 0.2280227426723698,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 4.083090303229477
+              },
+              {
+                "cells": 1332,
+                "confluence": 0.24413570023970338,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 4.179752986540457
+              },
+              {
+                "cells": 1579,
+                "confluence": 0.26821547742296553,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 4.156467046066733
+              },
+              {
+                "cells": 1519,
+                "confluence": 0.2605852406919297,
+                "fields": 8,
+                "hours": 76.0,
+                "median_q": 4.169764608078042
+              },
+              {
+                "cells": 1706,
+                "confluence": 0.292555106397513,
+                "fields": 8,
+                "hours": 84.0,
+                "median_q": 4.182116348052739
+              },
+              {
+                "cells": 1955,
+                "confluence": 0.297778215844222,
+                "fields": 8,
+                "hours": 88.0,
+                "median_q": 4.2446605404111395
+              },
+              {
+                "cells": 1648,
+                "confluence": 0.2729035706163976,
+                "fields": 8,
+                "hours": 96.0,
+                "median_q": 4.175444260518406
+              },
+              {
+                "cells": 1816,
+                "confluence": 0.3028994170843847,
+                "fields": 8,
+                "hours": 100.0,
+                "median_q": 4.127812928561666
+              },
+              {
+                "cells": 1776,
+                "confluence": 0.2906836618362149,
+                "fields": 8,
+                "hours": 108.0,
+                "median_q": 4.155272076729793
+              },
+              {
+                "cells": 1894,
+                "confluence": 0.2800330960104248,
+                "fields": 8,
+                "hours": 112.0,
+                "median_q": 4.234762597471944
+              },
+              {
+                "cells": 2263,
+                "confluence": 0.3224796133870976,
+                "fields": 8,
+                "hours": 120.0,
+                "median_q": 4.198779694409497
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.0003437390796187926,
+              "spearman_rho": 0.7064935064935066
+            },
+            "vs_time": {
+              "p_value": 0.00023665715585405184,
+              "spearman_rho": 0.7194805194805195
+            }
+          },
+          "B3": {
+            "confluence_range": [
+              0.1114344600565417,
+              0.4311064034329866
+            ],
+            "crossed_transition": true,
+            "crowded_regime": {
+              "note": "This well never crowds enough for jamming to be the dominant process, so its trajectory measures post-plating spreading instead. A positive correlation here is not evidence against jamming.",
+              "reached": false,
+              "threshold": 0.5,
+              "timepoints": 0
+            },
+            "hours_range": [
+              0.0,
+              120.0
+            ],
+            "jams_as_it_crowds": false,
+            "q_change": 0.49266329474632853,
+            "q_end": 4.147124690439484,
+            "q_start": 3.6544613956931555,
+            "timepoints": 21,
+            "trajectory": [
+              {
+                "cells": 1065,
+                "confluence": 0.1114344600565417,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.6544613956931555
+              },
+              {
+                "cells": 999,
+                "confluence": 0.13207687607558166,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 3.7655177561786055
+              },
+              {
+                "cells": 1006,
+                "confluence": 0.15719319033749538,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 3.980101317712849
+              },
+              {
+                "cells": 967,
+                "confluence": 0.1614505950372855,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 4.025570539793495
+              },
+              {
+                "cells": 990,
+                "confluence": 0.18434215002526452,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 4.106345626047315
+              },
+              {
+                "cells": 1117,
+                "confluence": 0.19588086352367667,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 4.1158397930509985
+              },
+              {
+                "cells": 1286,
+                "confluence": 0.2132177932760601,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 4.102092232317858
+              },
+              {
+                "cells": 1359,
+                "confluence": 0.23844961478706628,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 4.234867941269626
+              },
+              {
+                "cells": 1660,
+                "confluence": 0.2652363781823645,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 4.25074957735815
+              },
+              {
+                "cells": 1696,
+                "confluence": 0.28590412341564553,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 4.240347195888377
+              },
+              {
+                "cells": 1600,
+                "confluence": 0.28185444183990016,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 4.150410663510215
+              },
+              {
+                "cells": 1776,
+                "confluence": 0.3116227146047291,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 4.12520874813913
+              },
+              {
+                "cells": 1343,
+                "confluence": 0.2608381432166481,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 4.114879080553891
+              },
+              {
+                "cells": 1575,
+                "confluence": 0.29317767825680263,
+                "fields": 8,
+                "hours": 76.0,
+                "median_q": 4.140977591158293
+              },
+              {
+                "cells": 1709,
+                "confluence": 0.32133478245874914,
+                "fields": 8,
+                "hours": 84.0,
+                "median_q": 4.143805190935383
+              },
+              {
+                "cells": 2024,
+                "confluence": 0.36970400291602473,
+                "fields": 8,
+                "hours": 88.0,
+                "median_q": 4.159265457985881
+              },
+              {
+                "cells": 1620,
+                "confluence": 0.2920285953719162,
+                "fields": 8,
+                "hours": 96.0,
+                "median_q": 4.135914684083028
+              },
+              {
+                "cells": 1650,
+                "confluence": 0.2955430620014779,
+                "fields": 8,
+                "hours": 100.0,
+                "median_q": 4.095745102539503
+              },
+              {
+                "cells": 2033,
+                "confluence": 0.36377726956881545,
+                "fields": 8,
+                "hours": 108.0,
+                "median_q": 4.156895996055087
+              },
+              {
+                "cells": 2593,
+                "confluence": 0.3775615524782924,
+                "fields": 8,
+                "hours": 112.0,
+                "median_q": 4.185138422705052
+              },
+              {
+                "cells": 2827,
+                "confluence": 0.4311064034329866,
+                "fields": 8,
+                "hours": 120.0,
+                "median_q": 4.147124690439484
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.0018728838968196655,
+              "spearman_rho": 0.6376623376623376
+            },
+            "vs_time": {
+              "p_value": 0.010543755916837686,
+              "spearman_rho": 0.5454545454545454
+            }
+          },
+          "C3": {
+            "confluence_range": [
+              0.10352302346822924,
+              0.3810154145439485
+            ],
+            "crossed_transition": true,
+            "crowded_regime": {
+              "note": "This well never crowds enough for jamming to be the dominant process, so its trajectory measures post-plating spreading instead. A positive correlation here is not evidence against jamming.",
+              "reached": false,
+              "threshold": 0.5,
+              "timepoints": 0
+            },
+            "hours_range": [
+              0.0,
+              120.0
+            ],
+            "jams_as_it_crowds": false,
+            "q_change": 0.4350404528092886,
+            "q_end": 4.1300400174808445,
+            "q_start": 3.694999564671556,
+            "timepoints": 21,
+            "trajectory": [
+              {
+                "cells": 1030,
+                "confluence": 0.10352302346822924,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.694999564671556
+              },
+              {
+                "cells": 1095,
+                "confluence": 0.12712637746530203,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 3.8941462218474543
+              },
+              {
+                "cells": 1146,
+                "confluence": 0.15399813676313426,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 4.0120967533846255
+              },
+              {
+                "cells": 1080,
+                "confluence": 0.15760315272618292,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 4.079402710610039
+              },
+              {
+                "cells": 1072,
+                "confluence": 0.18480583963887787,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 4.10009405879398
+              },
+              {
+                "cells": 1230,
+                "confluence": 0.20716963332809918,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 4.1712507789349615
+              },
+              {
+                "cells": 1153,
+                "confluence": 0.21272898234333587,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 4.10501394902349
+              },
+              {
+                "cells": 1350,
+                "confluence": 0.22876629997200099,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 4.121932481024626
+              },
+              {
+                "cells": 1332,
+                "confluence": 0.2519520327182639,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 4.141435522656209
+              },
+              {
+                "cells": 1314,
+                "confluence": 0.23185756724964615,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 4.117509788758559
+              },
+              {
+                "cells": 1516,
+                "confluence": 0.27014312636582766,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 4.119449415831331
+              },
+              {
+                "cells": 1525,
+                "confluence": 0.2712440778654977,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 4.15070813363917
+              },
+              {
+                "cells": 1576,
+                "confluence": 0.2979022208772683,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 4.156386653953845
+              },
+              {
+                "cells": 1605,
+                "confluence": 0.3059032980837444,
+                "fields": 8,
+                "hours": 76.0,
+                "median_q": 4.1826268688453565
+              },
+              {
+                "cells": 1906,
+                "confluence": 0.29737310896867925,
+                "fields": 8,
+                "hours": 84.0,
+                "median_q": 4.253030118203023
+              },
+              {
+                "cells": 2065,
+                "confluence": 0.34655215535197287,
+                "fields": 8,
+                "hours": 88.0,
+                "median_q": 4.161831540391977
+              },
+              {
+                "cells": 2206,
+                "confluence": 0.3341414555220162,
+                "fields": 8,
+                "hours": 96.0,
+                "median_q": 4.203207548001838
+              },
+              {
+                "cells": 2358,
+                "confluence": 0.3477258314268703,
+                "fields": 8,
+                "hours": 100.0,
+                "median_q": 4.147259346048246
+              },
+              {
+                "cells": 1964,
+                "confluence": 0.3007379538454689,
+                "fields": 8,
+                "hours": 108.0,
+                "median_q": 4.0639067336431225
+              },
+              {
+                "cells": 2592,
+                "confluence": 0.33774467240766537,
+                "fields": 8,
+                "hours": 112.0,
+                "median_q": 4.0707530651832915
+              },
+              {
+                "cells": 2916,
+                "confluence": 0.3810154145439485,
+                "fields": 8,
+                "hours": 120.0,
+                "median_q": 4.1300400174808445
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.008325815617061394,
+              "spearman_rho": 0.5597402597402598
+            },
+            "vs_time": {
+              "p_value": 0.031507962850302,
+              "spearman_rho": 0.4701298701298702
+            }
+          },
+          "D3": {
+            "confluence_range": [
+              0.10419739742679111,
+              0.34043264143084084
+            ],
+            "crossed_transition": true,
+            "crowded_regime": {
+              "note": "This well never crowds enough for jamming to be the dominant process, so its trajectory measures post-plating spreading instead. A positive correlation here is not evidence against jamming.",
+              "reached": false,
+              "threshold": 0.5,
+              "timepoints": 0
+            },
+            "hours_range": [
+              0.0,
+              120.0
+            ],
+            "jams_as_it_crowds": false,
+            "q_change": 0.5054249668737949,
+            "q_end": 4.169391968582429,
+            "q_start": 3.6639670017086345,
+            "timepoints": 21,
+            "trajectory": [
+              {
+                "cells": 991,
+                "confluence": 0.10419739742679111,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.6639670017086345
+              },
+              {
+                "cells": 1012,
+                "confluence": 0.1265974364551472,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 3.800287340894042
+              },
+              {
+                "cells": 1058,
+                "confluence": 0.14719589464734342,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 3.958416982477557
+              },
+              {
+                "cells": 1158,
+                "confluence": 0.16855963151838796,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 4.091911243993147
+              },
+              {
+                "cells": 1198,
+                "confluence": 0.19655070268110988,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 4.140824852162558
+              },
+              {
+                "cells": 1196,
+                "confluence": 0.19062256142783723,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 4.09382091580617
+              },
+              {
+                "cells": 1374,
+                "confluence": 0.21869855431189683,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 4.183772672100419
+              },
+              {
+                "cells": 1376,
+                "confluence": 0.23420955788353146,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 4.239237336890607
+              },
+              {
+                "cells": 1525,
+                "confluence": 0.25908820249330633,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 4.27889846014903
+              },
+              {
+                "cells": 1587,
+                "confluence": 0.2410549730420938,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 4.22976734562282
+              },
+              {
+                "cells": 1414,
+                "confluence": 0.2639688867187493,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 4.163678495647103
+              },
+              {
+                "cells": 1477,
+                "confluence": 0.2703266828459626,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 4.201228787872621
+              },
+              {
+                "cells": 1834,
+                "confluence": 0.30383760655116177,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 4.184065677844664
+              },
+              {
+                "cells": 1682,
+                "confluence": 0.3074191467370516,
+                "fields": 8,
+                "hours": 76.0,
+                "median_q": 4.173618372420465
+              },
+              {
+                "cells": 1486,
+                "confluence": 0.28845579270581795,
+                "fields": 8,
+                "hours": 84.0,
+                "median_q": 4.216818835748691
+              },
+              {
+                "cells": 1813,
+                "confluence": 0.32830781980714857,
+                "fields": 8,
+                "hours": 88.0,
+                "median_q": 4.195857556324464
+              },
+              {
+                "cells": 1756,
+                "confluence": 0.3027469992044067,
+                "fields": 8,
+                "hours": 96.0,
+                "median_q": 4.107137776073363
+              },
+              {
+                "cells": 2079,
+                "confluence": 0.3299089095108929,
+                "fields": 8,
+                "hours": 100.0,
+                "median_q": 4.210798412828187
+              },
+              {
+                "cells": 2413,
+                "confluence": 0.34043264143084084,
+                "fields": 8,
+                "hours": 108.0,
+                "median_q": 4.191144923312244
+              },
+              {
+                "cells": 1742,
+                "confluence": 0.28617542197060963,
+                "fields": 8,
+                "hours": 112.0,
+                "median_q": 4.10502632283817
+              },
+              {
+                "cells": 2296,
+                "confluence": 0.33163800656618664,
+                "fields": 8,
+                "hours": 120.0,
+                "median_q": 4.169391968582429
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.017401319733001776,
+              "spearman_rho": 0.512987012987013
+            },
+            "vs_time": {
+              "p_value": 0.05499601800989416,
+              "spearman_rho": 0.4246753246753247
+            }
+          }
+        },
+        "wells_measured": 4,
+        "wells_reaching_crowded_regime": 0,
+        "wells_that_jam_as_they_crowd": 0
       }
     },
     "BV2": {
@@ -4836,6 +6242,677 @@
           3.734709561450014
         ],
         "state": "jammed (solid-like)"
+      },
+      "time_course": {
+        "cell_type": "BV2",
+        "consistent": false,
+        "note": "Each well is one trajectory and the unit of analysis; fields imaged at the same timestamp are averaged first. A well-level result from a single well is descriptive, not replicated - check wells_measured before quoting it.",
+        "verdict": "0 of 0 wells that reach confluence 0.5 jam as they crowd (4 well(s) never crowd that far)",
+        "wells": {
+          "A4": {
+            "confluence_range": [
+              0.026468935905405777,
+              0.48955031943153954
+            ],
+            "crossed_transition": false,
+            "crowded_regime": {
+              "note": "This well never crowds enough for jamming to be the dominant process, so its trajectory measures post-plating spreading instead. A positive correlation here is not evidence against jamming.",
+              "reached": false,
+              "threshold": 0.5,
+              "timepoints": 0
+            },
+            "hours_range": [
+              0.0,
+              72.0
+            ],
+            "jams_as_it_crowds": false,
+            "q_change": 0.10440967594679496,
+            "q_end": 3.7763917607039685,
+            "q_start": 3.6719820847571736,
+            "timepoints": 19,
+            "trajectory": [
+              {
+                "cells": 550,
+                "confluence": 0.026468935905405777,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.6719820847571736
+              },
+              {
+                "cells": 701,
+                "confluence": 0.03421192188182722,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 3.6703950358902455
+              },
+              {
+                "cells": 799,
+                "confluence": 0.039987659784060575,
+                "fields": 8,
+                "hours": 8.0,
+                "median_q": 3.671917583105611
+              },
+              {
+                "cells": 981,
+                "confluence": 0.046035747992237794,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 3.69051029491502
+              },
+              {
+                "cells": 1104,
+                "confluence": 0.05890731797011556,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 3.6922834669210607
+              },
+              {
+                "cells": 1244,
+                "confluence": 0.07463487504438703,
+                "fields": 8,
+                "hours": 20.0,
+                "median_q": 3.711717274997782
+              },
+              {
+                "cells": 1692,
+                "confluence": 0.0931894143185963,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 3.740801047291237
+              },
+              {
+                "cells": 1941,
+                "confluence": 0.11359219922899647,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 3.729355235715374
+              },
+              {
+                "cells": 2484,
+                "confluence": 0.13508703468163025,
+                "fields": 8,
+                "hours": 32.0,
+                "median_q": 3.698096648768389
+              },
+              {
+                "cells": 2933,
+                "confluence": 0.15596406413897868,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 3.690795023137118
+              },
+              {
+                "cells": 3575,
+                "confluence": 0.18753307581335654,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 3.739308195244208
+              },
+              {
+                "cells": 4713,
+                "confluence": 0.2463507437411227,
+                "fields": 8,
+                "hours": 44.0,
+                "median_q": 3.726716259126016
+              },
+              {
+                "cells": 6404,
+                "confluence": 0.3391012422318971,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 3.683454208817679
+              },
+              {
+                "cells": 9441,
+                "confluence": 0.48955031943153954,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 3.7381611838522795
+              },
+              {
+                "cells": 7805,
+                "confluence": 0.39036337136007476,
+                "fields": 8,
+                "hours": 56.0,
+                "median_q": 3.7410855140857016
+              },
+              {
+                "cells": 9502,
+                "confluence": 0.42745228812692226,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 3.7922659611615486
+              },
+              {
+                "cells": 10624,
+                "confluence": 0.42327124363186514,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 3.685628883037281
+              },
+              {
+                "cells": 11288,
+                "confluence": 0.4710084486997341,
+                "fields": 8,
+                "hours": 68.0,
+                "median_q": 3.7664777849990037
+              },
+              {
+                "cells": 9602,
+                "confluence": 0.3728835658018756,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 3.7763917607039685
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.0023669295508711285,
+              "spearman_rho": 0.6543859649122807
+            },
+            "vs_time": {
+              "p_value": 0.0015654497616056653,
+              "spearman_rho": 0.6736842105263158
+            }
+          },
+          "B4": {
+            "confluence_range": [
+              0.03365167664854745,
+              0.4780371945681334
+            ],
+            "crossed_transition": false,
+            "crowded_regime": {
+              "note": "This well never crowds enough for jamming to be the dominant process, so its trajectory measures post-plating spreading instead. A positive correlation here is not evidence against jamming.",
+              "reached": false,
+              "threshold": 0.5,
+              "timepoints": 0
+            },
+            "hours_range": [
+              0.0,
+              72.0
+            ],
+            "jams_as_it_crowds": false,
+            "q_change": 0.00740788539518622,
+            "q_end": 3.654492489359333,
+            "q_start": 3.6470846039641467,
+            "timepoints": 19,
+            "trajectory": [
+              {
+                "cells": 706,
+                "confluence": 0.03365167664854745,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.6470846039641467
+              },
+              {
+                "cells": 778,
+                "confluence": 0.039050783401169034,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 3.684343226326525
+              },
+              {
+                "cells": 817,
+                "confluence": 0.044017824843615,
+                "fields": 8,
+                "hours": 8.0,
+                "median_q": 3.679607963804777
+              },
+              {
+                "cells": 1078,
+                "confluence": 0.05413749935123456,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 3.65649280812742
+              },
+              {
+                "cells": 1082,
+                "confluence": 0.05441273002144224,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 3.6282459335435164
+              },
+              {
+                "cells": 1272,
+                "confluence": 0.07347768737366167,
+                "fields": 8,
+                "hours": 20.0,
+                "median_q": 3.6719740312464895
+              },
+              {
+                "cells": 1721,
+                "confluence": 0.0908284792258494,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 3.643524333040715
+              },
+              {
+                "cells": 1986,
+                "confluence": 0.10802600573986461,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 3.651937206368614
+              },
+              {
+                "cells": 2709,
+                "confluence": 0.14072313703630457,
+                "fields": 8,
+                "hours": 32.0,
+                "median_q": 3.6771874763069867
+              },
+              {
+                "cells": 3150,
+                "confluence": 0.16675271661931976,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 3.6659422533912998
+              },
+              {
+                "cells": 4136,
+                "confluence": 0.2124029054612333,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 3.7491823081554365
+              },
+              {
+                "cells": 5148,
+                "confluence": 0.2969033929912858,
+                "fields": 8,
+                "hours": 44.0,
+                "median_q": 3.6765135014287296
+              },
+              {
+                "cells": 5968,
+                "confluence": 0.33478267516663057,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 3.7068796421894987
+              },
+              {
+                "cells": 8296,
+                "confluence": 0.4441838731800481,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 3.7964573795756085
+              },
+              {
+                "cells": 7991,
+                "confluence": 0.405435552065126,
+                "fields": 8,
+                "hours": 56.0,
+                "median_q": 3.6522455132583187
+              },
+              {
+                "cells": 9805,
+                "confluence": 0.4322496426156684,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 3.710783227627504
+              },
+              {
+                "cells": 11420,
+                "confluence": 0.4734365035989392,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 3.7172327166178833
+              },
+              {
+                "cells": 10518,
+                "confluence": 0.464862854550244,
+                "fields": 8,
+                "hours": 68.0,
+                "median_q": 3.7418000163711014
+              },
+              {
+                "cells": 9851,
+                "confluence": 0.4780371945681334,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 3.654492489359333
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.04309342451548045,
+              "spearman_rho": 0.46842105263157896
+            },
+            "vs_time": {
+              "p_value": 0.06031528712001896,
+              "spearman_rho": 0.4385964912280701
+            }
+          },
+          "C4": {
+            "confluence_range": [
+              0.034519805250904236,
+              0.546162704207425
+            ],
+            "crossed_transition": false,
+            "crowded_regime": {
+              "note": "This well never crowds enough for jamming to be the dominant process, so its trajectory measures post-plating spreading instead. A positive correlation here is not evidence against jamming.",
+              "reached": false,
+              "threshold": 0.5,
+              "timepoints": 1
+            },
+            "hours_range": [
+              0.0,
+              72.0
+            ],
+            "jams_as_it_crowds": false,
+            "q_change": 0.16268903619171038,
+            "q_end": 3.7817718600489068,
+            "q_start": 3.6190828238571964,
+            "timepoints": 19,
+            "trajectory": [
+              {
+                "cells": 678,
+                "confluence": 0.034519805250904236,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.6190828238571964
+              },
+              {
+                "cells": 817,
+                "confluence": 0.04042389732093901,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 3.66229174935598
+              },
+              {
+                "cells": 784,
+                "confluence": 0.036346702445503656,
+                "fields": 8,
+                "hours": 8.0,
+                "median_q": 3.6645398977421033
+              },
+              {
+                "cells": 949,
+                "confluence": 0.044753008324685505,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 3.6929335582315397
+              },
+              {
+                "cells": 1067,
+                "confluence": 0.053677740418759716,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 3.698352438711689
+              },
+              {
+                "cells": 1193,
+                "confluence": 0.06790390435491955,
+                "fields": 8,
+                "hours": 20.0,
+                "median_q": 3.659642651165608
+              },
+              {
+                "cells": 1545,
+                "confluence": 0.08348300566132875,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 3.6867142443212186
+              },
+              {
+                "cells": 1887,
+                "confluence": 0.10301075847492094,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 3.700151417787773
+              },
+              {
+                "cells": 2518,
+                "confluence": 0.13240846619932692,
+                "fields": 8,
+                "hours": 32.0,
+                "median_q": 3.673296472903292
+              },
+              {
+                "cells": 2890,
+                "confluence": 0.16472955271046616,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 3.678381987635583
+              },
+              {
+                "cells": 3535,
+                "confluence": 0.22736636428512663,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 3.6362284891453585
+              },
+              {
+                "cells": 4495,
+                "confluence": 0.2665341090233047,
+                "fields": 8,
+                "hours": 44.0,
+                "median_q": 3.7174671936471504
+              },
+              {
+                "cells": 5912,
+                "confluence": 0.32532882846645084,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 3.7851187020269537
+              },
+              {
+                "cells": 7805,
+                "confluence": 0.431213264211375,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 3.804573991884587
+              },
+              {
+                "cells": 8735,
+                "confluence": 0.4475382115930976,
+                "fields": 8,
+                "hours": 56.0,
+                "median_q": 3.7149375227739787
+              },
+              {
+                "cells": 9574,
+                "confluence": 0.4466058029494793,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 3.6571959810626296
+              },
+              {
+                "cells": 10367,
+                "confluence": 0.45036886119494934,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 3.750259031595554
+              },
+              {
+                "cells": 10276,
+                "confluence": 0.4233030137026036,
+                "fields": 8,
+                "hours": 68.0,
+                "median_q": 3.7659614478290178
+              },
+              {
+                "cells": 14397,
+                "confluence": 0.546162704207425,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 3.7817718600489068
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.00622186140199637,
+              "spearman_rho": 0.6035087719298246
+            },
+            "vs_time": {
+              "p_value": 0.00532742794148891,
+              "spearman_rho": 0.612280701754386
+            }
+          },
+          "D4": {
+            "confluence_range": [
+              0.036666335927258216,
+              0.5661355065320338
+            ],
+            "crossed_transition": false,
+            "crowded_regime": {
+              "note": "This well never crowds enough for jamming to be the dominant process, so its trajectory measures post-plating spreading instead. A positive correlation here is not evidence against jamming.",
+              "reached": false,
+              "threshold": 0.5,
+              "timepoints": 2
+            },
+            "hours_range": [
+              0.0,
+              72.0
+            ],
+            "jams_as_it_crowds": false,
+            "q_change": 0.0641952669871868,
+            "q_end": 3.712826341356486,
+            "q_start": 3.648631074369299,
+            "timepoints": 19,
+            "trajectory": [
+              {
+                "cells": 767,
+                "confluence": 0.036666335927258216,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.648631074369299
+              },
+              {
+                "cells": 858,
+                "confluence": 0.04329861097642392,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 3.6585844502760367
+              },
+              {
+                "cells": 863,
+                "confluence": 0.04557629957932644,
+                "fields": 8,
+                "hours": 8.0,
+                "median_q": 3.6625859072308606
+              },
+              {
+                "cells": 911,
+                "confluence": 0.048532596734318895,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 3.681345104422151
+              },
+              {
+                "cells": 1183,
+                "confluence": 0.06389793146306652,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 3.6612655915904218
+              },
+              {
+                "cells": 1594,
+                "confluence": 0.09264722487229404,
+                "fields": 8,
+                "hours": 20.0,
+                "median_q": 3.7020225921980794
+              },
+              {
+                "cells": 1711,
+                "confluence": 0.08635239809262683,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 3.739488284039195
+              },
+              {
+                "cells": 2174,
+                "confluence": 0.1364335172298519,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 3.72465939806553
+              },
+              {
+                "cells": 2776,
+                "confluence": 0.14690923638616737,
+                "fields": 8,
+                "hours": 32.0,
+                "median_q": 3.6740036734996036
+              },
+              {
+                "cells": 3521,
+                "confluence": 0.18934552541452912,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 3.6837606611873124
+              },
+              {
+                "cells": 3948,
+                "confluence": 0.208083146306823,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 3.7206894700707034
+              },
+              {
+                "cells": 5280,
+                "confluence": 0.2960050142386862,
+                "fields": 8,
+                "hours": 44.0,
+                "median_q": 3.7509333435618415
+              },
+              {
+                "cells": 6877,
+                "confluence": 0.35570992769681986,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 3.73784477208242
+              },
+              {
+                "cells": 8339,
+                "confluence": 0.4088747439937972,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 3.6972735302852775
+              },
+              {
+                "cells": 9343,
+                "confluence": 0.48447528050562005,
+                "fields": 8,
+                "hours": 56.0,
+                "median_q": 3.7126518318190502
+              },
+              {
+                "cells": 10563,
+                "confluence": 0.49466561583191676,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 3.7207032924769083
+              },
+              {
+                "cells": 10563,
+                "confluence": 0.49109897688006565,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 3.652285178408675
+              },
+              {
+                "cells": 15512,
+                "confluence": 0.5661355065320338,
+                "fields": 8,
+                "hours": 68.0,
+                "median_q": 3.7334806171353425
+              },
+              {
+                "cells": 13657,
+                "confluence": 0.5316955073856787,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 3.712826341356486
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.03643194294552844,
+              "spearman_rho": 0.48245614035087714
+            },
+            "vs_time": {
+              "p_value": 0.04309342451548045,
+              "spearman_rho": 0.46842105263157896
+            }
+          }
+        },
+        "wells_measured": 4,
+        "wells_reaching_crowded_regime": 0,
+        "wells_that_jam_as_they_crowd": 0
       }
     },
     "Huh7": {
@@ -6882,6 +8959,638 @@
           4.094867452462781
         ],
         "state": "unjammed (fluid-like)"
+      },
+      "time_course": {
+        "cell_type": "Huh7",
+        "consistent": false,
+        "note": "Each well is one trajectory and the unit of analysis; fields imaged at the same timestamp are averaged first. A well-level result from a single well is descriptive, not replicated - check wells_measured before quoting it.",
+        "verdict": "0 of 0 wells that reach confluence 0.5 jam as they crowd (3 well(s) never crowd that far)",
+        "wells": {
+          "A10": {
+            "confluence_range": [
+              0.12505368902364897,
+              0.28030211847478254
+            ],
+            "crossed_transition": false,
+            "crowded_regime": {
+              "note": "This well never crowds enough for jamming to be the dominant process, so its trajectory measures post-plating spreading instead. A positive correlation here is not evidence against jamming.",
+              "reached": false,
+              "threshold": 0.5,
+              "timepoints": 0
+            },
+            "hours_range": [
+              0.0,
+              96.0
+            ],
+            "jams_as_it_crowds": false,
+            "q_change": 0.17500110068598485,
+            "q_end": 4.153383157242767,
+            "q_start": 3.9783820565567822,
+            "timepoints": 25,
+            "trajectory": [
+              {
+                "cells": 571,
+                "confluence": 0.12505368902364897,
+                "fields": 9,
+                "hours": 0.0,
+                "median_q": 3.9783820565567822
+              },
+              {
+                "cells": 467,
+                "confluence": 0.14819798184481606,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 4.12301413795015
+              },
+              {
+                "cells": 463,
+                "confluence": 0.16704044867242288,
+                "fields": 8,
+                "hours": 8.0,
+                "median_q": 4.1987797800326465
+              },
+              {
+                "cells": 571,
+                "confluence": 0.17086591123069378,
+                "fields": 9,
+                "hours": 12.0,
+                "median_q": 4.159287105880718
+              },
+              {
+                "cells": 576,
+                "confluence": 0.1877650796274016,
+                "fields": 9,
+                "hours": 16.0,
+                "median_q": 4.109230117202786
+              },
+              {
+                "cells": 531,
+                "confluence": 0.17470499440013096,
+                "fields": 9,
+                "hours": 20.0,
+                "median_q": 4.05073277139498
+              },
+              {
+                "cells": 665,
+                "confluence": 0.17539282211041846,
+                "fields": 11,
+                "hours": 24.0,
+                "median_q": 4.070705055269436
+              },
+              {
+                "cells": 487,
+                "confluence": 0.19216370185478512,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 4.121283795318204
+              },
+              {
+                "cells": 455,
+                "confluence": 0.20140351369577253,
+                "fields": 8,
+                "hours": 32.0,
+                "median_q": 4.039603976903812
+              },
+              {
+                "cells": 465,
+                "confluence": 0.21972271851439582,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 4.067605954643047
+              },
+              {
+                "cells": 562,
+                "confluence": 0.2508675273335064,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 4.083573519354555
+              },
+              {
+                "cells": 518,
+                "confluence": 0.2341622752198975,
+                "fields": 8,
+                "hours": 44.0,
+                "median_q": 4.1181882699505845
+              },
+              {
+                "cells": 476,
+                "confluence": 0.2327324657178776,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 4.077097889198432
+              },
+              {
+                "cells": 496,
+                "confluence": 0.23123046716223394,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 4.106935200341265
+              },
+              {
+                "cells": 485,
+                "confluence": 0.230796920959896,
+                "fields": 8,
+                "hours": 56.0,
+                "median_q": 4.110092304958749
+              },
+              {
+                "cells": 504,
+                "confluence": 0.2420089500587317,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 4.106135935147943
+              },
+              {
+                "cells": 468,
+                "confluence": 0.23519580375191063,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 4.113888240280653
+              },
+              {
+                "cells": 460,
+                "confluence": 0.25208521817294055,
+                "fields": 8,
+                "hours": 68.0,
+                "median_q": 4.127667976265371
+              },
+              {
+                "cells": 370,
+                "confluence": 0.22295819052529675,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 4.1523251552789695
+              },
+              {
+                "cells": 397,
+                "confluence": 0.24520817290619668,
+                "fields": 8,
+                "hours": 76.0,
+                "median_q": 4.163068227510297
+              },
+              {
+                "cells": 428,
+                "confluence": 0.24311655290510426,
+                "fields": 8,
+                "hours": 80.0,
+                "median_q": 4.131259590231999
+              },
+              {
+                "cells": 436,
+                "confluence": 0.2675322117433345,
+                "fields": 8,
+                "hours": 84.0,
+                "median_q": 4.130989564807416
+              },
+              {
+                "cells": 453,
+                "confluence": 0.2601809181906978,
+                "fields": 8,
+                "hours": 88.0,
+                "median_q": 4.1120054160784045
+              },
+              {
+                "cells": 460,
+                "confluence": 0.2578590253155044,
+                "fields": 8,
+                "hours": 92.0,
+                "median_q": 4.131859426858744
+              },
+              {
+                "cells": 423,
+                "confluence": 0.28030211847478254,
+                "fields": 8,
+                "hours": 96.0,
+                "median_q": 4.153383157242767
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.15736225008219257,
+              "spearman_rho": 0.2915384615384616
+            },
+            "vs_time": {
+              "p_value": 0.05498318521785998,
+              "spearman_rho": 0.3884615384615384
+            }
+          },
+          "A11": {
+            "confluence_range": [
+              0.12082657272659199,
+              0.3368938495513283
+            ],
+            "crossed_transition": false,
+            "crowded_regime": {
+              "note": "This well never crowds enough for jamming to be the dominant process, so its trajectory measures post-plating spreading instead. A positive correlation here is not evidence against jamming.",
+              "reached": false,
+              "threshold": 0.5,
+              "timepoints": 0
+            },
+            "hours_range": [
+              0.0,
+              96.0
+            ],
+            "jams_as_it_crowds": false,
+            "q_change": 0.21823113735243815,
+            "q_end": 4.199718065140163,
+            "q_start": 3.981486927787725,
+            "timepoints": 25,
+            "trajectory": [
+              {
+                "cells": 464,
+                "confluence": 0.12082657272659199,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.981486927787725
+              },
+              {
+                "cells": 462,
+                "confluence": 0.12476742936994589,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 4.0119198948062476
+              },
+              {
+                "cells": 453,
+                "confluence": 0.1414093927215405,
+                "fields": 8,
+                "hours": 8.0,
+                "median_q": 4.039898078160612
+              },
+              {
+                "cells": 443,
+                "confluence": 0.15054058643261156,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 4.042290536955268
+              },
+              {
+                "cells": 441,
+                "confluence": 0.15757885356343498,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 4.150944619534785
+              },
+              {
+                "cells": 433,
+                "confluence": 0.15913874738786307,
+                "fields": 8,
+                "hours": 20.0,
+                "median_q": 4.100414849840995
+              },
+              {
+                "cells": 477,
+                "confluence": 0.18079683337658595,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 4.107714803531642
+              },
+              {
+                "cells": 490,
+                "confluence": 0.17009197199041293,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 4.0990077850008895
+              },
+              {
+                "cells": 475,
+                "confluence": 0.1724926249119837,
+                "fields": 9,
+                "hours": 32.0,
+                "median_q": 4.031422460248379
+              },
+              {
+                "cells": 438,
+                "confluence": 0.1837561287491916,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 4.077347240185492
+              },
+              {
+                "cells": 519,
+                "confluence": 0.17765506486287075,
+                "fields": 10,
+                "hours": 40.0,
+                "median_q": 4.031755079672107
+              },
+              {
+                "cells": 492,
+                "confluence": 0.17989499706347015,
+                "fields": 10,
+                "hours": 44.0,
+                "median_q": 4.019410221115398
+              },
+              {
+                "cells": 482,
+                "confluence": 0.17140305523382787,
+                "fields": 10,
+                "hours": 48.0,
+                "median_q": 4.089640392789608
+              },
+              {
+                "cells": 535,
+                "confluence": 0.197882459683427,
+                "fields": 11,
+                "hours": 52.0,
+                "median_q": 4.018606498524606
+              },
+              {
+                "cells": 457,
+                "confluence": 0.24380828258167656,
+                "fields": 8,
+                "hours": 56.0,
+                "median_q": 4.074214426330563
+              },
+              {
+                "cells": 481,
+                "confluence": 0.2439421228454145,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 4.098795405683077
+              },
+              {
+                "cells": 455,
+                "confluence": 0.24060774431135235,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 4.094973260779868
+              },
+              {
+                "cells": 486,
+                "confluence": 0.25548400537450566,
+                "fields": 8,
+                "hours": 68.0,
+                "median_q": 4.124910446021666
+              },
+              {
+                "cells": 446,
+                "confluence": 0.2532613403832475,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 4.1079418888854775
+              },
+              {
+                "cells": 554,
+                "confluence": 0.2970670964850579,
+                "fields": 8,
+                "hours": 76.0,
+                "median_q": 4.1382898754765005
+              },
+              {
+                "cells": 576,
+                "confluence": 0.3131739769824883,
+                "fields": 8,
+                "hours": 80.0,
+                "median_q": 4.157687920855159
+              },
+              {
+                "cells": 458,
+                "confluence": 0.2670750132655461,
+                "fields": 8,
+                "hours": 84.0,
+                "median_q": 4.101474534674752
+              },
+              {
+                "cells": 430,
+                "confluence": 0.29725953649133724,
+                "fields": 8,
+                "hours": 88.0,
+                "median_q": 4.1285759915807985
+              },
+              {
+                "cells": 538,
+                "confluence": 0.3273419387667988,
+                "fields": 8,
+                "hours": 92.0,
+                "median_q": 4.225656178979651
+              },
+              {
+                "cells": 546,
+                "confluence": 0.3368938495513283,
+                "fields": 8,
+                "hours": 96.0,
+                "median_q": 4.199718065140163
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.00011398652156746228,
+              "spearman_rho": 0.6953846153846154
+            },
+            "vs_time": {
+              "p_value": 0.0003607567346294127,
+              "spearman_rho": 0.6569230769230769
+            }
+          },
+          "A12": {
+            "confluence_range": [
+              0.10856483075762041,
+              0.27715781104880777
+            ],
+            "crossed_transition": false,
+            "crowded_regime": {
+              "note": "This well never crowds enough for jamming to be the dominant process, so its trajectory measures post-plating spreading instead. A positive correlation here is not evidence against jamming.",
+              "reached": false,
+              "threshold": 0.5,
+              "timepoints": 0
+            },
+            "hours_range": [
+              0.0,
+              96.0
+            ],
+            "jams_as_it_crowds": false,
+            "q_change": 0.19323621097617227,
+            "q_end": 4.20973207655579,
+            "q_start": 4.016495865579618,
+            "timepoints": 25,
+            "trajectory": [
+              {
+                "cells": 426,
+                "confluence": 0.10856483075762041,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 4.016495865579618
+              },
+              {
+                "cells": 419,
+                "confluence": 0.1269125804127505,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 4.10518552736396
+              },
+              {
+                "cells": 425,
+                "confluence": 0.13917038287396516,
+                "fields": 8,
+                "hours": 8.0,
+                "median_q": 4.076206765914328
+              },
+              {
+                "cells": 437,
+                "confluence": 0.14360902162779124,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 4.0781460479485805
+              },
+              {
+                "cells": 422,
+                "confluence": 0.1440981717281692,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 4.037340395806247
+              },
+              {
+                "cells": 541,
+                "confluence": 0.19109219644613318,
+                "fields": 8,
+                "hours": 20.0,
+                "median_q": 4.041085839034957
+              },
+              {
+                "cells": 444,
+                "confluence": 0.15204631530334545,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 4.096386856668952
+              },
+              {
+                "cells": 469,
+                "confluence": 0.17195890133303793,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 4.025989131540086
+              },
+              {
+                "cells": 508,
+                "confluence": 0.1779241627513121,
+                "fields": 8,
+                "hours": 32.0,
+                "median_q": 4.018676392552839
+              },
+              {
+                "cells": 425,
+                "confluence": 0.180346944452033,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 4.009665841073212
+              },
+              {
+                "cells": 573,
+                "confluence": 0.1887495935826846,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 4.0063779296499815
+              },
+              {
+                "cells": 435,
+                "confluence": 0.17300223286235641,
+                "fields": 8,
+                "hours": 44.0,
+                "median_q": 3.9900696048132223
+              },
+              {
+                "cells": 437,
+                "confluence": 0.19485469000969094,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 4.08530257136064
+              },
+              {
+                "cells": 432,
+                "confluence": 0.19780391251571244,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 4.089185724037463
+              },
+              {
+                "cells": 456,
+                "confluence": 0.21104260807063877,
+                "fields": 8,
+                "hours": 56.0,
+                "median_q": 4.036141777070705
+              },
+              {
+                "cells": 461,
+                "confluence": 0.2152986712774523,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 4.086632297357313
+              },
+              {
+                "cells": 435,
+                "confluence": 0.2161641464638945,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 4.087942932029269
+              },
+              {
+                "cells": 492,
+                "confluence": 0.23929507679332815,
+                "fields": 8,
+                "hours": 68.0,
+                "median_q": 4.091401394904924
+              },
+              {
+                "cells": 464,
+                "confluence": 0.2287121965656394,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 4.116621385057412
+              },
+              {
+                "cells": 548,
+                "confluence": 0.27715781104880777,
+                "fields": 8,
+                "hours": 76.0,
+                "median_q": 4.0963753960477005
+              },
+              {
+                "cells": 495,
+                "confluence": 0.25659913922503413,
+                "fields": 8,
+                "hours": 80.0,
+                "median_q": 4.1185933777129025
+              },
+              {
+                "cells": 407,
+                "confluence": 0.2583604342630046,
+                "fields": 8,
+                "hours": 84.0,
+                "median_q": 4.195346776108725
+              },
+              {
+                "cells": 466,
+                "confluence": 0.24871081423459537,
+                "fields": 8,
+                "hours": 88.0,
+                "median_q": 4.1622431516530405
+              },
+              {
+                "cells": 446,
+                "confluence": 0.26970010772918046,
+                "fields": 8,
+                "hours": 92.0,
+                "median_q": 4.208995873787476
+              },
+              {
+                "cells": 481,
+                "confluence": 0.26956505965226024,
+                "fields": 8,
+                "hours": 96.0,
+                "median_q": 4.20973207655579
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.0005046173401452837,
+              "spearman_rho": 0.6446153846153846
+            },
+            "vs_time": {
+              "p_value": 0.0004185676325965188,
+              "spearman_rho": 0.6515384615384615
+            }
+          }
+        },
+        "wells_measured": 3,
+        "wells_reaching_crowded_regime": 0,
+        "wells_that_jam_as_they_crowd": 0
       }
     },
     "MCF7": {
@@ -8768,6 +11477,793 @@
           4.197965186171405
         ],
         "state": "unjammed (fluid-like)"
+      },
+      "time_course": {
+        "cell_type": "MCF7",
+        "consistent": false,
+        "note": "Each well is one trajectory and the unit of analysis; fields imaged at the same timestamp are averaged first. A well-level result from a single well is descriptive, not replicated - check wells_measured before quoting it.",
+        "verdict": "1 of 2 wells that reach confluence 0.5 jam as they crowd (2 well(s) never crowd that far)",
+        "wells": {
+          "E4": {
+            "confluence_range": [
+              0.12244272758492004,
+              0.7177421113383665
+            ],
+            "crossed_transition": false,
+            "crowded_regime": {
+              "jams": false,
+              "p_value": 0.4820720382996776,
+              "reached": true,
+              "spearman_rho": 0.3214285714285715,
+              "threshold": 0.5,
+              "timepoints": 7
+            },
+            "hours_range": [
+              0.0,
+              88.0
+            ],
+            "jams_as_it_crowds": false,
+            "q_change": 0.3210495145865937,
+            "q_end": 4.171123599896479,
+            "q_start": 3.850074085309885,
+            "timepoints": 23,
+            "trajectory": [
+              {
+                "cells": 1126,
+                "confluence": 0.12244272758492004,
+                "fields": 7,
+                "hours": 0.0,
+                "median_q": 3.850074085309885
+              },
+              {
+                "cells": 1059,
+                "confluence": 0.13054578360604432,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 4.1385818804712144
+              },
+              {
+                "cells": 932,
+                "confluence": 0.14120338732312648,
+                "fields": 8,
+                "hours": 8.0,
+                "median_q": 4.256935590878394
+              },
+              {
+                "cells": 1077,
+                "confluence": 0.16719694161794924,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 4.2328566422064275
+              },
+              {
+                "cells": 1128,
+                "confluence": 0.1779913209032176,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 4.213346459882883
+              },
+              {
+                "cells": 1363,
+                "confluence": 0.20401268274694226,
+                "fields": 8,
+                "hours": 20.0,
+                "median_q": 4.134795348775183
+              },
+              {
+                "cells": 1613,
+                "confluence": 0.2103530211121853,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 4.20957978144263
+              },
+              {
+                "cells": 1871,
+                "confluence": 0.21659082446118,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 4.234421846124624
+              },
+              {
+                "cells": 2326,
+                "confluence": 0.25749333530239504,
+                "fields": 8,
+                "hours": 32.0,
+                "median_q": 4.298108899190504
+              },
+              {
+                "cells": 2591,
+                "confluence": 0.2892990331006899,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 4.2860073307981645
+              },
+              {
+                "cells": 3197,
+                "confluence": 0.3048618340424181,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 4.237384054580186
+              },
+              {
+                "cells": 3652,
+                "confluence": 0.3404934207516127,
+                "fields": 8,
+                "hours": 44.0,
+                "median_q": 4.242985132845849
+              },
+              {
+                "cells": 3307,
+                "confluence": 0.3427046360597438,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 4.154257091567831
+              },
+              {
+                "cells": 4436,
+                "confluence": 0.4205810303075788,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 4.258931529181034
+              },
+              {
+                "cells": 4398,
+                "confluence": 0.43540858173076835,
+                "fields": 8,
+                "hours": 56.0,
+                "median_q": 4.3049280690678025
+              },
+              {
+                "cells": 4829,
+                "confluence": 0.43863074601179797,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 4.185504683239479
+              },
+              {
+                "cells": 6209,
+                "confluence": 0.5145702675132588,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 4.130177966995256
+              },
+              {
+                "cells": 6980,
+                "confluence": 0.562461327595738,
+                "fields": 8,
+                "hours": 68.0,
+                "median_q": 4.214007674407982
+              },
+              {
+                "cells": 6202,
+                "confluence": 0.5377292837289517,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 4.164929767707392
+              },
+              {
+                "cells": 6557,
+                "confluence": 0.5737470526251152,
+                "fields": 8,
+                "hours": 76.0,
+                "median_q": 4.081308312462036
+              },
+              {
+                "cells": 6661,
+                "confluence": 0.5695357524994509,
+                "fields": 8,
+                "hours": 80.0,
+                "median_q": 4.117560933216126
+              },
+              {
+                "cells": 10190,
+                "confluence": 0.7177421113383665,
+                "fields": 8,
+                "hours": 84.0,
+                "median_q": 4.21769427810494
+              },
+              {
+                "cells": 9746,
+                "confluence": 0.6782612753530661,
+                "fields": 8,
+                "hours": 88.0,
+                "median_q": 4.171123599896479
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.5931009526165396,
+              "spearman_rho": -0.11758893280632411
+            },
+            "vs_time": {
+              "p_value": 0.5652386723187266,
+              "spearman_rho": -0.12648221343873517
+            }
+          },
+          "F4": {
+            "confluence_range": [
+              0.07737900795249684,
+              0.7074031213634941
+            ],
+            "crossed_transition": false,
+            "crowded_regime": {
+              "note": "This well never crowds enough for jamming to be the dominant process, so its trajectory measures post-plating spreading instead. A positive correlation here is not evidence against jamming.",
+              "reached": false,
+              "threshold": 0.5,
+              "timepoints": 4
+            },
+            "hours_range": [
+              0.0,
+              88.0
+            ],
+            "jams_as_it_crowds": false,
+            "q_change": 0.27445391655757057,
+            "q_end": 4.1997062582793765,
+            "q_start": 3.925252341721806,
+            "timepoints": 23,
+            "trajectory": [
+              {
+                "cells": 792,
+                "confluence": 0.07737900795249684,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.925252341721806
+              },
+              {
+                "cells": 802,
+                "confluence": 0.09553959563142021,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 4.229600546514913
+              },
+              {
+                "cells": 872,
+                "confluence": 0.1166517566174059,
+                "fields": 8,
+                "hours": 8.0,
+                "median_q": 4.2726018040076035
+              },
+              {
+                "cells": 1015,
+                "confluence": 0.14031595269476824,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 4.258467862884494
+              },
+              {
+                "cells": 1115,
+                "confluence": 0.1543977618621597,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 4.236987462704161
+              },
+              {
+                "cells": 1279,
+                "confluence": 0.16451104333410607,
+                "fields": 8,
+                "hours": 20.0,
+                "median_q": 4.23290244454697
+              },
+              {
+                "cells": 1395,
+                "confluence": 0.1869180567772146,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 4.163372694635081
+              },
+              {
+                "cells": 1597,
+                "confluence": 0.19161808658626936,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 4.130255904252739
+              },
+              {
+                "cells": 1782,
+                "confluence": 0.20316953408407354,
+                "fields": 8,
+                "hours": 32.0,
+                "median_q": 4.201060672645326
+              },
+              {
+                "cells": 2260,
+                "confluence": 0.24768293817266776,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 4.269873180674339
+              },
+              {
+                "cells": 2657,
+                "confluence": 0.27571986034473395,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 4.3012020143912455
+              },
+              {
+                "cells": 2585,
+                "confluence": 0.2894522094726639,
+                "fields": 8,
+                "hours": 44.0,
+                "median_q": 4.209055862644974
+              },
+              {
+                "cells": 3356,
+                "confluence": 0.3335715154474444,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 4.409159564176069
+              },
+              {
+                "cells": 4043,
+                "confluence": 0.3722545742050953,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 4.433140643969627
+              },
+              {
+                "cells": 4942,
+                "confluence": 0.41353199242651734,
+                "fields": 8,
+                "hours": 56.0,
+                "median_q": 4.4053320295686085
+              },
+              {
+                "cells": 4831,
+                "confluence": 0.43923746346426756,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 4.2484733997941415
+              },
+              {
+                "cells": 4469,
+                "confluence": 0.44116190542368233,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 4.141982744517314
+              },
+              {
+                "cells": 5006,
+                "confluence": 0.48510771008044695,
+                "fields": 8,
+                "hours": 68.0,
+                "median_q": 4.133452765606577
+              },
+              {
+                "cells": 6203,
+                "confluence": 0.4764796309891262,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 4.221885774463584
+              },
+              {
+                "cells": 6958,
+                "confluence": 0.5281810815258923,
+                "fields": 8,
+                "hours": 76.0,
+                "median_q": 4.21168154349882
+              },
+              {
+                "cells": 6577,
+                "confluence": 0.5847063384540165,
+                "fields": 8,
+                "hours": 80.0,
+                "median_q": 4.188908516092326
+              },
+              {
+                "cells": 6876,
+                "confluence": 0.6140097474766417,
+                "fields": 8,
+                "hours": 84.0,
+                "median_q": 4.176584531717607
+              },
+              {
+                "cells": 8751,
+                "confluence": 0.7074031213634941,
+                "fields": 8,
+                "hours": 88.0,
+                "median_q": 4.1997062582793765
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.5113391540131089,
+              "spearman_rho": -0.1442687747035573
+            },
+            "vs_time": {
+              "p_value": 0.5379749676391852,
+              "spearman_rho": -0.13537549407114624
+            }
+          },
+          "G4": {
+            "confluence_range": [
+              0.07776980129002094,
+              0.6093513408271414
+            ],
+            "crossed_transition": false,
+            "crowded_regime": {
+              "note": "This well never crowds enough for jamming to be the dominant process, so its trajectory measures post-plating spreading instead. A positive correlation here is not evidence against jamming.",
+              "reached": false,
+              "threshold": 0.5,
+              "timepoints": 3
+            },
+            "hours_range": [
+              0.0,
+              88.0
+            ],
+            "jams_as_it_crowds": false,
+            "q_change": 0.2434691473693289,
+            "q_end": 4.148822658229404,
+            "q_start": 3.9053535108600754,
+            "timepoints": 23,
+            "trajectory": [
+              {
+                "cells": 861,
+                "confluence": 0.07776980129002094,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.9053535108600754
+              },
+              {
+                "cells": 841,
+                "confluence": 0.09736667654611067,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 4.197802669994524
+              },
+              {
+                "cells": 972,
+                "confluence": 0.12072240483637403,
+                "fields": 8,
+                "hours": 8.0,
+                "median_q": 4.255176303097063
+              },
+              {
+                "cells": 1126,
+                "confluence": 0.13595363919771775,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 4.22600702154334
+              },
+              {
+                "cells": 1150,
+                "confluence": 0.1519216822825576,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 4.263955087388914
+              },
+              {
+                "cells": 1336,
+                "confluence": 0.17150830115684404,
+                "fields": 8,
+                "hours": 20.0,
+                "median_q": 4.191289772362989
+              },
+              {
+                "cells": 1441,
+                "confluence": 0.1810334807965458,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 4.241800959419533
+              },
+              {
+                "cells": 1722,
+                "confluence": 0.20454313194862078,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 4.279621251045603
+              },
+              {
+                "cells": 1582,
+                "confluence": 0.20969344692416533,
+                "fields": 8,
+                "hours": 32.0,
+                "median_q": 4.250057088632536
+              },
+              {
+                "cells": 2020,
+                "confluence": 0.23790011039253578,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 4.307273379938776
+              },
+              {
+                "cells": 2284,
+                "confluence": 0.2659039398833547,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 4.188877309571955
+              },
+              {
+                "cells": 2702,
+                "confluence": 0.3013208394852199,
+                "fields": 8,
+                "hours": 44.0,
+                "median_q": 4.224278213923488
+              },
+              {
+                "cells": 3745,
+                "confluence": 0.3502219171185261,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 4.283468047062623
+              },
+              {
+                "cells": 4271,
+                "confluence": 0.3843431658551417,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 4.217630904510355
+              },
+              {
+                "cells": 4132,
+                "confluence": 0.3811917507272934,
+                "fields": 8,
+                "hours": 56.0,
+                "median_q": 4.245922552582563
+              },
+              {
+                "cells": 4188,
+                "confluence": 0.3912538394613183,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 4.237439020814196
+              },
+              {
+                "cells": 4932,
+                "confluence": 0.4421150079388308,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 4.183252193699001
+              },
+              {
+                "cells": 5334,
+                "confluence": 0.4693393566979827,
+                "fields": 8,
+                "hours": 68.0,
+                "median_q": 4.18619960024988
+              },
+              {
+                "cells": 6167,
+                "confluence": 0.4943832242781607,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 4.134405709733707
+              },
+              {
+                "cells": 5838,
+                "confluence": 0.44929874219774807,
+                "fields": 8,
+                "hours": 76.0,
+                "median_q": 4.191298025630765
+              },
+              {
+                "cells": 7566,
+                "confluence": 0.5825725011609425,
+                "fields": 8,
+                "hours": 80.0,
+                "median_q": 4.203107222711939
+              },
+              {
+                "cells": 8186,
+                "confluence": 0.6093513408271414,
+                "fields": 8,
+                "hours": 84.0,
+                "median_q": 4.068889328641859
+              },
+              {
+                "cells": 7023,
+                "confluence": 0.5711497903463713,
+                "fields": 8,
+                "hours": 88.0,
+                "median_q": 4.148822658229404
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.0709324027483355,
+              "spearman_rho": -0.383399209486166
+            },
+            "vs_time": {
+              "p_value": 0.07830136218924433,
+              "spearman_rho": -0.3745059288537549
+            }
+          },
+          "H4": {
+            "confluence_range": [
+              0.09370682330364911,
+              0.6782502594548933
+            ],
+            "crossed_transition": false,
+            "crowded_regime": {
+              "jams": true,
+              "p_value": 0.04652823228416724,
+              "reached": true,
+              "spearman_rho": -0.7142857142857144,
+              "threshold": 0.5,
+              "timepoints": 8
+            },
+            "hours_range": [
+              0.0,
+              88.0
+            ],
+            "jams_as_it_crowds": true,
+            "q_change": 0.3169216754932611,
+            "q_end": 4.168200909845561,
+            "q_start": 3.8512792343523,
+            "timepoints": 23,
+            "trajectory": [
+              {
+                "cells": 1013,
+                "confluence": 0.09370682330364911,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.8512792343523
+              },
+              {
+                "cells": 917,
+                "confluence": 0.10927898288967035,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 4.199585786310052
+              },
+              {
+                "cells": 1022,
+                "confluence": 0.13268182673527928,
+                "fields": 8,
+                "hours": 8.0,
+                "median_q": 4.236921497297722
+              },
+              {
+                "cells": 1353,
+                "confluence": 0.18219524292846437,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 4.228235607659905
+              },
+              {
+                "cells": 1225,
+                "confluence": 0.1852696453302527,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 4.177677414159159
+              },
+              {
+                "cells": 1436,
+                "confluence": 0.20178851089584562,
+                "fields": 8,
+                "hours": 20.0,
+                "median_q": 4.153256818889792
+              },
+              {
+                "cells": 1792,
+                "confluence": 0.20840982975032257,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 4.1048982724918615
+              },
+              {
+                "cells": 1843,
+                "confluence": 0.21923204477163036,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 4.197524114111375
+              },
+              {
+                "cells": 2358,
+                "confluence": 0.27031903699328086,
+                "fields": 8,
+                "hours": 32.0,
+                "median_q": 4.2220857586356715
+              },
+              {
+                "cells": 2620,
+                "confluence": 0.30452139612585466,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 4.278650276725486
+              },
+              {
+                "cells": 2894,
+                "confluence": 0.3074575452769868,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 4.2019817601087
+              },
+              {
+                "cells": 2932,
+                "confluence": 0.31828501951416566,
+                "fields": 8,
+                "hours": 44.0,
+                "median_q": 4.185364118572494
+              },
+              {
+                "cells": 4013,
+                "confluence": 0.38761105525090506,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 4.213766250450872
+              },
+              {
+                "cells": 3872,
+                "confluence": 0.39688331268097393,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 4.257979947154753
+              },
+              {
+                "cells": 5183,
+                "confluence": 0.45766618479909565,
+                "fields": 8,
+                "hours": 56.0,
+                "median_q": 4.228735626553171
+              },
+              {
+                "cells": 5948,
+                "confluence": 0.5181174795809633,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 4.306797022943938
+              },
+              {
+                "cells": 6499,
+                "confluence": 0.5248494655369037,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 4.189797570600115
+              },
+              {
+                "cells": 7571,
+                "confluence": 0.5779376795543361,
+                "fields": 8,
+                "hours": 68.0,
+                "median_q": 4.2137157691628335
+              },
+              {
+                "cells": 7766,
+                "confluence": 0.5675923999364879,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 4.180576076664952
+              },
+              {
+                "cells": 8746,
+                "confluence": 0.6413827792080856,
+                "fields": 8,
+                "hours": 76.0,
+                "median_q": 4.205876711485921
+              },
+              {
+                "cells": 7999,
+                "confluence": 0.6254644110064631,
+                "fields": 8,
+                "hours": 80.0,
+                "median_q": 4.171930998739729
+              },
+              {
+                "cells": 8594,
+                "confluence": 0.6699630688817979,
+                "fields": 8,
+                "hours": 84.0,
+                "median_q": 4.1172643471775245
+              },
+              {
+                "cells": 9033,
+                "confluence": 0.6782502594548933,
+                "fields": 8,
+                "hours": 88.0,
+                "median_q": 4.168200909845561
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.9251264681656184,
+              "spearman_rho": -0.02075098814229249
+            },
+            "vs_time": {
+              "p_value": 0.871983698281857,
+              "spearman_rho": -0.03557312252964427
+            }
+          }
+        },
+        "wells_measured": 4,
+        "wells_reaching_crowded_regime": 2,
+        "wells_that_jam_as_they_crowd": 1
       }
     },
     "SHSY5Y": {
@@ -10574,6 +14070,765 @@
           5.268937107439556
         ],
         "state": "unjammed (fluid-like)"
+      },
+      "time_course": {
+        "cell_type": "SHSY5Y",
+        "consistent": true,
+        "note": "Each well is one trajectory and the unit of analysis; fields imaged at the same timestamp are averaged first. A well-level result from a single well is descriptive, not replicated - check wells_measured before quoting it.",
+        "verdict": "2 of 2 wells that reach confluence 0.5 jam as they crowd (2 well(s) never crowd that far)",
+        "wells": {
+          "A10": {
+            "confluence_range": [
+              0.05210737448098749,
+              0.7270723476084591
+            ],
+            "crossed_transition": true,
+            "crowded_regime": {
+              "jams": true,
+              "p_value": 0.01884548104956266,
+              "reached": true,
+              "spearman_rho": -0.8857142857142858,
+              "threshold": 0.5,
+              "timepoints": 6
+            },
+            "hours_range": [
+              0.0,
+              84.0
+            ],
+            "jams_as_it_crowds": true,
+            "q_change": 1.000788230448693,
+            "q_end": 4.720930335740141,
+            "q_start": 3.7201421052914476,
+            "timepoints": 22,
+            "trajectory": [
+              {
+                "cells": 1004,
+                "confluence": 0.05210737448098749,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.7201421052914476
+              },
+              {
+                "cells": 1158,
+                "confluence": 0.11277681307705031,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 5.176317909393131
+              },
+              {
+                "cells": 1162,
+                "confluence": 0.12883399525034245,
+                "fields": 8,
+                "hours": 8.0,
+                "median_q": 5.686974559411402
+              },
+              {
+                "cells": 1281,
+                "confluence": 0.14758252704327407,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 6.4590869204255545
+              },
+              {
+                "cells": 1299,
+                "confluence": 0.1423926368894869,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 6.41576950680224
+              },
+              {
+                "cells": 1468,
+                "confluence": 0.1875933210295593,
+                "fields": 8,
+                "hours": 20.0,
+                "median_q": 6.309159753090863
+              },
+              {
+                "cells": 1842,
+                "confluence": 0.2186770539397202,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 6.150195938760858
+              },
+              {
+                "cells": 2218,
+                "confluence": 0.24358631871789913,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 6.271551202783021
+              },
+              {
+                "cells": 2152,
+                "confluence": 0.3002986295174598,
+                "fields": 8,
+                "hours": 32.0,
+                "median_q": 5.968543837838335
+              },
+              {
+                "cells": 2334,
+                "confluence": 0.3151134040032231,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 6.476624485791376
+              },
+              {
+                "cells": 2874,
+                "confluence": 0.3076986559802489,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 6.310550520171541
+              },
+              {
+                "cells": 3149,
+                "confluence": 0.391749993802565,
+                "fields": 8,
+                "hours": 44.0,
+                "median_q": 6.061010210342364
+              },
+              {
+                "cells": 3291,
+                "confluence": 0.3949927185826868,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 6.029732531410701
+              },
+              {
+                "cells": 3425,
+                "confluence": 0.4152174750908189,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 5.658691311150348
+              },
+              {
+                "cells": 4299,
+                "confluence": 0.4763561845088568,
+                "fields": 8,
+                "hours": 56.0,
+                "median_q": 5.439877246936963
+              },
+              {
+                "cells": 4427,
+                "confluence": 0.48659761652166483,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 5.338023563910262
+              },
+              {
+                "cells": 5169,
+                "confluence": 0.5606681346119898,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 5.136963555011603
+              },
+              {
+                "cells": 5465,
+                "confluence": 0.5821404123586364,
+                "fields": 8,
+                "hours": 68.0,
+                "median_q": 5.168764941570668
+              },
+              {
+                "cells": 6301,
+                "confluence": 0.6355601453405124,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 4.975924581410858
+              },
+              {
+                "cells": 7033,
+                "confluence": 0.6213755759157792,
+                "fields": 8,
+                "hours": 76.0,
+                "median_q": 4.840608800858787
+              },
+              {
+                "cells": 7389,
+                "confluence": 0.705796197979258,
+                "fields": 8,
+                "hours": 80.0,
+                "median_q": 4.780747827752914
+              },
+              {
+                "cells": 6775,
+                "confluence": 0.7270723476084591,
+                "fields": 8,
+                "hours": 84.0,
+                "median_q": 4.720930335740141
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.01700001271906154,
+              "spearman_rho": -0.5031055900621118
+            },
+            "vs_time": {
+              "p_value": 0.015609360752437032,
+              "spearman_rho": -0.5087521174477697
+            }
+          },
+          "B10": {
+            "confluence_range": [
+              0.04898471549934014,
+              0.630494695899809
+            ],
+            "crossed_transition": true,
+            "crowded_regime": {
+              "jams": true,
+              "p_value": 0.03738607346849875,
+              "reached": true,
+              "spearman_rho": -0.8999999999999998,
+              "threshold": 0.5,
+              "timepoints": 5
+            },
+            "hours_range": [
+              0.0,
+              84.0
+            ],
+            "jams_as_it_crowds": true,
+            "q_change": 0.9657736650322581,
+            "q_end": 4.700369031245324,
+            "q_start": 3.7345953662130658,
+            "timepoints": 22,
+            "trajectory": [
+              {
+                "cells": 940,
+                "confluence": 0.04898471549934014,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.7345953662130658
+              },
+              {
+                "cells": 1421,
+                "confluence": 0.13178428342164678,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 5.146518666501679
+              },
+              {
+                "cells": 1214,
+                "confluence": 0.12833653965664413,
+                "fields": 8,
+                "hours": 8.0,
+                "median_q": 5.9348827069838865
+              },
+              {
+                "cells": 1249,
+                "confluence": 0.16089401201580666,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 6.114469759491255
+              },
+              {
+                "cells": 1714,
+                "confluence": 0.2262835196883257,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 6.326416636052935
+              },
+              {
+                "cells": 1543,
+                "confluence": 0.2054908368560259,
+                "fields": 8,
+                "hours": 20.0,
+                "median_q": 6.334267363406537
+              },
+              {
+                "cells": 1281,
+                "confluence": 0.18686980706061498,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 6.475227590043393
+              },
+              {
+                "cells": 1619,
+                "confluence": 0.2122361526168978,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 6.422357795865679
+              },
+              {
+                "cells": 1764,
+                "confluence": 0.1908119334913004,
+                "fields": 8,
+                "hours": 32.0,
+                "median_q": 6.464555894583819
+              },
+              {
+                "cells": 1875,
+                "confluence": 0.2500519396887361,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 6.478234854126794
+              },
+              {
+                "cells": 2113,
+                "confluence": 0.2833606284316161,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 6.077626283667535
+              },
+              {
+                "cells": 2671,
+                "confluence": 0.31282256322046514,
+                "fields": 8,
+                "hours": 44.0,
+                "median_q": 5.728997567908521
+              },
+              {
+                "cells": 3187,
+                "confluence": 0.3667973931585804,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 5.831189468861821
+              },
+              {
+                "cells": 3795,
+                "confluence": 0.4403614211203895,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 5.496600888062994
+              },
+              {
+                "cells": 3761,
+                "confluence": 0.4104581748012759,
+                "fields": 8,
+                "hours": 56.0,
+                "median_q": 5.57011324850292
+              },
+              {
+                "cells": 3941,
+                "confluence": 0.43120112792968657,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 5.5473941210799405
+              },
+              {
+                "cells": 4619,
+                "confluence": 0.49943452496720525,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 5.426019798648092
+              },
+              {
+                "cells": 4828,
+                "confluence": 0.5513665374371558,
+                "fields": 8,
+                "hours": 68.0,
+                "median_q": 5.226586071728393
+              },
+              {
+                "cells": 4699,
+                "confluence": 0.5276177921834009,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 4.875713127965224
+              },
+              {
+                "cells": 6591,
+                "confluence": 0.5757703822593575,
+                "fields": 8,
+                "hours": 76.0,
+                "median_q": 4.812652780858129
+              },
+              {
+                "cells": 6480,
+                "confluence": 0.621059724513776,
+                "fields": 8,
+                "hours": 80.0,
+                "median_q": 4.743027009483745
+              },
+              {
+                "cells": 5774,
+                "confluence": 0.630494695899809,
+                "fields": 8,
+                "hours": 84.0,
+                "median_q": 4.700369031245324
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.015609360752437032,
+              "spearman_rho": -0.5087521174477697
+            },
+            "vs_time": {
+              "p_value": 0.023598014259632493,
+              "spearman_rho": -0.4805194805194805
+            }
+          },
+          "C10": {
+            "confluence_range": [
+              0.043646869844020636,
+              0.6706782370315342
+            ],
+            "crossed_transition": true,
+            "crowded_regime": {
+              "note": "This well never crowds enough for jamming to be the dominant process, so its trajectory measures post-plating spreading instead. A positive correlation here is not evidence against jamming.",
+              "reached": false,
+              "threshold": 0.5,
+              "timepoints": 4
+            },
+            "hours_range": [
+              0.0,
+              84.0
+            ],
+            "jams_as_it_crowds": false,
+            "q_change": 0.9473423185853487,
+            "q_end": 4.602713833249745,
+            "q_start": 3.6553715146643966,
+            "timepoints": 22,
+            "trajectory": [
+              {
+                "cells": 953,
+                "confluence": 0.043646869844020636,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.6553715146643966
+              },
+              {
+                "cells": 989,
+                "confluence": 0.08854139890870978,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 5.024612110650773
+              },
+              {
+                "cells": 1018,
+                "confluence": 0.0987358506508089,
+                "fields": 8,
+                "hours": 8.0,
+                "median_q": 5.335021985085779
+              },
+              {
+                "cells": 1152,
+                "confluence": 0.12524652890077406,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 5.992297341445069
+              },
+              {
+                "cells": 1112,
+                "confluence": 0.1384117268937114,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 6.5556923972811365
+              },
+              {
+                "cells": 1263,
+                "confluence": 0.15173975853979202,
+                "fields": 8,
+                "hours": 20.0,
+                "median_q": 6.216540323488141
+              },
+              {
+                "cells": 1553,
+                "confluence": 0.18227919445544552,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 6.6265579277064806
+              },
+              {
+                "cells": 1657,
+                "confluence": 0.22423531787792028,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 6.5258210258099405
+              },
+              {
+                "cells": 1608,
+                "confluence": 0.23737351260312628,
+                "fields": 8,
+                "hours": 32.0,
+                "median_q": 6.020868036193413
+              },
+              {
+                "cells": 1985,
+                "confluence": 0.27798257751039135,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 5.962274568062761
+              },
+              {
+                "cells": 2411,
+                "confluence": 0.315404092804168,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 6.260910735143705
+              },
+              {
+                "cells": 2916,
+                "confluence": 0.3503924319308474,
+                "fields": 8,
+                "hours": 44.0,
+                "median_q": 5.751249261109635
+              },
+              {
+                "cells": 3761,
+                "confluence": 0.4568625229970291,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 5.846868547639043
+              },
+              {
+                "cells": 3881,
+                "confluence": 0.4348405561455388,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 5.58528009771783
+              },
+              {
+                "cells": 3608,
+                "confluence": 0.42218524400403057,
+                "fields": 8,
+                "hours": 56.0,
+                "median_q": 5.664688255077303
+              },
+              {
+                "cells": 3831,
+                "confluence": 0.4806421903682269,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 5.270269435102683
+              },
+              {
+                "cells": 3984,
+                "confluence": 0.4736846526885985,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 5.5480053349064
+              },
+              {
+                "cells": 4782,
+                "confluence": 0.48465186876845123,
+                "fields": 8,
+                "hours": 68.0,
+                "median_q": 5.281574574422992
+              },
+              {
+                "cells": 5583,
+                "confluence": 0.5228419562151726,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 5.1695792568328125
+              },
+              {
+                "cells": 5819,
+                "confluence": 0.6062208611676477,
+                "fields": 8,
+                "hours": 76.0,
+                "median_q": 5.035154437118509
+              },
+              {
+                "cells": 6260,
+                "confluence": 0.6136187678239654,
+                "fields": 8,
+                "hours": 80.0,
+                "median_q": 4.846990902950261
+              },
+              {
+                "cells": 7419,
+                "confluence": 0.6706782370315342,
+                "fields": 8,
+                "hours": 84.0,
+                "median_q": 4.602713833249745
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.06822788864462451,
+              "spearman_rho": -0.39582156973461324
+            },
+            "vs_time": {
+              "p_value": 0.06737336646852345,
+              "spearman_rho": -0.3969508752117449
+            }
+          },
+          "D10": {
+            "confluence_range": [
+              0.04141533633359193,
+              0.5879188693386707
+            ],
+            "crossed_transition": true,
+            "crowded_regime": {
+              "note": "This well never crowds enough for jamming to be the dominant process, so its trajectory measures post-plating spreading instead. A positive correlation here is not evidence against jamming.",
+              "reached": false,
+              "threshold": 0.5,
+              "timepoints": 3
+            },
+            "hours_range": [
+              0.0,
+              84.0
+            ],
+            "jams_as_it_crowds": false,
+            "q_change": 1.027819002203941,
+            "q_end": 4.748384558509802,
+            "q_start": 3.7205655563058606,
+            "timepoints": 22,
+            "trajectory": [
+              {
+                "cells": 822,
+                "confluence": 0.04141533633359193,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.7205655563058606
+              },
+              {
+                "cells": 983,
+                "confluence": 0.08189251657765907,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 5.208765102530856
+              },
+              {
+                "cells": 1000,
+                "confluence": 0.08051458021471374,
+                "fields": 8,
+                "hours": 8.0,
+                "median_q": 5.346909298672566
+              },
+              {
+                "cells": 918,
+                "confluence": 0.09577072417571708,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 6.072348251561728
+              },
+              {
+                "cells": 1154,
+                "confluence": 0.12491519869290817,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 6.2320507184764224
+              },
+              {
+                "cells": 1579,
+                "confluence": 0.18059659570653658,
+                "fields": 8,
+                "hours": 20.0,
+                "median_q": 6.299139173254841
+              },
+              {
+                "cells": 1287,
+                "confluence": 0.15723423433745104,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 6.208266532030214
+              },
+              {
+                "cells": 1357,
+                "confluence": 0.1956357100906915,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 6.290871227587307
+              },
+              {
+                "cells": 1455,
+                "confluence": 0.19205434128127793,
+                "fields": 8,
+                "hours": 32.0,
+                "median_q": 6.025566112783714
+              },
+              {
+                "cells": 1682,
+                "confluence": 0.23387621431790512,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 6.045031934294833
+              },
+              {
+                "cells": 1779,
+                "confluence": 0.20481142612269201,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 6.131915757586749
+              },
+              {
+                "cells": 2190,
+                "confluence": 0.2749929463505317,
+                "fields": 8,
+                "hours": 44.0,
+                "median_q": 5.973129253459205
+              },
+              {
+                "cells": 2175,
+                "confluence": 0.2981098891806496,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 5.969922913576209
+              },
+              {
+                "cells": 2877,
+                "confluence": 0.36605778724936433,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 5.736120142684805
+              },
+              {
+                "cells": 2643,
+                "confluence": 0.31369531478773377,
+                "fields": 8,
+                "hours": 56.0,
+                "median_q": 6.042317074896256
+              },
+              {
+                "cells": 3191,
+                "confluence": 0.3574721685321561,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 5.369287340669692
+              },
+              {
+                "cells": 3367,
+                "confluence": 0.40368431558676215,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 5.448885999041274
+              },
+              {
+                "cells": 4062,
+                "confluence": 0.45068858591359445,
+                "fields": 8,
+                "hours": 68.0,
+                "median_q": 5.456719583712194
+              },
+              {
+                "cells": 5420,
+                "confluence": 0.493387873603439,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 5.10254695959566
+              },
+              {
+                "cells": 6211,
+                "confluence": 0.5383986970744185,
+                "fields": 8,
+                "hours": 76.0,
+                "median_q": 5.066829676628871
+              },
+              {
+                "cells": 5677,
+                "confluence": 0.5879188693386707,
+                "fields": 8,
+                "hours": 80.0,
+                "median_q": 4.980250059115931
+              },
+              {
+                "cells": 5802,
+                "confluence": 0.5477004560820178,
+                "fields": 8,
+                "hours": 84.0,
+                "median_q": 4.748384558509802
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.06909060271028518,
+              "spearman_rho": -0.3946922642574817
+            },
+            "vs_time": {
+              "p_value": 0.06322201647005031,
+              "spearman_rho": -0.4025974025974026
+            }
+          }
+        },
+        "wells_measured": 4,
+        "wells_reaching_crowded_regime": 2,
+        "wells_that_jam_as_they_crowd": 2
       }
     },
     "SKOV3": {
@@ -14020,6 +18275,685 @@
           4.539409195786207
         ],
         "state": "unjammed (fluid-like)"
+      },
+      "time_course": {
+        "cell_type": "SKOV3",
+        "consistent": false,
+        "note": "Each well is one trajectory and the unit of analysis; fields imaged at the same timestamp are averaged first. A well-level result from a single well is descriptive, not replicated - check wells_measured before quoting it.",
+        "verdict": "3 of 4 wells that reach confluence 0.5 jam as they crowd (0 well(s) never crowd that far)",
+        "wells": {
+          "E4": {
+            "confluence_range": [
+              0.17380550187117474,
+              1.1649648245431228
+            ],
+            "crossed_transition": false,
+            "crowded_regime": {
+              "jams": true,
+              "p_value": 1.8782484299388895e-06,
+              "reached": true,
+              "spearman_rho": -0.9395604395604396,
+              "threshold": 0.5,
+              "timepoints": 13
+            },
+            "hours_range": [
+              0.0,
+              72.0
+            ],
+            "jams_as_it_crowds": true,
+            "q_change": 0.3839248218451621,
+            "q_end": 4.26850917137045,
+            "q_start": 3.884584349525288,
+            "timepoints": 19,
+            "trajectory": [
+              {
+                "cells": 478,
+                "confluence": 0.17380550187117474,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.884584349525288
+              },
+              {
+                "cells": 526,
+                "confluence": 0.30806636049498015,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 4.746418744488495
+              },
+              {
+                "cells": 631,
+                "confluence": 0.3536648730980957,
+                "fields": 8,
+                "hours": 8.0,
+                "median_q": 5.194625984871441
+              },
+              {
+                "cells": 669,
+                "confluence": 0.4036854597185077,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 5.129702901017361
+              },
+              {
+                "cells": 682,
+                "confluence": 0.4504930722792788,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 5.087489110663022
+              },
+              {
+                "cells": 754,
+                "confluence": 0.46092913942990016,
+                "fields": 8,
+                "hours": 20.0,
+                "median_q": 5.013369737244381
+              },
+              {
+                "cells": 1013,
+                "confluence": 0.5808177053683707,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 5.0810420497679205
+              },
+              {
+                "cells": 1175,
+                "confluence": 0.6427444756098575,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 4.9757242640335075
+              },
+              {
+                "cells": 1330,
+                "confluence": 0.7387433809720573,
+                "fields": 8,
+                "hours": 32.0,
+                "median_q": 4.830408476082826
+              },
+              {
+                "cells": 1102,
+                "confluence": 0.6703488601022991,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 4.68156354781473
+              },
+              {
+                "cells": 1798,
+                "confluence": 0.7043382061070355,
+                "fields": 12,
+                "hours": 40.0,
+                "median_q": 4.7004873993599645
+              },
+              {
+                "cells": 2032,
+                "confluence": 0.7460659628018486,
+                "fields": 12,
+                "hours": 44.0,
+                "median_q": 4.620334463779588
+              },
+              {
+                "cells": 2584,
+                "confluence": 0.9559473515010224,
+                "fields": 12,
+                "hours": 48.0,
+                "median_q": 4.496268206134831
+              },
+              {
+                "cells": 2647,
+                "confluence": 0.937379940404641,
+                "fields": 12,
+                "hours": 52.0,
+                "median_q": 4.452563175437733
+              },
+              {
+                "cells": 2757,
+                "confluence": 0.9223534315928229,
+                "fields": 12,
+                "hours": 56.0,
+                "median_q": 4.484156202794593
+              },
+              {
+                "cells": 1948,
+                "confluence": 0.9512214140181121,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 4.433347138222279
+              },
+              {
+                "cells": 2384,
+                "confluence": 1.0288177924053425,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 4.381433464188001
+              },
+              {
+                "cells": 2858,
+                "confluence": 1.1649648245431228,
+                "fields": 8,
+                "hours": 68.0,
+                "median_q": 4.299418152603411
+              },
+              {
+                "cells": 2799,
+                "confluence": 1.065177705487874,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 4.26850917137045
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.004116972306622232,
+              "spearman_rho": -0.6263157894736843
+            },
+            "vs_time": {
+              "p_value": 0.002830188983053137,
+              "spearman_rho": -0.6456140350877193
+            }
+          },
+          "F4": {
+            "confluence_range": [
+              0.1573996805172373,
+              0.9591333461037629
+            ],
+            "crossed_transition": false,
+            "crowded_regime": {
+              "jams": true,
+              "p_value": 0.0006116938500931706,
+              "reached": true,
+              "spearman_rho": -0.8636363636363636,
+              "threshold": 0.5,
+              "timepoints": 11
+            },
+            "hours_range": [
+              0.0,
+              72.0
+            ],
+            "jams_as_it_crowds": true,
+            "q_change": 0.5630672246133335,
+            "q_end": 4.430381109385135,
+            "q_start": 3.867313884771802,
+            "timepoints": 19,
+            "trajectory": [
+              {
+                "cells": 409,
+                "confluence": 0.1573996805172373,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.867313884771802
+              },
+              {
+                "cells": 497,
+                "confluence": 0.2908416000088827,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 4.871739139600468
+              },
+              {
+                "cells": 558,
+                "confluence": 0.3384238201349411,
+                "fields": 8,
+                "hours": 8.0,
+                "median_q": 5.079181797648975
+              },
+              {
+                "cells": 572,
+                "confluence": 0.36260209901182483,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 5.223935815241722
+              },
+              {
+                "cells": 604,
+                "confluence": 0.3942673394818122,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 5.305508481353558
+              },
+              {
+                "cells": 658,
+                "confluence": 0.4579141736949589,
+                "fields": 8,
+                "hours": 20.0,
+                "median_q": 4.893014785621737
+              },
+              {
+                "cells": 708,
+                "confluence": 0.4361614807555616,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 4.9554741697052815
+              },
+              {
+                "cells": 820,
+                "confluence": 0.4772908623285848,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 4.8432849845784425
+              },
+              {
+                "cells": 923,
+                "confluence": 0.5594764340786188,
+                "fields": 8,
+                "hours": 32.0,
+                "median_q": 4.798756290343486
+              },
+              {
+                "cells": 994,
+                "confluence": 0.6468668027480343,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 4.77356423662224
+              },
+              {
+                "cells": 1059,
+                "confluence": 0.7032944878339458,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 4.604967423073968
+              },
+              {
+                "cells": 1147,
+                "confluence": 0.7656755320387585,
+                "fields": 8,
+                "hours": 44.0,
+                "median_q": 4.612465695187704
+              },
+              {
+                "cells": 1306,
+                "confluence": 0.8013675738397336,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 4.54386822811915
+              },
+              {
+                "cells": 1427,
+                "confluence": 0.8599865101207439,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 4.485066767397147
+              },
+              {
+                "cells": 1563,
+                "confluence": 0.9021634770234612,
+                "fields": 8,
+                "hours": 56.0,
+                "median_q": 4.390199073583588
+              },
+              {
+                "cells": 2651,
+                "confluence": 0.9340407574164187,
+                "fields": 12,
+                "hours": 60.0,
+                "median_q": 4.481228545787965
+              },
+              {
+                "cells": 2847,
+                "confluence": 0.9468929458041954,
+                "fields": 12,
+                "hours": 64.0,
+                "median_q": 4.495974272176352
+              },
+              {
+                "cells": 3116,
+                "confluence": 0.9512476254393455,
+                "fields": 12,
+                "hours": 68.0,
+                "median_q": 4.436595717918147
+              },
+              {
+                "cells": 3365,
+                "confluence": 0.9591333461037629,
+                "fields": 12,
+                "hours": 72.0,
+                "median_q": 4.430381109385135
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.003142474005112738,
+              "spearman_rho": -0.6403508771929824
+            },
+            "vs_time": {
+              "p_value": 0.003252685934175873,
+              "spearman_rho": -0.6385964912280702
+            }
+          },
+          "G4": {
+            "confluence_range": [
+              0.13722679317020972,
+              1.4656248187554557
+            ],
+            "crossed_transition": false,
+            "crowded_regime": {
+              "jams": false,
+              "p_value": 0.14199852020631992,
+              "reached": true,
+              "spearman_rho": -0.4727272727272727,
+              "threshold": 0.5,
+              "timepoints": 11
+            },
+            "hours_range": [
+              0.0,
+              72.0
+            ],
+            "jams_as_it_crowds": false,
+            "q_change": 0.5337122308986659,
+            "q_end": 4.396773601174826,
+            "q_start": 3.86306137027616,
+            "timepoints": 19,
+            "trajectory": [
+              {
+                "cells": 361,
+                "confluence": 0.13722679317020972,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.86306137027616
+              },
+              {
+                "cells": 444,
+                "confluence": 0.25521798906660215,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 4.825976976534179
+              },
+              {
+                "cells": 475,
+                "confluence": 0.2981522875464395,
+                "fields": 8,
+                "hours": 8.0,
+                "median_q": 5.102323393644043
+              },
+              {
+                "cells": 507,
+                "confluence": 0.33173598270869425,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 5.105220072135936
+              },
+              {
+                "cells": 566,
+                "confluence": 0.37404178091196244,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 5.101674738211532
+              },
+              {
+                "cells": 690,
+                "confluence": 0.37348611474267646,
+                "fields": 10,
+                "hours": 20.0,
+                "median_q": 5.127160668016955
+              },
+              {
+                "cells": 756,
+                "confluence": 0.41761718614935534,
+                "fields": 9,
+                "hours": 24.0,
+                "median_q": 5.031113154885752
+              },
+              {
+                "cells": 876,
+                "confluence": 0.4742876660535581,
+                "fields": 9,
+                "hours": 28.0,
+                "median_q": 4.963384017469727
+              },
+              {
+                "cells": 1012,
+                "confluence": 0.5568449983154973,
+                "fields": 9,
+                "hours": 32.0,
+                "median_q": 4.816805390338511
+              },
+              {
+                "cells": 1045,
+                "confluence": 0.5943464485753069,
+                "fields": 9,
+                "hours": 36.0,
+                "median_q": 4.698213622958586
+              },
+              {
+                "cells": 1551,
+                "confluence": 0.9355281466824303,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 4.782889361941878
+              },
+              {
+                "cells": 1648,
+                "confluence": 1.03827368954532,
+                "fields": 8,
+                "hours": 44.0,
+                "median_q": 4.659329343024648
+              },
+              {
+                "cells": 2292,
+                "confluence": 1.4097778312800462,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 4.5036270385036214
+              },
+              {
+                "cells": 2536,
+                "confluence": 1.4656248187554557,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 4.445622493083658
+              },
+              {
+                "cells": 2282,
+                "confluence": 1.310710136957778,
+                "fields": 8,
+                "hours": 56.0,
+                "median_q": 4.397063081882307
+              },
+              {
+                "cells": 1837,
+                "confluence": 0.8923534827428407,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 4.465391310655959
+              },
+              {
+                "cells": 2038,
+                "confluence": 0.9187493326254015,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 4.435031396133741
+              },
+              {
+                "cells": 2462,
+                "confluence": 0.9323009110030618,
+                "fields": 8,
+                "hours": 68.0,
+                "median_q": 4.511156245707559
+              },
+              {
+                "cells": 2383,
+                "confluence": 0.9580435690627684,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 4.396773601174826
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.013768957045708035,
+              "spearman_rho": -0.5543859649122806
+            },
+            "vs_time": {
+              "p_value": 0.005161852692152183,
+              "spearman_rho": -0.6140350877192983
+            }
+          },
+          "H4": {
+            "confluence_range": [
+              0.1778185051233434,
+              0.90310547112312
+            ],
+            "crossed_transition": false,
+            "crowded_regime": {
+              "jams": true,
+              "p_value": 2.1550312748357714e-05,
+              "reached": true,
+              "spearman_rho": -0.9666666666666667,
+              "threshold": 0.5,
+              "timepoints": 9
+            },
+            "hours_range": [
+              0.0,
+              72.0
+            ],
+            "jams_as_it_crowds": true,
+            "q_change": 0.5640924536355638,
+            "q_end": 4.458010780042759,
+            "q_start": 3.8939183264071953,
+            "timepoints": 19,
+            "trajectory": [
+              {
+                "cells": 484,
+                "confluence": 0.1778185051233434,
+                "fields": 9,
+                "hours": 0.0,
+                "median_q": 3.8939183264071953
+              },
+              {
+                "cells": 654,
+                "confluence": 0.2958721169006674,
+                "fields": 10,
+                "hours": 4.0,
+                "median_q": 4.877958462442849
+              },
+              {
+                "cells": 660,
+                "confluence": 0.2832562989783675,
+                "fields": 10,
+                "hours": 8.0,
+                "median_q": 4.925334282924455
+              },
+              {
+                "cells": 655,
+                "confluence": 0.38407495571703965,
+                "fields": 9,
+                "hours": 12.0,
+                "median_q": 5.103413966240251
+              },
+              {
+                "cells": 544,
+                "confluence": 0.32317507575757354,
+                "fields": 9,
+                "hours": 16.0,
+                "median_q": 5.257688354871313
+              },
+              {
+                "cells": 541,
+                "confluence": 0.3242145795830175,
+                "fields": 8,
+                "hours": 20.0,
+                "median_q": 5.306065937079145
+              },
+              {
+                "cells": 585,
+                "confluence": 0.34787201178704,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 5.153706508950416
+              },
+              {
+                "cells": 623,
+                "confluence": 0.36921366303130826,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 5.121288017773757
+              },
+              {
+                "cells": 716,
+                "confluence": 0.4287652478454239,
+                "fields": 8,
+                "hours": 32.0,
+                "median_q": 5.119852033033428
+              },
+              {
+                "cells": 807,
+                "confluence": 0.4946909803526699,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 5.028017190686782
+              },
+              {
+                "cells": 886,
+                "confluence": 0.5451097297038969,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 4.923364571313947
+              },
+              {
+                "cells": 946,
+                "confluence": 0.578546926781711,
+                "fields": 8,
+                "hours": 44.0,
+                "median_q": 4.823683142566258
+              },
+              {
+                "cells": 1059,
+                "confluence": 0.622833099066452,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 4.693397059163857
+              },
+              {
+                "cells": 1202,
+                "confluence": 0.7015567188865888,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 4.659842470164593
+              },
+              {
+                "cells": 1419,
+                "confluence": 0.766360993908435,
+                "fields": 8,
+                "hours": 56.0,
+                "median_q": 4.552326569719689
+              },
+              {
+                "cells": 1494,
+                "confluence": 0.8476813958697487,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 4.570311580652751
+              },
+              {
+                "cells": 1650,
+                "confluence": 0.8807830020419019,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 4.4705878019908045
+              },
+              {
+                "cells": 1865,
+                "confluence": 0.885463863107104,
+                "fields": 8,
+                "hours": 68.0,
+                "median_q": 4.455356357584123
+              },
+              {
+                "cells": 2095,
+                "confluence": 0.90310547112312,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 4.458010780042759
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 0.011106774915463205,
+              "spearman_rho": -0.5684210526315789
+            },
+            "vs_time": {
+              "p_value": 0.016919489971602298,
+              "spearman_rho": -0.5403508771929825
+            }
+          }
+        },
+        "wells_measured": 4,
+        "wells_reaching_crowded_regime": 4,
+        "wells_that_jam_as_they_crowd": 3
       }
     },
     "SkBr3": {
@@ -15826,6 +20760,765 @@
           3.7789695278384836
         ],
         "state": "jammed (solid-like)"
+      },
+      "time_course": {
+        "cell_type": "SkBr3",
+        "consistent": true,
+        "note": "Each well is one trajectory and the unit of analysis; fields imaged at the same timestamp are averaged first. A well-level result from a single well is descriptive, not replicated - check wells_measured before quoting it.",
+        "verdict": "0 of 2 wells that reach confluence 0.5 jam as they crowd (2 well(s) never crowd that far)",
+        "wells": {
+          "E3": {
+            "confluence_range": [
+              0.16419411346221743,
+              0.5981374829613748
+            ],
+            "crossed_transition": true,
+            "crowded_regime": {
+              "note": "This well never crowds enough for jamming to be the dominant process, so its trajectory measures post-plating spreading instead. A positive correlation here is not evidence against jamming.",
+              "reached": false,
+              "threshold": 0.5,
+              "timepoints": 4
+            },
+            "hours_range": [
+              0.0,
+              84.0
+            ],
+            "jams_as_it_crowds": false,
+            "q_change": 0.2568038389396672,
+            "q_end": 3.907294505271504,
+            "q_start": 3.650490666331837,
+            "timepoints": 22,
+            "trajectory": [
+              {
+                "cells": 1593,
+                "confluence": 0.16419411346221743,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.650490666331837
+              },
+              {
+                "cells": 1661,
+                "confluence": 0.17557799272016833,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 3.6407952312057565
+              },
+              {
+                "cells": 1761,
+                "confluence": 0.17875139064548612,
+                "fields": 8,
+                "hours": 8.0,
+                "median_q": 3.670260277480291
+              },
+              {
+                "cells": 1873,
+                "confluence": 0.19521590953480292,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 3.6744225415617278
+              },
+              {
+                "cells": 1963,
+                "confluence": 0.21343740401687994,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 3.69857901579609
+              },
+              {
+                "cells": 2039,
+                "confluence": 0.23349220097041523,
+                "fields": 8,
+                "hours": 20.0,
+                "median_q": 3.744094740918615
+              },
+              {
+                "cells": 2271,
+                "confluence": 0.2656018122575637,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 3.7533792876496928
+              },
+              {
+                "cells": 2396,
+                "confluence": 0.2895251853249309,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 3.7820923779752658
+              },
+              {
+                "cells": 2437,
+                "confluence": 0.31927853554892244,
+                "fields": 8,
+                "hours": 32.0,
+                "median_q": 3.7807285700460285
+              },
+              {
+                "cells": 2557,
+                "confluence": 0.34613312052693085,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 3.819752124585217
+              },
+              {
+                "cells": 2726,
+                "confluence": 0.3669087188080474,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 3.793604941336121
+              },
+              {
+                "cells": 2840,
+                "confluence": 0.3669030743963122,
+                "fields": 8,
+                "hours": 44.0,
+                "median_q": 3.7812390151020865
+              },
+              {
+                "cells": 2894,
+                "confluence": 0.4029777950345517,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 3.8362521606885025
+              },
+              {
+                "cells": 3084,
+                "confluence": 0.43137125510476537,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 3.8474033337295688
+              },
+              {
+                "cells": 3285,
+                "confluence": 0.45494137591168743,
+                "fields": 8,
+                "hours": 56.0,
+                "median_q": 3.808557689961561
+              },
+              {
+                "cells": 3457,
+                "confluence": 0.4815027322750499,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 3.826454984305516
+              },
+              {
+                "cells": 3519,
+                "confluence": 0.48076865668023566,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 3.8343946970998286
+              },
+              {
+                "cells": 3599,
+                "confluence": 0.48617596910168187,
+                "fields": 8,
+                "hours": 68.0,
+                "median_q": 3.821648498661716
+              },
+              {
+                "cells": 4139,
+                "confluence": 0.540449334127794,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 3.9105009391420387
+              },
+              {
+                "cells": 4350,
+                "confluence": 0.5620125635277755,
+                "fields": 8,
+                "hours": 76.0,
+                "median_q": 3.8949414709310375
+              },
+              {
+                "cells": 4557,
+                "confluence": 0.5819831296096468,
+                "fields": 8,
+                "hours": 80.0,
+                "median_q": 3.8940099382075064
+              },
+              {
+                "cells": 4936,
+                "confluence": 0.5981374829613748,
+                "fields": 8,
+                "hours": 84.0,
+                "median_q": 3.907294505271504
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 3.157883046967692e-11,
+              "spearman_rho": 0.9457933370976851
+            },
+            "vs_time": {
+              "p_value": 3.862695618087642e-11,
+              "spearman_rho": 0.9446640316205535
+            }
+          },
+          "F3": {
+            "confluence_range": [
+              0.15229155230755617,
+              0.6155899147215176
+            ],
+            "crossed_transition": true,
+            "crowded_regime": {
+              "jams": false,
+              "p_value": 0.04244227208707231,
+              "reached": true,
+              "spearman_rho": 0.6833333333333333,
+              "threshold": 0.5,
+              "timepoints": 9
+            },
+            "hours_range": [
+              0.0,
+              84.0
+            ],
+            "jams_as_it_crowds": false,
+            "q_change": 0.28306128958333154,
+            "q_end": 3.926314430060922,
+            "q_start": 3.6432531404775905,
+            "timepoints": 22,
+            "trajectory": [
+              {
+                "cells": 1495,
+                "confluence": 0.15454909664553695,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.6432531404775905
+              },
+              {
+                "cells": 1538,
+                "confluence": 0.15229155230755617,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 3.637075686942947
+              },
+              {
+                "cells": 1660,
+                "confluence": 0.16436678687035094,
+                "fields": 8,
+                "hours": 8.0,
+                "median_q": 3.753027231938164
+              },
+              {
+                "cells": 1809,
+                "confluence": 0.19372550881979045,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 3.688344681648831
+              },
+              {
+                "cells": 1886,
+                "confluence": 0.21252996971290178,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 3.690541884821881
+              },
+              {
+                "cells": 2142,
+                "confluence": 0.25569536006474614,
+                "fields": 8,
+                "hours": 20.0,
+                "median_q": 3.709003411424458
+              },
+              {
+                "cells": 2143,
+                "confluence": 0.25113397606055704,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 3.789053926068072
+              },
+              {
+                "cells": 2215,
+                "confluence": 0.27588122587617997,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 3.7908394120633084
+              },
+              {
+                "cells": 2327,
+                "confluence": 0.3155353374774493,
+                "fields": 8,
+                "hours": 32.0,
+                "median_q": 3.861971420970558
+              },
+              {
+                "cells": 2424,
+                "confluence": 0.32969577626475943,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 3.8316022092093567
+              },
+              {
+                "cells": 2535,
+                "confluence": 0.3401503621988335,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 3.7893038521321727
+              },
+              {
+                "cells": 2710,
+                "confluence": 0.3711219939118576,
+                "fields": 8,
+                "hours": 44.0,
+                "median_q": 3.7915999864479444
+              },
+              {
+                "cells": 4012,
+                "confluence": 0.5061429153975883,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 3.782935332667927
+              },
+              {
+                "cells": 4263,
+                "confluence": 0.5367072624665365,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 3.8121739126197594
+              },
+              {
+                "cells": 4077,
+                "confluence": 0.5205235359928035,
+                "fields": 8,
+                "hours": 56.0,
+                "median_q": 3.8312027017860073
+              },
+              {
+                "cells": 3448,
+                "confluence": 0.4716520351255157,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 3.906789225499442
+              },
+              {
+                "cells": 3620,
+                "confluence": 0.505782186321978,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 3.887710693941337
+              },
+              {
+                "cells": 3838,
+                "confluence": 0.525220492583588,
+                "fields": 8,
+                "hours": 68.0,
+                "median_q": 3.8481785222275127
+              },
+              {
+                "cells": 3912,
+                "confluence": 0.537356416732676,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 3.861341511552768
+              },
+              {
+                "cells": 4203,
+                "confluence": 0.5564197441303799,
+                "fields": 8,
+                "hours": 76.0,
+                "median_q": 3.9212056391446177
+              },
+              {
+                "cells": 4514,
+                "confluence": 0.5735491263180187,
+                "fields": 8,
+                "hours": 80.0,
+                "median_q": 3.9109065692334317
+              },
+              {
+                "cells": 4696,
+                "confluence": 0.6155899147215176,
+                "fields": 8,
+                "hours": 84.0,
+                "median_q": 3.926314430060922
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 1.028720056372839e-06,
+              "spearman_rho": 0.839638622247318
+            },
+            "vs_time": {
+              "p_value": 1.2469233827274197e-08,
+              "spearman_rho": 0.8994918125352909
+            }
+          },
+          "G3": {
+            "confluence_range": [
+              0.14833982500408685,
+              0.8057360593995888
+            ],
+            "crossed_transition": true,
+            "crowded_regime": {
+              "note": "This well never crowds enough for jamming to be the dominant process, so its trajectory measures post-plating spreading instead. A positive correlation here is not evidence against jamming.",
+              "reached": false,
+              "threshold": 0.5,
+              "timepoints": 4
+            },
+            "hours_range": [
+              0.0,
+              84.0
+            ],
+            "jams_as_it_crowds": false,
+            "q_change": 0.24912041356718007,
+            "q_end": 3.854851404746995,
+            "q_start": 3.605730991179815,
+            "timepoints": 22,
+            "trajectory": [
+              {
+                "cells": 1555,
+                "confluence": 0.14833982500408685,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.605730991179815
+              },
+              {
+                "cells": 1575,
+                "confluence": 0.15472608845744426,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 3.63228286530066
+              },
+              {
+                "cells": 1667,
+                "confluence": 0.1726948795345284,
+                "fields": 8,
+                "hours": 8.0,
+                "median_q": 3.6507006179275154
+              },
+              {
+                "cells": 1782,
+                "confluence": 0.1883203830617599,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 3.6812577495321657
+              },
+              {
+                "cells": 1866,
+                "confluence": 0.20292934174224284,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 3.6790106570252608
+              },
+              {
+                "cells": 1999,
+                "confluence": 0.2275987904624701,
+                "fields": 8,
+                "hours": 20.0,
+                "median_q": 3.674471480812985
+              },
+              {
+                "cells": 2035,
+                "confluence": 0.23777881112052396,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 3.692462776201571
+              },
+              {
+                "cells": 2147,
+                "confluence": 0.25309935003961326,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 3.6930552853845726
+              },
+              {
+                "cells": 2257,
+                "confluence": 0.2604904447286093,
+                "fields": 8,
+                "hours": 32.0,
+                "median_q": 3.703076274287258
+              },
+              {
+                "cells": 2339,
+                "confluence": 0.27369023046533186,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 3.7102107635839756
+              },
+              {
+                "cells": 2831,
+                "confluence": 0.3451892250498484,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 3.718733831168219
+              },
+              {
+                "cells": 2699,
+                "confluence": 0.35824328065246025,
+                "fields": 8,
+                "hours": 44.0,
+                "median_q": 3.7440274101102653
+              },
+              {
+                "cells": 2879,
+                "confluence": 0.38771660791356827,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 3.890205853606214
+              },
+              {
+                "cells": 2974,
+                "confluence": 0.3921933211149216,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 3.8653658464328204
+              },
+              {
+                "cells": 3145,
+                "confluence": 0.4206010913256655,
+                "fields": 8,
+                "hours": 56.0,
+                "median_q": 3.810794461848242
+              },
+              {
+                "cells": 3444,
+                "confluence": 0.45942048739346614,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 3.814158726318568
+              },
+              {
+                "cells": 3589,
+                "confluence": 0.48201888514806623,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 3.8134998083214935
+              },
+              {
+                "cells": 3742,
+                "confluence": 0.4994572118116389,
+                "fields": 8,
+                "hours": 68.0,
+                "median_q": 3.8211782092354185
+              },
+              {
+                "cells": 5911,
+                "confluence": 0.7707903969589944,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 3.8879649240330667
+              },
+              {
+                "cells": 6165,
+                "confluence": 0.8057360593995888,
+                "fields": 8,
+                "hours": 76.0,
+                "median_q": 3.882261559999511
+              },
+              {
+                "cells": 4257,
+                "confluence": 0.5865361416391218,
+                "fields": 8,
+                "hours": 80.0,
+                "median_q": 3.8441953026479636
+              },
+              {
+                "cells": 4493,
+                "confluence": 0.6212194014457385,
+                "fields": 8,
+                "hours": 84.0,
+                "median_q": 3.854851404746995
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 1.624556477811128e-09,
+              "spearman_rho": 0.9186900056465275
+            },
+            "vs_time": {
+              "p_value": 7.164664560765993e-09,
+              "spearman_rho": 0.9051383399209487
+            }
+          },
+          "H3": {
+            "confluence_range": [
+              0.17402093748292768,
+              0.6885847642250461
+            ],
+            "crossed_transition": true,
+            "crowded_regime": {
+              "jams": false,
+              "p_value": 0.07239650145772594,
+              "reached": true,
+              "spearman_rho": 0.7714285714285715,
+              "threshold": 0.5,
+              "timepoints": 6
+            },
+            "hours_range": [
+              0.0,
+              84.0
+            ],
+            "jams_as_it_crowds": false,
+            "q_change": 0.36402081616017545,
+            "q_end": 3.992118563583883,
+            "q_start": 3.6280977474237077,
+            "timepoints": 22,
+            "trajectory": [
+              {
+                "cells": 1943,
+                "confluence": 0.20819490560465265,
+                "fields": 8,
+                "hours": 0.0,
+                "median_q": 3.6280977474237077
+              },
+              {
+                "cells": 1957,
+                "confluence": 0.21841842645391563,
+                "fields": 8,
+                "hours": 4.0,
+                "median_q": 3.6384774578172396
+              },
+              {
+                "cells": 1695,
+                "confluence": 0.17402093748292768,
+                "fields": 8,
+                "hours": 8.0,
+                "median_q": 3.7487224068726253
+              },
+              {
+                "cells": 2818,
+                "confluence": 0.3042674496182552,
+                "fields": 8,
+                "hours": 12.0,
+                "median_q": 3.683815765138971
+              },
+              {
+                "cells": 3016,
+                "confluence": 0.3430159435437657,
+                "fields": 8,
+                "hours": 16.0,
+                "median_q": 3.685999816017201
+              },
+              {
+                "cells": 2283,
+                "confluence": 0.27659447528545084,
+                "fields": 8,
+                "hours": 20.0,
+                "median_q": 3.7019918222915673
+              },
+              {
+                "cells": 2149,
+                "confluence": 0.24389027114974762,
+                "fields": 8,
+                "hours": 24.0,
+                "median_q": 3.647644321026801
+              },
+              {
+                "cells": 2279,
+                "confluence": 0.267795797127681,
+                "fields": 8,
+                "hours": 28.0,
+                "median_q": 3.662852275365984
+              },
+              {
+                "cells": 2630,
+                "confluence": 0.34109726466891455,
+                "fields": 8,
+                "hours": 32.0,
+                "median_q": 3.717694753371483
+              },
+              {
+                "cells": 2485,
+                "confluence": 0.3315727253947302,
+                "fields": 8,
+                "hours": 36.0,
+                "median_q": 3.793744990727221
+              },
+              {
+                "cells": 2637,
+                "confluence": 0.35682671644517316,
+                "fields": 8,
+                "hours": 40.0,
+                "median_q": 3.774759905179529
+              },
+              {
+                "cells": 2784,
+                "confluence": 0.36750744084285203,
+                "fields": 8,
+                "hours": 44.0,
+                "median_q": 3.782468068661881
+              },
+              {
+                "cells": 2881,
+                "confluence": 0.3861635114421783,
+                "fields": 8,
+                "hours": 48.0,
+                "median_q": 3.7677557887296698
+              },
+              {
+                "cells": 3049,
+                "confluence": 0.41993676257580825,
+                "fields": 8,
+                "hours": 52.0,
+                "median_q": 3.7986342278420464
+              },
+              {
+                "cells": 3202,
+                "confluence": 0.4459216881555988,
+                "fields": 8,
+                "hours": 56.0,
+                "median_q": 3.835121518977536
+              },
+              {
+                "cells": 3453,
+                "confluence": 0.46789299714201465,
+                "fields": 8,
+                "hours": 60.0,
+                "median_q": 3.8926260459413164
+              },
+              {
+                "cells": 5153,
+                "confluence": 0.6885847642250461,
+                "fields": 8,
+                "hours": 64.0,
+                "median_q": 3.9432577970221727
+              },
+              {
+                "cells": 4393,
+                "confluence": 0.5913760605093195,
+                "fields": 8,
+                "hours": 68.0,
+                "median_q": 3.9781190313120343
+              },
+              {
+                "cells": 4164,
+                "confluence": 0.5457723851514696,
+                "fields": 8,
+                "hours": 72.0,
+                "median_q": 3.872236825409
+              },
+              {
+                "cells": 4225,
+                "confluence": 0.559233877567748,
+                "fields": 8,
+                "hours": 76.0,
+                "median_q": 3.925544115291534
+              },
+              {
+                "cells": 4418,
+                "confluence": 0.5789150931319611,
+                "fields": 8,
+                "hours": 80.0,
+                "median_q": 3.9025333302333456
+              },
+              {
+                "cells": 4778,
+                "confluence": 0.6294500470696313,
+                "fields": 8,
+                "hours": 84.0,
+                "median_q": 3.992118563583883
+              }
+            ],
+            "vs_confluence": {
+              "p_value": 8.100911537056286e-10,
+              "spearman_rho": 0.9243365330321853
+            },
+            "vs_time": {
+              "p_value": 5.197553818465719e-10,
+              "spearman_rho": 0.9277244494635801
+            }
+          }
+        },
+        "wells_measured": 4,
+        "wells_reaching_crowded_regime": 2,
+        "wells_that_jam_as_they_crowd": 0
       }
     }
   },
@@ -15837,7 +21530,7 @@
     },
     "git": {
       "branch": "master",
-      "commit": "c425b7a30d5bc151abab5475cd64f5dff0baff92",
+      "commit": "acbc914a478ee8d3c1e351ce029b9db887d4cf62",
       "dirty": true
     },
     "machine": "arm64",
@@ -15851,7 +21544,7 @@
     },
     "platform": "macOS-15.6-arm64-arm-64bit-Mach-O",
     "python": "3.13.9",
-    "recorded_at_utc": "2026-09-06T14:01:04+00:00",
+    "recorded_at_utc": "2026-09-06T16:00:54+00:00",
     "torch_threads": 4
   },
   "hexagon_shape_index": 3.7224194364083982,
