@@ -137,11 +137,19 @@ def resolve_contained_path(root: Path, value: object, *, field_name: str) -> Pat
     """Resolve a manifest-supplied relative path, refusing anything outside *root*."""
     if not isinstance(value, str) or not value.strip():
         raise ManifestError(f"Manifest field {field_name!r} must be a nonempty relative path.")
+    if "\x00" in value:
+        raise ManifestError(f"Manifest field {field_name!r} contains a NUL byte.")
     candidate = Path(value)
     if candidate.is_absolute():
         raise ManifestError(f"Manifest field {field_name!r} must be relative, got {value!r}.")
     resolved_root = root.resolve()
-    resolved = (resolved_root / candidate).resolve()
+    try:
+        resolved = (resolved_root / candidate).resolve()
+    except (OSError, ValueError) as exc:
+        # Some pathological values raise from the OS rather than comparing badly.
+        raise ManifestError(
+            f"Manifest field {field_name!r} is not a usable path: {value!r}"
+        ) from exc
     if resolved != resolved_root and resolved_root not in resolved.parents:
         raise ManifestError(f"Manifest field {field_name!r} escapes the data directory: {value!r}.")
     return resolved

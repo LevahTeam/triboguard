@@ -387,6 +387,15 @@ def fit_dose_response(concentrations: np.ndarray, responses: np.ndarray) -> dict
 
 
 def _ridge_fit(x: np.ndarray, y: np.ndarray, alpha: float = 1.0) -> np.ndarray:
+    """Ridge regression with a fixed penalty and an unpenalised intercept.
+
+    ``alpha`` is deliberately fixed rather than tuned. Choosing it by nested
+    cross-validation at 20-60 wells would spend more of the data on the choice
+    than the choice is worth, and would make the permutation null much harder to
+    reason about. On standardised features alpha = 1 is weak regularisation for
+    several correlated predictors — which is a further reason the confirmatory
+    test uses a single pre-specified feature.
+    """
     design = np.hstack([np.ones((x.shape[0], 1)), x])
     penalty = alpha * np.eye(design.shape[1])
     penalty[0, 0] = 0.0

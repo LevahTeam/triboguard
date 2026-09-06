@@ -221,3 +221,15 @@ def test_unknown_group_level_is_rejected(tiny_training_data: Path) -> None:
     splits = {"train": load_manifest(tiny_training_data / "manifests" / "train.jsonl")}
     with pytest.raises(ManifestError, match="group_by must be one of"):
         check_group_leakage(splits, group_by="plate")
+
+
+@pytest.mark.parametrize("value", ["bad\x00name.tif", "\x00", "a\x00/b.json"])
+def test_a_nul_byte_in_a_path_is_a_manifest_error_not_a_raw_oserror(
+    tiny_training_data: Path, value: str
+) -> None:
+    """Every bad manifest value should surface through one exception type."""
+    path = rewrite_manifest(
+        tiny_training_data, "train", lambda rows: [{**row, "image_path": value} for row in rows]
+    )
+    with pytest.raises(ManifestError):
+        load_manifest(path)
