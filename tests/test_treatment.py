@@ -414,3 +414,85 @@ def test_the_confirmatory_endpoint_is_tested_separately_from_the_exploratory_mod
     assert confirmatory["feature"] == report["primary_feature"]
     # The pre-specified endpoint must be a shape feature, not a confluency proxy.
     assert report["feature_kinds"].get(report["primary_feature"]) == "shape"
+
+
+def test_within_day_centring_is_on_by_default_and_narrows_the_claim() -> None:
+    rng = np.random.default_rng(9)
+    days = ["d1"] * 10 + ["d2"] * 10
+    features = rng.normal(size=(20, 1))
+    targets = 0.8 * features[:, 0] + rng.normal(0, 0.2, 20)
+    result = leave_one_day_out(features, targets, days, permutations=100, seed=1)
+    assert result["centred_by_day"] is True
+    assert "relative to its own experiment day" in result["claim"]
+
+    uncentred = leave_one_day_out(
+        features, targets, days, permutations=100, seed=1, centre_by_day=False
+    )
+    assert uncentred["centred_by_day"] is False
+    assert "confound" in uncentred["claim"]
+
+
+def _null_confounded_experiment(seed: int, correlation: float) -> tuple:
+    """Three days; morphology and viability each carry an unrelated day-level shift."""
+    rng = np.random.default_rng(seed)
+    days: list[str] = []
+    feature: list[np.ndarray] = []
+    viability: list[np.ndarray] = []
+    for index in range(3):
+        morphology_shift = rng.normal(0, 1.0)
+        viability_shift = rng.normal(0, 0.3)
+        latent = rng.normal(size=10)
+        noise = rng.normal(size=10)
+        days += [f"d{index}"] * 10
+        feature.append(latent + morphology_shift)
+        viability.append(
+            0.2 * (correlation * latent + np.sqrt(1 - correlation**2) * noise)
+            + viability_shift
+            + 0.6
+        )
+    return np.concatenate(feature)[:, None], np.concatenate(viability), days
+
+
+def test_centring_detects_effects_that_confounded_day_shifts_would_otherwise_hide() -> None:
+    """The measured reason centring is the default.
+
+    A model fitted across days learns a slope corrupted by day-level shifts that
+    are independent in morphology and in viability. Fitted to within-day
+    deviations it does not. Counted over several independent experiments at a
+    moderate effect size, centring detects strictly more of them.
+    """
+    centred_hits = 0
+    uncentred_hits = 0
+    for trial in range(6):
+        features, targets, days = _null_confounded_experiment(trial, correlation=0.5)
+        centred = leave_one_day_out(features, targets, days, permutations=150, seed=trial)
+        uncentred = leave_one_day_out(
+            features, targets, days, permutations=150, seed=trial, centre_by_day=False
+        )
+        centred_hits += centred["permutation_p_value"] < 0.05
+        uncentred_hits += uncentred["permutation_p_value"] < 0.05
+    assert centred_hits > uncentred_hits
+
+
+def test_centring_does_not_inflate_the_false_positive_rate() -> None:
+    """Power is worthless if it comes from a broken null. Ten independent nulls."""
+    significant = 0
+    for trial in range(10):
+        rng = np.random.default_rng(100 + trial)
+        days: list[str] = []
+        feature: list[np.ndarray] = []
+        viability: list[np.ndarray] = []
+        for index in range(3):
+            days += [f"d{index}"] * 10
+            feature.append(rng.normal(size=10) + rng.normal(0, 1.0))
+            viability.append(rng.normal(0, 0.2, 10) + rng.normal(0, 0.3) + 0.6)
+        result = leave_one_day_out(
+            np.concatenate(feature)[:, None],
+            np.concatenate(viability),
+            days,
+            permutations=200,
+            seed=trial,
+        )
+        significant += result["permutation_p_value"] < 0.05
+    # At alpha = 0.05 over 10 pure nulls, more than two hits would be alarming.
+    assert significant <= 2

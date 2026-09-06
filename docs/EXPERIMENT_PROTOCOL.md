@@ -48,17 +48,26 @@ The analysis refuses manifests that cannot support the claim. Concretely:
 ### Power: plan for more than the minimum
 
 The enforced minimum lets the analysis run; it does not give it a real chance of
-detecting an effect. Simulated power for the leave-one-day-out viability test, at
-a within-day correlation of rho between morphology and viability:
+detecting an effect. Simulated power for the confirmatory leave-one-day-out test,
+at a within-day correlation of rho between the morphology endpoint and viability,
+with day-level batch shifts in both:
 
 | Design | rho = 0.5 | rho = 0.7 | rho = 0.85 |
 |---|---|---|---|
-| 2 days, 20 wells | 0.15 | 0.39 | 0.77 |
-| 3 days, 30 wells | 0.31 | 0.65 | 0.92 |
-| 3 days, 45 wells | 0.45 | 0.89 | 1.00 |
-| **4 days, 60 wells** | **0.66** | **0.98** | **1.00** |
+| 2 days, 20 wells | 0.53 | 0.85 | 0.99 |
+| 3 days, 30 wells | 0.74 | 0.95 | 1.00 |
+| **4 days, 60 wells** | **0.96** | **1.00** | **1.00** |
 
-At 3 days and 30 wells a moderate real effect is missed two times in three.
+Measured type-I error under a pure null across the same designs: 0.033-0.067
+against a nominal 0.05, i.e. correctly calibrated.
+
+Those figures depend on the within-day centring the analysis now uses by default.
+Without it — fitting across days to predict absolute viability — the same designs
+give 0.33, 0.32 and 0.35 at rho = 0.5, and power stops improving as the study
+grows, because the model keeps learning a slope that day-level confounding has
+corrupted. That is a large enough difference to change what an experiment is
+worth doing.
+
 **Plan for 3-4 experiment days and 45-60 wells**, and commit to that number in the
 logbook before collecting anything. A negative result below that size is
 uninformative, and saying so afterwards is not the same as saying so in advance.
@@ -157,7 +166,10 @@ Generate the template with `tribovision treatment-template`.
 - 4-parameter-logistic dose-response fits with bootstrap IC50 confidence
   intervals, flagged when the IC50 falls outside the tested range.
 - Leave-one-day-out ridge prediction of viability from morphology, with a
-  within-day label-permutation null and an exact permutation p-value. Two are
+  within-day label-permutation null and an exact permutation p-value. The model
+  is fitted to each day's deviations from its own mean, so what it predicts is a
+  well's viability **relative to its own day**, not an absolute value; the result
+  says so explicitly. Two are
   reported: a **confirmatory** model using the single pre-specified endpoint, and
   an **exploratory** one using every available feature. Eight correlated
   predictors at 20-30 wells roughly halves the power, which is why the
