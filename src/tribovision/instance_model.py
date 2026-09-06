@@ -309,3 +309,64 @@ def train_instance_model(config: InstanceConfig, *, progress: bool = True) -> di
         json.dumps(result, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8"
     )
     return result
+
+
+@torch.no_grad()
+def predict_instances(
+    model: TriboUNet,
+    image: Any,
+    *,
+    image_size: int,
+    device: torch.device,
+    interior_threshold: float = 0.5,
+    min_area: int = 20,
+) -> np.ndarray:
+    """Run the three-class model on one image and decode instances natively."""
+    from tribovision.geometry import letterbox_image, normalize_intensity, unletterbox_mask
+
+    grey = image.convert("L")
+    boxed, transform = letterbox_image(grey, image_size)
+    valid = transform.valid_mask()
+    pixels = np.asarray(boxed, dtype=np.float32)
+    normalized = np.zeros_like(pixels)
+    interior_pixels = pixels[valid > 0]
+    if interior_pixels.size:
+        normalized[valid > 0] = normalize_intensity(interior_pixels)
+    tensor = torch.from_numpy(normalized[None, None, ...]).to(device)
+    probabilities = torch.softmax(model(tensor), dim=1)[0].cpu().numpy() * valid
+
+    # Decode on the padded square, then map the labels back to the native grid.
+    labels = decode_instances(
+        probabilities[INTERIOR],
+        probabilities[INTERIOR] + probabilities[BOUNDARY],
+        interior_threshold=interior_threshold,
+        min_area=min_area,
+    )
+    native = np.zeros((transform.original_height, transform.original_width), dtype=np.int32)
+    for index in range(1, int(labels.max()) + 1):
+        restored = unletterbox_mask((labels == index).astype(np.uint8), transform)
+        native[restored > 0] = index
+    from tribovision.morphology import relabel
+
+    return relabel(native)
+
+
+def load_instance_checkpoint(path: Any, device: torch.device) -> TriboUNet:
+    """Load a three-class checkpoint, refusing a binary one."""
+    from tribovision.predict import PredictionError
+
+    payload = torch.load(Path(path), map_location=device, weights_only=True)
+    if payload.get("target") != "three_class":
+        raise PredictionError(
+            f"{Path(path).name} is not a three-class checkpoint; it was trained for "
+            f"{payload.get('target', 'semantic segmentation')}."
+        )
+    architecture = payload.get("architecture") or {}
+    model = TriboUNet(
+        base_channels=int(architecture.get("base_channels", 32)),
+        depth=int(architecture.get("depth", 3)),
+        out_channels=3,
+    )
+    model.load_state_dict(payload["model_state"])
+    model.to(device).eval()
+    return model

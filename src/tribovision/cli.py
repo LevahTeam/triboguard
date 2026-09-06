@@ -144,6 +144,13 @@ def _add_instance_benchmark(subparsers: Any) -> None:
         help="Expected cell diameter in pixels; choose it on the training split.",
     )
     parser.add_argument("--no-cellpose", action="store_true")
+    parser.add_argument(
+        "--three-class-checkpoint",
+        type=Path,
+        default=Path("runs/instance_model/best_model.pt"),
+        help="Three-class instance model to include in the comparison.",
+    )
+    parser.add_argument("--interior-threshold", type=float, default=0.7)
 
 
 def _add_mechanics(subparsers: Any) -> None:
@@ -377,6 +384,8 @@ def _run(args: argparse.Namespace) -> int:
             min_area=args.min_area,
             cellpose_diameter=args.cellpose_diameter,
             include_cellpose=not args.no_cellpose,
+            three_class_checkpoint=args.three_class_checkpoint,
+            interior_threshold=args.interior_threshold,
         )
         _print(
             {key: value for key, value in report.items() if key not in ("per_image", "environment")}

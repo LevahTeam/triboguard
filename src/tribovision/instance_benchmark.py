@@ -58,6 +58,8 @@ def run(
     cellpose_diameter: float | None = 15.0,
     cellpose_model: str = external.DEFAULT_MODEL,
     include_cellpose: bool = True,
+    three_class_checkpoint: Path | None = None,
+    interior_threshold: float = 0.7,
 ) -> dict[str, Any]:
     """Score every available instance approach on one held-out manifest."""
     from tribovision.training import resolve_device
@@ -73,6 +75,19 @@ def run(
         torch_device = resolve_device(device)
         model, payload = load_checkpoint(Path(checkpoint), torch_device)
         image_size = int((payload.get("preprocessing") or {}).get("image_size") or 512)
+
+    three_class = None
+    three_class_size = 512
+    if three_class_checkpoint is not None and Path(three_class_checkpoint).is_file():
+        from tribovision.instance_model import load_instance_checkpoint
+
+        if torch_device is None:
+            torch_device = resolve_device(device)
+        three_class = load_instance_checkpoint(three_class_checkpoint, torch_device)
+        payload = torch.load(
+            Path(three_class_checkpoint), map_location=torch_device, weights_only=True
+        )
+        three_class_size = int((payload.get("preprocessing") or {}).get("image_size") or 512)
 
     use_cellpose = include_cellpose and external.cellpose_available()
     per_image: list[dict[str, Any]] = []
@@ -111,6 +126,20 @@ def run(
             row["tribovision_unet"] = _score(
                 label_objects(mask, method="watershed_split", min_area=min_area), true_labels
             )
+        if three_class is not None and torch_device is not None:
+            from tribovision.instance_model import predict_instances
+
+            row["tribovision_three_class"] = _score(
+                predict_instances(
+                    three_class,
+                    image,
+                    image_size=three_class_size,
+                    device=torch_device,
+                    interior_threshold=interior_threshold,
+                    min_area=min_area,
+                ),
+                true_labels,
+            )
         if use_cellpose:
             row["cellpose"] = _score(
                 external.cellpose_instances(
@@ -143,6 +172,19 @@ def run(
         "images": len(per_image),
         "min_area": min_area,
         "summary": summary,
+        "three_class_model": {
+            "used": three_class is not None,
+            "checkpoint": provenance.relative_to_repo(Path(three_class_checkpoint))
+            if three_class_checkpoint
+            else None,
+            "interior_threshold": interior_threshold,
+            "note": (
+                "Same U-Net body as tribovision_unet; only the output head and the "
+                "target differ. Any gap between the two rows is representation, not "
+                "capacity. The decoder's interior threshold was chosen on the training "
+                "split, never on the manifest scored here."
+            ),
+        },
         "cellpose": {
             "used": use_cellpose,
             "version": external.cellpose_version(),
