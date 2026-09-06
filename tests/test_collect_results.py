@@ -103,3 +103,21 @@ def test_an_empty_run_directory_produces_a_report_without_crashing(tmp_path: Pat
 
 def test_missing_run_directory_exits_non_zero(tmp_path: Path) -> None:
     assert main([str(tmp_path / "absent")]) == 1
+
+
+def test_publishing_copies_the_evidence_out_of_the_ignored_run_directory(
+    runs: Path, tmp_path: Path
+) -> None:
+    """Documentation citing runs/*.json is dangling for anyone who clones the repo."""
+    destination = tmp_path / "results"
+    assert main([str(runs), "--publish", str(destination)]) == 0
+    names = {path.name for path in destination.glob("*.json")}
+    assert "baseline__metrics.json" in names
+    assert "comparison__comparison.json" in names
+    assert (destination / "README.md").is_file()
+    # Flattened names cannot collide or escape the destination.
+    assert all("/" not in name and ".." not in name for name in names)
+
+
+def test_publish_without_a_destination_is_an_error(runs: Path) -> None:
+    assert main([str(runs), "--publish"]) == 1

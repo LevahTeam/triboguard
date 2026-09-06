@@ -61,14 +61,48 @@ baseline's 0.425 would flatter the result. The real margin is +0.242 Dice and
 crowded frames, because Dice is generous to over-segmentation. Any future report
 of this project should quote both, and should quote the trivial floor alongside.
 
-**Instance separation.** The model is semantic. Instance matching (0.50:0.95) is
-0.049, which is better than the classical baseline's 0.007 but far from usable
-for per-cell counting at confluence. Two consequences: cell *counts* from this
-model are not trustworthy at high density, and per-object morphology is a
-measurement of predicted *regions*. The watershed splitter improves this and is
-labelled in every output row, but it is a heuristic, not a trained instance
-model. The fix is a model that predicts instances directly — Cellpose or
-StarDist fine-tuned on the project's own annotated frames.
+**Instance separation, and its measured ceiling.** The model is semantic, and its
+instance matching score (0.50:0.95) is about 0.05. That number is meaningless
+without its ceiling, so `tribovision compare` now measures it: the *ground-truth
+mask itself*, put through the same watershed step, scores about 0.12. Through
+plain connected components it scores 0.002, because 382 annotated cells in one
+frame collapse into a single component.
+
+So roughly 0.05 against a ceiling of 0.12 — the model recovers much of what this
+representation allows, and the representation allows very little. That is a
+limit of predicting a binary foreground mask at 59% confluence, not a limit of
+this model's training. No number of extra epochs moves it.
+
+Three consequences: cell *counts* from this model are not trustworthy at high
+density; per-object morphology is a measurement of predicted *regions*; and the
+treatment pipeline's size-derived features are confluency measurements until this
+is fixed (see the feature taxonomy in `treatment.py`).
+
+The fix is a model that predicts instances directly. **Cellpose, specifically —
+not StarDist.** StarDist represents each object as a star-convex polygon, which
+cannot express a concave or ruffled adherent cell, and A172 and RAW 264.7 at
+confluence are exactly that shape. StarDist is the right tool for round nuclei
+and the wrong one here. The cheapest informative next experiment is to run stock
+Cellpose `cyto3` on the C7 test split with no training at all and report its
+instance score beside 0.05.
+
+**A pipeline ceiling from resampling.** Letterboxing 704x520 into a 512-pixel
+square is a 0.727x downscale, and the prediction is resampled back. Pushing the
+*ground truth* through that transform and back, with no model at all, scores
+0.986 Dice — so 0.986 is the hard ceiling at `image_size=512`, and about a
+quarter of the model's residual error is resampling loss rather than model error.
+At 768 the round trip is lossless (1.000), which is why that configuration is
+reported alongside.
+
+**A measured brittleness to imaging conditions.** Perturbing held-out images
+without retraining: a 2x optical zoom costs almost nothing (0.935), gamma changes
+nothing (0.952), but a 2-pixel blur drops it to 0.807 and moderate sensor noise
+to 0.739 — at which point the model labels 100% of pixels foreground. Note what
+0.739 is: exactly the all-foreground score on those frames. **The failure mode is
+collapse to the trivial predictor, and Dice makes it look like a mediocre but
+working model.** This is the strongest practical reason to quote IoU and the
+trivial floor beside every Dice number. Photometric augmentation was added in
+response; scale and illumination were never the risk, optics and noise are.
 
 **One cell line, one plate.** The LIVECell subset used here is A172 from a single
 plate. Wells A7/B7/D7/C7 are separated, which controls for the strongest local
@@ -128,9 +162,9 @@ correctly declines to claim transfer it cannot support. Two lessons follow:
 
 | Item | Status |
 |---|---|
-| Reproducible code with version control | Done — commit history, `metrics.json` records revision |
-| Quantitative result on held-out data | Done — 0.952 vs 0.425, p = 1.7e-18 |
-| Comparison against a non-learned baseline | Done — `tribovision compare` gates on it |
+| Reproducible code with version control | Done — commit history, `metrics.json` records revision and working-tree cleanliness |
+| Quantitative result on held-out data | Done — 0.952 against a 0.710 trivial-predictor floor (see `results/comparison.json`) |
+| Comparison against non-learned baselines | Done — `tribovision compare` gates on the *stronger* of the classical rule and the all-foreground predictor |
 | Repeated seeds with reported spread | Done — `docs/RESULTS.md` |
 | Automated test suite | Done — 280+ tests, 91% coverage |
 | Documented limitations | Done — this file, and every generated report |

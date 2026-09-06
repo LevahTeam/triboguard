@@ -12,6 +12,8 @@ dist/
 *.egg-info/
 
 # Downloaded research data and generated model artifacts are intentionally local.
+# The small JSON evidence is copied into results/ and tracked, so a reviewer who
+# clones the repository has the numbers the documentation quotes.
 data/
 runs/
 

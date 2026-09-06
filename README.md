@@ -29,6 +29,7 @@ the model never saw** (`C7`, 60 images):
 | Every pixel labelled cell — no learning at all | 0.710 | 0.593 | — |
 | Classical local-contrast + Otsu | 0.425 | 0.275 | 0.007 |
 | TriboVision U-Net | **0.952** | **0.909** | 0.049 |
+| *The ground-truth mask itself, same instance step* | *1.000* | *1.000* | *0.118* |
 
 **Read the first row before the last one.** These frames average 59% foreground,
 so a predictor that labels every single pixel a cell already scores 0.710 Dice —
@@ -36,19 +37,33 @@ much better than the classical rule. That trivial predictor, not the classical
 one, is the floor this model has to clear, and it clears it by +0.242 Dice. IoU
 separates them far more sharply (+0.316), which is why both are reported.
 
-Against the classical rule the model wins on 60 of 60 held-out images (exact sign
-test p = 1.7 × 10⁻¹⁸). `tribovision compare` scores all of these and passes only
-if the model beats the *strongest* reference. Reproduce it yourself:
+**And read the last row before the instance column.** Putting the *perfect* mask
+through the same instance step scores 0.118, because 382 annotated cells in one
+crowded frame merge into one predicted region. So 0.049 sits against a ceiling of
+0.118, not against 1.0. That is a limit of representing cells as a binary
+foreground mask at 59% confluence — not something more training fixes.
+
+Against the classical rule the model wins on every held-out image. The sign test
+counts acquisition groups, not crops: LIVECell tiles one capture into several
+crops and this manifest is a time-lapse of one well, so the 60 images are 33
+independent fields of view (p = 2.3 × 10⁻¹⁰; the per-image figure of 1.7 × 10⁻¹⁸
+is pseudoreplication and is reported only to show the size of the inflation). At
+the level of *biological* replication this is one well on one plate — n = 1.
+
+`tribovision compare` scores all of these and passes only if the model beats the
+*strongest* reference. Reproduce it yourself:
 
 ```bash
 tribovision compare --checkpoint runs/baseline/best_model.pt
 ```
 
-Read the instance column honestly: this is a **semantic** segmenter. It finds
-cell pixels very well and does not separate touching cells reliably, so instance
-matching stays low for both methods. Separating individual cells is the next
-step, and it needs an instance-aware model (Cellpose or StarDist), not more
-epochs of this one. See [docs/RESEARCH_PLAN.md](docs/RESEARCH_PLAN.md).
+Separating individual cells needs a model that predicts instances directly —
+Cellpose specifically, not StarDist, whose star-convex polygons cannot represent
+a ruffled adherent cell. See [docs/RESEARCH_PLAN.md](docs/RESEARCH_PLAN.md) for
+the measured ceilings, the brittleness stress test, and what remains to be done.
+
+Published run artifacts are in [results/](results/) so these numbers are available
+without retraining. `docs/RESULTS.md` is generated from them, not typed by hand.
 
 ## What was wrong before, and what fixed it
 
@@ -64,7 +79,7 @@ evaluation mode collapsed every prediction to background. Switching to
 identical by construction. `tests/test_model.py` asserts that equality so the
 regression cannot come back.
 
-Four other corrections changed reported numbers:
+Six other corrections changed reported numbers:
 
 - **Split leakage.** The official LIVECell `train` and `val` files share wells
   (A7, B7 and D7 all appeared in both, with 22 shared acquisition groups). Splits
@@ -79,6 +94,15 @@ Four other corrections changed reported numbers:
 - **Metric naming and smoothing.** The reported "instance AP" had no confidence
   ranking and no precision-recall curve, so it was not average precision; it is
   now named for what it is. Reported Dice and IoU are exact, with no ε smoothing.
+- **A silent data-corruption bug on the default device.** Batches were moved to
+  the accelerator with `non_blocking=True` from unpinned host memory, letting the
+  copy race the freeing of the augmented tensors. On Apple silicon — which
+  `--device auto` selects — masks arrived as NaN while the logits from the same
+  batch were still finite, so training optimised against garbage and the run
+  finished reporting a plausible score. CPU and MPS now agree to four decimals.
+- **A flattering comparison.** The headline quoted the classical rule (0.425),
+  which loses to a predictor that labels every pixel a cell (0.710). The gate now
+  measures against the stronger reference.
 
 A point-by-point response to the full audit is in
 [docs/AUDIT_RESPONSE.md](docs/AUDIT_RESPONSE.md).
