@@ -19,7 +19,9 @@ from conftest import build_synthetic_experiment
 from tribovision.treatment import (
     TreatmentDataError,
     benjamini_hochberg,
+    exponential_approach,
     fit_dose_response,
+    fit_kinetics,
     four_parameter_logistic,
     leave_one_day_out,
     load_treatment_manifest,
@@ -496,3 +498,115 @@ def test_centring_does_not_inflate_the_false_positive_rate() -> None:
         significant += result["permutation_p_value"] < 0.05
     # At alpha = 0.05 over 10 pure nulls, more than two hits would be alarming.
     assert significant <= 2
+
+
+# ------------------------------------------------------------------- kinetics
+
+
+def test_kinetics_recovers_a_planted_half_time() -> None:
+    hours = np.array([0, 3, 6, 12, 24, 48], dtype=float)
+    values = exponential_approach(hours, 1.0, 0.2, math.log(2) / 9.0)
+    fit = fit_kinetics(hours, values)
+    assert fit["fitted"]
+    assert fit["half_time_hours"] == pytest.approx(9.0, rel=0.05)
+    assert fit["saturating_r_squared"] > 0.99
+
+
+@pytest.mark.parametrize("hours", [[0.0, 24.0], [24.0, 24.0, 24.0], [0.0, 0.0, 12.0]])
+def test_kinetics_refuses_fewer_than_three_distinct_times(hours: list[float]) -> None:
+    fit = fit_kinetics(np.array(hours), np.linspace(1.0, 0.5, len(hours)))
+    assert not fit["fitted"]
+    assert "three distinct exposure times" in fit["reason"]
+
+
+def test_kinetics_quotes_no_half_time_when_the_response_has_not_plateaued() -> None:
+    """A half-time far beyond the observation window is extrapolation, not a result."""
+    hours = np.array([0, 6, 12, 18, 24], dtype=float)
+    values = 1.0 - 0.001 * hours  # barely moving; the plateau is nowhere in sight
+    fit = fit_kinetics(hours, values)
+    assert fit["fitted"]
+    assert fit["half_time_hours"] is None
+    assert "not visibly plateaued" in fit["model_note"] or "linear" in fit["model_note"].lower()
+
+
+def test_a_single_timepoint_study_reports_no_kinetics_rather_than_guessing(
+    tmp_path: Path,
+) -> None:
+    report = run_treatment_analysis(
+        build_synthetic_experiment(tmp_path / "flat", seed=3),
+        tmp_path / "out",
+        instance_method="connected_components",
+        min_area=5,
+        permutations=100,
+    )
+    kinetics = report["kinetics"]
+    assert kinetics["evaluated"] is False
+    assert "three distinct exposure times" in kinetics["reason"]
+
+
+def test_a_time_course_study_measures_how_quickly_changes_occur(tmp_path: Path) -> None:
+    """The stated goal that had no implementation at all."""
+    manifest = build_synthetic_experiment(
+        tmp_path / "course",
+        timepoints=(0.0, 6.0, 12.0, 24.0, 48.0),
+        half_time_hours=12.0,
+        longitudinal=True,
+        fields=1,
+        seed=5,
+    )
+    report = run_treatment_analysis(
+        manifest,
+        tmp_path / "out",
+        instance_method="connected_components",
+        min_area=5,
+        permutations=100,
+    )
+    kinetics = report["kinetics"]
+    assert kinetics["evaluated"] is True
+    assert kinetics["design"] == "longitudinal"
+    assert kinetics["exposure_hours"] == [0.0, 6.0, 12.0, 24.0, 48.0]
+    assert kinetics["units_with_a_rate"] > 0
+    assert "individual cells" in kinetics["caveat"]
+
+
+def test_a_destructive_design_is_reported_as_cross_sectional(tmp_path: Path) -> None:
+    """Rates fitted across wells are confounded, and the report must say so."""
+    manifest = build_synthetic_experiment(
+        tmp_path / "destructive",
+        timepoints=(0.0, 12.0, 24.0, 48.0),
+        longitudinal=False,
+        wells_per_condition=2,
+        fields=1,
+        seed=6,
+    )
+    report = run_treatment_analysis(
+        manifest,
+        tmp_path / "out",
+        instance_method="connected_components",
+        min_area=5,
+        permutations=100,
+    )
+    kinetics = report["kinetics"]
+    assert kinetics["design"] == "cross-sectional"
+    assert "confounded with well-to-well variation" in kinetics["design_note"]
+
+
+def test_the_rate_of_change_itself_is_tested_against_dose(tmp_path: Path) -> None:
+    manifest = build_synthetic_experiment(
+        tmp_path / "course",
+        timepoints=(0.0, 6.0, 12.0, 24.0, 48.0),
+        longitudinal=True,
+        fields=1,
+        seed=7,
+    )
+    report = run_treatment_analysis(
+        manifest,
+        tmp_path / "out",
+        instance_method="connected_components",
+        min_area=5,
+        permutations=100,
+    )
+    dose = report["kinetics"]["dose_dependence_of_rate"]
+    assert dose["evaluated"] is True
+    assert "rate of change itself" in dose["question"]
+    assert dose["spearman_rho"] is not None

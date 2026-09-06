@@ -35,6 +35,7 @@ def test_every_command_is_registered() -> None:
         "train",
         "predict",
         "compare",
+        "instance-benchmark",
         "treatment-template",
         "analyze-treatment",
     }
@@ -275,3 +276,30 @@ def test_compare_exits_zero_when_the_model_actually_wins(tmp_path: Path, capsys)
     )
     assert code == 0
     assert payload["passed"] is True
+
+
+def test_instance_benchmark_runs_without_cellpose_installed(
+    tiny_training_data: Path, tmp_path: Path, capsys
+) -> None:
+    """The optional dependency must not be load-bearing for the rest of the tool."""
+    code, payload = run(
+        [
+            "instance-benchmark",
+            "--manifest",
+            str(tiny_training_data / "manifests" / "test.jsonl"),
+            "--checkpoint",
+            str(tmp_path / "absent.pt"),
+            "--output-dir",
+            str(tmp_path / "ib"),
+            "--no-cellpose",
+            "--min-area",
+            "2",
+        ],
+        capsys,
+    )
+    assert code == 0
+    assert payload["cellpose"]["used"] is False
+    # The ceiling is always computed, because it needs only the ground truth.
+    assert "ceiling" in payload["summary"]
+    assert "classical" in payload["summary"]
+    assert (tmp_path / "ib" / "instance_benchmark.json").is_file()

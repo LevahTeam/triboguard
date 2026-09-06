@@ -126,6 +126,26 @@ def _add_compare(subparsers: Any) -> None:
     parser.add_argument("--max-images", type=int, default=None)
 
 
+def _add_instance_benchmark(subparsers: Any) -> None:
+    parser = subparsers.add_parser(
+        "instance-benchmark",
+        help="Score instance separation against the classical rule, Cellpose, and the ceiling.",
+    )
+    parser.add_argument("--manifest", type=Path, default=Path("data/livecell/manifests/test.jsonl"))
+    parser.add_argument("--checkpoint", type=Path, default=Path("runs/baseline/best_model.pt"))
+    parser.add_argument("--output-dir", type=Path, default=Path("runs/instance_benchmark"))
+    parser.add_argument("--device", choices=("auto", "cpu", "cuda", "mps"), default="auto")
+    parser.add_argument("--max-images", type=int, default=None)
+    parser.add_argument("--min-area", type=int, default=20)
+    parser.add_argument(
+        "--cellpose-diameter",
+        type=float,
+        default=15.0,
+        help="Expected cell diameter in pixels; choose it on the training split.",
+    )
+    parser.add_argument("--no-cellpose", action="store_true")
+
+
 def _add_treatment(subparsers: Any) -> None:
     template = subparsers.add_parser(
         "treatment-template",
@@ -173,6 +193,7 @@ def build_parser() -> argparse.ArgumentParser:
     _add_train(subparsers)
     _add_predict(subparsers)
     _add_compare(subparsers)
+    _add_instance_benchmark(subparsers)
     _add_treatment(subparsers)
     return parser
 
@@ -298,6 +319,25 @@ def _run(args: argparse.Namespace) -> int:
             {key: value for key, value in report.items() if key not in ("per_image", "environment")}
         )
         return 0 if report["passed"] else 2
+
+    if args.command == "instance-benchmark":
+        from tribovision.instance_benchmark import run as run_instance_benchmark
+
+        checkpoint = Path(args.checkpoint)
+        report = run_instance_benchmark(
+            args.manifest,
+            args.output_dir,
+            checkpoint=checkpoint if checkpoint.is_file() else None,
+            device=args.device,
+            max_images=args.max_images,
+            min_area=args.min_area,
+            cellpose_diameter=args.cellpose_diameter,
+            include_cellpose=not args.no_cellpose,
+        )
+        _print(
+            {key: value for key, value in report.items() if key not in ("per_image", "environment")}
+        )
+        return 0
 
     if args.command == "treatment-template":
         from tribovision.treatment import write_template

@@ -386,6 +386,101 @@ def fit_dose_response(concentrations: np.ndarray, responses: np.ndarray) -> dict
     }
 
 
+def exponential_approach(
+    hours: np.ndarray, start: float, plateau: float, rate: float
+) -> np.ndarray:
+    """A feature relaxing from *start* toward *plateau* at first-order *rate*.
+
+    Morphological responses to a cytotoxic agent do not rise forever; cells round
+    up, or spread, and then stop. A straight line through such data reports a
+    slope that depends entirely on when imaging stopped, which is why the rate
+    constant, not the slope, is the answer to "how quickly".
+    """
+    return plateau + (start - plateau) * np.exp(-np.abs(rate) * np.asarray(hours, dtype=float))
+
+
+def fit_kinetics(hours: np.ndarray, values: np.ndarray) -> dict[str, Any]:
+    """Fit a rate of change, reporting a half-time where one is identifiable."""
+    hours = np.asarray(hours, dtype=float)
+    values = np.asarray(values, dtype=float)
+    distinct = len(np.unique(hours))
+    if distinct < 3 or hours.size < 3:
+        return {
+            "fitted": False,
+            "reason": (
+                "A rate needs at least three distinct exposure times; two points fit a "
+                f"line with no residual degrees of freedom. This design has {distinct}."
+            ),
+            "timepoints": distinct,
+        }
+
+    # Linear rate first: always identifiable, and it is what a reader expects.
+    slope, intercept = np.polyfit(hours, values, 1)
+    predicted = slope * hours + intercept
+    total = values - values.mean()
+    linear_r2 = (
+        1.0 - float((values - predicted) @ (values - predicted)) / float(total @ total)
+        if total.any()
+        else float("nan")
+    )
+
+    result: dict[str, Any] = {
+        "fitted": True,
+        "timepoints": distinct,
+        "linear_slope_per_hour": float(slope),
+        "linear_r_squared": linear_r2,
+        "total_change": float(values[np.argmax(hours)] - values[np.argmin(hours)]),
+        "half_time_hours": None,
+        "rate_constant_per_hour": None,
+        "plateau": None,
+        "saturating_r_squared": None,
+        "model_note": "Only a linear rate was identifiable.",
+    }
+    if distinct < 4:
+        result["model_note"] = (
+            "Only a linear rate was fitted; a saturating model needs at least four "
+            "distinct exposure times."
+        )
+        return result
+
+    guess = [float(values[np.argmin(hours)]), float(values[np.argmax(hours)]), 0.05]
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", optimize.OptimizeWarning)
+            parameters, _ = optimize.curve_fit(
+                exponential_approach, hours, values, p0=guess, maxfev=20000
+            )
+    except (RuntimeError, ValueError, TypeError):
+        return result
+
+    saturating = exponential_approach(hours, *parameters)
+    saturating_r2 = (
+        1.0 - float((values - saturating) @ (values - saturating)) / float(total @ total)
+        if total.any()
+        else float("nan")
+    )
+    rate = float(abs(parameters[2]))
+    # A rate this slow is indistinguishable from a straight line over the window
+    # observed, so quoting a half-time from it would be extrapolation.
+    identifiable = rate > 1e-4 and math.log(2) / rate <= 3 * float(hours.max())
+    result.update(
+        {
+            "rate_constant_per_hour": rate,
+            "plateau": float(parameters[1]),
+            "saturating_r_squared": saturating_r2,
+            "half_time_hours": float(math.log(2) / rate) if identifiable else None,
+            "model_note": (
+                "Saturating fit preferred; half-time is the time to cover half the "
+                "distance from the starting value to the plateau."
+                if saturating_r2 > linear_r2 and identifiable
+                else "Linear fit is as good as the saturating one over this window; "
+                "no half-time is quoted, because the response has not visibly plateaued."
+            ),
+        }
+    )
+    return result
+
+
 def _ridge_fit(x: np.ndarray, y: np.ndarray, alpha: float = 1.0) -> np.ndarray:
     """Ridge regression with a fixed penalty and an unpenalised intercept.
 
@@ -590,6 +685,130 @@ def stratified_spearman(
     }
 
 
+def analyse_kinetics(
+    well_rows: list[dict[str, Any]],
+    feature: str,
+    *,
+    permutations: int = 2000,
+) -> dict[str, Any]:
+    """How fast does *feature* change with exposure time, and does dose change the rate?
+
+    Two experimental designs give this answer, and they are not interchangeable:
+
+    * **longitudinal** — the same well imaged repeatedly. Imaging is
+      non-destructive, so this is usually possible, and it is much the stronger
+      design: a rate is fitted *within* each well, so well-to-well variation
+      cannot masquerade as a time effect.
+    * **cross-sectional** — a different well per timepoint, as a destructive assay
+      forces. A rate can only be fitted across wells, so it is confounded with
+      whatever differs between them.
+
+    Which one you ran is detected from the manifest and reported, because a reader
+    cannot otherwise tell which claim the number supports.
+    """
+    times = sorted({float(row["exposure_hours"]) for row in well_rows})
+    if len(times) < 3:
+        return {
+            "evaluated": False,
+            "reason": (
+                f"Kinetics needs at least three distinct exposure times; this study has "
+                f"{len(times)} ({times}). Image the same plates at several timepoints to "
+                "measure how quickly changes occur."
+            ),
+            "exposure_hours": times,
+        }
+    if not all(isinstance(row.get(feature), int | float) for row in well_rows):
+        return {
+            "evaluated": False,
+            "reason": f"Feature {feature!r} is not available in every well.",
+        }
+
+    repeats: dict[tuple[str, str, str], set[float]] = defaultdict(set)
+    for row in well_rows:
+        key = (str(row["experiment_day"]), str(row["plate_id"]), str(row["well_id"]))
+        repeats[key].add(float(row["exposure_hours"]))
+    longitudinal_units = [key for key, values in repeats.items() if len(values) >= 3]
+    design = "longitudinal" if longitudinal_units else "cross-sectional"
+
+    per_concentration: dict[str, Any] = {}
+    rates: list[float] = []
+    rate_concentrations: list[float] = []
+
+    if design == "longitudinal":
+        # A rate per well, which keeps the well as the unit of analysis.
+        for key in longitudinal_units:
+            member = [
+                row
+                for row in well_rows
+                if (str(row["experiment_day"]), str(row["plate_id"]), str(row["well_id"])) == key
+            ]
+            hours = np.array([float(row["exposure_hours"]) for row in member])
+            values = np.array([float(row[feature]) for row in member])
+            fit = fit_kinetics(hours, values)
+            if fit["fitted"]:
+                rates.append(float(fit["linear_slope_per_hour"]))
+                rate_concentrations.append(float(member[0]["concentration_ug_per_ml"]))
+        grouped: dict[float, list[float]] = defaultdict(list)
+        for concentration, rate in zip(rate_concentrations, rates, strict=True):
+            grouped[concentration].append(rate)
+        for concentration, well_slopes in sorted(grouped.items()):
+            per_concentration[str(concentration)] = {
+                "wells": len(well_slopes),
+                "mean_slope_per_hour": float(np.mean(well_slopes)),
+                "sd_slope_per_hour": (
+                    float(np.std(well_slopes, ddof=1)) if len(well_slopes) > 1 else 0.0
+                ),
+            }
+    else:
+        for concentration in sorted({float(row["concentration_ug_per_ml"]) for row in well_rows}):
+            member = [
+                row for row in well_rows if float(row["concentration_ug_per_ml"]) == concentration
+            ]
+            hours = np.array([float(row["exposure_hours"]) for row in member])
+            values = np.array([float(row[feature]) for row in member])
+            fit = fit_kinetics(hours, values)
+            per_concentration[str(concentration)] = {"wells": len(member), **fit}
+            if fit["fitted"]:
+                rates.append(float(fit["linear_slope_per_hour"]))
+                rate_concentrations.append(concentration)
+
+    dose_dependence: dict[str, Any] = {"evaluated": False, "reason": "Fewer than three rates."}
+    if len(rates) >= 3:
+        dose_dependence = {
+            "evaluated": True,
+            **stratified_spearman(
+                np.array(rate_concentrations),
+                np.array(rates),
+                np.array(["all"] * len(rates)),
+                permutations=min(permutations, 2000),
+            ),
+            "question": "Does the rate of change itself depend on concentration?",
+        }
+
+    return {
+        "evaluated": True,
+        "feature": feature,
+        "design": design,
+        "design_note": (
+            "The same wells were imaged at several timepoints, so each rate is fitted "
+            "within a well."
+            if design == "longitudinal"
+            else "Each timepoint uses different wells, so rates are fitted across wells "
+            "and are confounded with well-to-well variation. Imaging the same wells "
+            "repeatedly would remove that."
+        ),
+        "exposure_hours": times,
+        "units_with_a_rate": len(rates),
+        "per_concentration": per_concentration,
+        "dose_dependence_of_rate": dose_dependence,
+        "caveat": (
+            "Rates describe the population average in each well, not individual cells. "
+            "Following a single cell through time needs instance segmentation and "
+            "frame-to-frame tracking, neither of which this pipeline does yet."
+        ),
+    }
+
+
 def _safe_spearman(x: np.ndarray, y: np.ndarray) -> dict[str, Any]:
     """Spearman correlation that reports undefined rather than warning."""
     if float(np.std(x)) < 1e-12 or float(np.std(y)) < 1e-12:
@@ -762,9 +981,16 @@ def analyse(
             ),
         }
 
+    kinetics = analyse_kinetics(
+        well_rows,
+        primary_feature if primary_feature in usable else (usable[0] if usable else ""),
+        permutations=permutations,
+    )
+
     return {
         "images_analysed": len(rows),
         "constant_features": constant,
+        "kinetics": kinetics,
         "wells": len(well_rows),
         "experiment_days": sorted({str(row["experiment_day"]) for row in well_rows}),
         "concentrations_ug_per_ml": sorted({float(value) for value in concentrations}),
@@ -800,6 +1026,9 @@ def analyse(
             "halves the power to detect a real association.",
             "Leave-one-day-out R^2 is reported against the global mean and, separately, "
             "within day. Only the within-day value is free of between-day variance.",
+            "Rates of change are reported only when at least three distinct exposure "
+            "times exist, and the report says whether they were fitted within a well "
+            "(longitudinal) or across wells (cross-sectional).",
         ],
     }
 
