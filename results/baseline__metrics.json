@@ -1,0 +1,1180 @@
+{
+  "best_epoch": 36,
+  "best_validation": {
+    "loss": 0.22584296944664745,
+    "macro_dice": 0.9481717115495263,
+    "macro_iou": 0.9019808856452384,
+    "micro_dice": 0.9523911192028586,
+    "micro_iou": 0.9091094364131104,
+    "samples": 41,
+    "total_fn": 94105,
+    "total_fp": 311735,
+    "total_tp": 4059310
+  },
+  "checkpoint": "runs/baseline/best_model.pt",
+  "config": {
+    "augment": true,
+    "base_channels": 32,
+    "batch_size": 4,
+    "data_dir": "data/livecell",
+    "depth": 3,
+    "device": "mps",
+    "epochs": 40,
+    "group_by": "well",
+    "image_size": 512,
+    "learning_rate": 0.001,
+    "output_dir": "runs/baseline",
+    "patience": 12,
+    "photometric_augment": true,
+    "seed": 42,
+    "verify_hashes": true,
+    "weight_decay": 0.0001,
+    "workers": 0
+  },
+  "datasets": {
+    "test": {
+      "cell_types": [
+        "A172"
+      ],
+      "coco_backend": "pycocotools",
+      "content_sha256": "a97889c35cbf2c9c69910983e4f7d36caa057b4ab222f7d3011635cc742b1f51",
+      "image_size": 512,
+      "images": 60,
+      "manifest": "test.jsonl",
+      "wells": [
+        "C7"
+      ]
+    },
+    "train": {
+      "cell_types": [
+        "A172"
+      ],
+      "coco_backend": "pycocotools",
+      "content_sha256": "70dd967439f5b93d1e2e66cf94cc3a9fcecc070146fd7e683831f455d5fcf14a",
+      "image_size": 512,
+      "images": 79,
+      "manifest": "train.jsonl",
+      "wells": [
+        "A7",
+        "D7"
+      ]
+    },
+    "val": {
+      "cell_types": [
+        "A172"
+      ],
+      "coco_backend": "pycocotools",
+      "content_sha256": "c2cd36211fc0cbbf46586ead44a53f46ef2ccbd82f53c07608ad4c6c7f0886d3",
+      "image_size": 512,
+      "images": 41,
+      "manifest": "val.jsonl",
+      "wells": [
+        "B7"
+      ]
+    }
+  },
+  "device": "mps",
+  "environment": {
+    "accelerators": {
+      "cuda": false,
+      "mps": true
+    },
+    "git": {
+      "branch": "master",
+      "commit": "f428dd529ba818f29d645714998a5fd05543c829",
+      "dirty": false
+    },
+    "machine": "arm64",
+    "packages": {
+      "numpy": "2.3.5",
+      "pillow": "11.3.0",
+      "pycocotools": "2.0.11",
+      "remotezip": "0.12.6",
+      "scipy": "1.16.3",
+      "torch": "2.11.0"
+    },
+    "platform": "macOS-15.6-arm64-arm-64bit-Mach-O",
+    "python": "3.13.9",
+    "recorded_at_utc": "2026-09-06T00:14:20+00:00",
+    "torch_threads": 4
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "learning_rate": 0.000998458666866564,
+      "train": {
+        "loss": 0.8363752395291871,
+        "macro_dice": 0.7332944055146808,
+        "macro_iou": 0.6210883554024033,
+        "micro_dice": 0.7567180684116565,
+        "micro_iou": 0.6086455929146481,
+        "samples": 79,
+        "total_fn": 507469,
+        "total_fp": 4741689,
+        "total_tp": 8163641
+      },
+      "val": {
+        "loss": 0.833856025846993,
+        "macro_dice": 0.7496015429496765,
+        "macro_iou": 0.6403709780879137,
+        "micro_dice": 0.7909514017045212,
+        "micro_iou": 0.6541932250032028,
+        "samples": 41,
+        "total_fn": 63117,
+        "total_fp": 2099016,
+        "total_tp": 4090298
+      }
+    },
+    {
+      "epoch": 2,
+      "learning_rate": 0.0009938441702975688,
+      "train": {
+        "loss": 0.6753716008572639,
+        "macro_dice": 0.8559757999227017,
+        "macro_iou": 0.7607847346535211,
+        "micro_dice": 0.8743292979318874,
+        "micro_iou": 0.7767185344040188,
+        "samples": 79,
+        "total_fn": 817879,
+        "total_fp": 1439671,
+        "total_tp": 7853231
+      },
+      "val": {
+        "loss": 0.5873488289553944,
+        "macro_dice": 0.8839571912114214,
+        "macro_iou": 0.7946046750719954,
+        "micro_dice": 0.8971964831650632,
+        "micro_iou": 0.8135596862621829,
+        "samples": 41,
+        "total_fn": 291845,
+        "total_fp": 593096,
+        "total_tp": 3861570
+      }
+    },
+    {
+      "epoch": 3,
+      "learning_rate": 0.0009861849601988382,
+      "train": {
+        "loss": 0.5595928430557251,
+        "macro_dice": 0.8760790010041828,
+        "macro_iou": 0.7858287352549879,
+        "micro_dice": 0.8850058295483654,
+        "micro_iou": 0.7937313512499252,
+        "samples": 79,
+        "total_fn": 997682,
+        "total_fp": 996428,
+        "total_tp": 7673428
+      },
+      "val": {
+        "loss": 0.4949063964006377,
+        "macro_dice": 0.8892542966982213,
+        "macro_iou": 0.8021566896903806,
+        "micro_dice": 0.8987914857056901,
+        "micro_iou": 0.8161864660860025,
+        "samples": 41,
+        "total_fn": 320414,
+        "total_fp": 542817,
+        "total_tp": 3833001
+      }
+    },
+    {
+      "epoch": 4,
+      "learning_rate": 0.0009755282581475767,
+      "train": {
+        "loss": 0.4585371756855446,
+        "macro_dice": 0.9038510020775131,
+        "macro_iou": 0.8265983907482292,
+        "micro_dice": 0.9092500874107367,
+        "micro_iou": 0.833600880381759,
+        "samples": 79,
+        "total_fn": 726551,
+        "total_fp": 859301,
+        "total_tp": 7944559
+      },
+      "val": {
+        "loss": 0.39202882313146825,
+        "macro_dice": 0.9222921947153603,
+        "macro_iou": 0.8563757596946344,
+        "micro_dice": 0.9250515306895923,
+        "micro_iou": 0.8605543029267476,
+        "samples": 41,
+        "total_fn": 245156,
+        "total_fp": 388145,
+        "total_tp": 3908259
+      }
+    },
+    {
+      "epoch": 5,
+      "learning_rate": 0.0009619397662556432,
+      "train": {
+        "loss": 0.4331731890575795,
+        "macro_dice": 0.9044032881531534,
+        "macro_iou": 0.8304232404201846,
+        "micro_dice": 0.9135222510850006,
+        "micro_iou": 0.8408108237810492,
+        "samples": 79,
+        "total_fn": 559079,
+        "total_fp": 976757,
+        "total_tp": 8112031
+      },
+      "val": {
+        "loss": 0.396143632691081,
+        "macro_dice": 0.9149169514818889,
+        "macro_iou": 0.8437251782998806,
+        "micro_dice": 0.9116441035241862,
+        "micro_iou": 0.8376341842555042,
+        "samples": 41,
+        "total_fn": 427784,
+        "total_fp": 294387,
+        "total_tp": 3725631
+      }
+    },
+    {
+      "epoch": 6,
+      "learning_rate": 0.0009455032620941838,
+      "train": {
+        "loss": 0.3795492505725426,
+        "macro_dice": 0.9183983983872812,
+        "macro_iou": 0.851323317877854,
+        "micro_dice": 0.9221546702946304,
+        "micro_iou": 0.8555538024613443,
+        "samples": 79,
+        "total_fn": 667500,
+        "total_fp": 683778,
+        "total_tp": 8003610
+      },
+      "val": {
+        "loss": 0.3390180628474166,
+        "macro_dice": 0.930525186585217,
+        "macro_iou": 0.8709908404001375,
+        "micro_dice": 0.9382731232195815,
+        "micro_iou": 0.8837236239745591,
+        "samples": 41,
+        "total_fn": 94559,
+        "total_fp": 439487,
+        "total_tp": 4058856
+      }
+    },
+    {
+      "epoch": 7,
+      "learning_rate": 0.000926320082177046,
+      "train": {
+        "loss": 0.3673437939414495,
+        "macro_dice": 0.9197225600858278,
+        "macro_iou": 0.8572972726218308,
+        "micro_dice": 0.9265633646897579,
+        "micro_iou": 0.8631747177344704,
+        "samples": 79,
+        "total_fn": 409247,
+        "total_fp": 900374,
+        "total_tp": 8261863
+      },
+      "val": {
+        "loss": 0.31723516379914635,
+        "macro_dice": 0.9349911838043027,
+        "macro_iou": 0.8784275898119298,
+        "micro_dice": 0.9387139601114012,
+        "micro_iou": 0.8845060849099045,
+        "samples": 41,
+        "total_fn": 181873,
+        "total_fp": 336709,
+        "total_tp": 3971542
+      }
+    },
+    {
+      "epoch": 8,
+      "learning_rate": 0.0009045084971874736,
+      "train": {
+        "loss": 0.3253376468827453,
+        "macro_dice": 0.9258597410177882,
+        "macro_iou": 0.8645916226543958,
+        "micro_dice": 0.9362845992891734,
+        "micro_iou": 0.8802021656013463,
+        "samples": 79,
+        "total_fn": 446655,
+        "total_fp": 672715,
+        "total_tp": 8224455
+      },
+      "val": {
+        "loss": 0.2951662227874849,
+        "macro_dice": 0.9379800281873564,
+        "macro_iou": 0.8838176610993176,
+        "micro_dice": 0.9424369608245861,
+        "micro_iou": 0.8911402213521077,
+        "samples": 41,
+        "total_fn": 84524,
+        "total_fp": 412523,
+        "total_tp": 4068891
+      }
+    },
+    {
+      "epoch": 9,
+      "learning_rate": 0.0008802029828000154,
+      "train": {
+        "loss": 0.3317385595056075,
+        "macro_dice": 0.9250422097459624,
+        "macro_iou": 0.863490832002857,
+        "micro_dice": 0.9325086072996033,
+        "micro_iou": 0.8735514062934672,
+        "samples": 79,
+        "total_fn": 459670,
+        "total_fp": 728955,
+        "total_tp": 8211440
+      },
+      "val": {
+        "loss": 0.4320149567069077,
+        "macro_dice": 0.8997247858745295,
+        "macro_iou": 0.8186852379543025,
+        "micro_dice": 0.8920923887161805,
+        "micro_iou": 0.8052046755798011,
+        "samples": 41,
+        "total_fn": 566109,
+        "total_fp": 301733,
+        "total_tp": 3587306
+      }
+    },
+    {
+      "epoch": 10,
+      "learning_rate": 0.0008535533905932736,
+      "train": {
+        "loss": 0.34194674748408643,
+        "macro_dice": 0.9215063596073585,
+        "macro_iou": 0.8563753049584883,
+        "micro_dice": 0.9299020165079808,
+        "micro_iou": 0.8689877290240832,
+        "samples": 79,
+        "total_fn": 499026,
+        "total_fp": 733032,
+        "total_tp": 8172084
+      },
+      "val": {
+        "loss": 0.3042286074743038,
+        "macro_dice": 0.9359925040384618,
+        "macro_iou": 0.8805349919854141,
+        "micro_dice": 0.9428569938125806,
+        "micro_iou": 0.8918916251576874,
+        "samples": 41,
+        "total_fn": 86696,
+        "total_fp": 406241,
+        "total_tp": 4066719
+      }
+    },
+    {
+      "epoch": 11,
+      "learning_rate": 0.0008247240241650918,
+      "train": {
+        "loss": 0.2968669013132023,
+        "macro_dice": 0.9323113447503198,
+        "macro_iou": 0.8765143322039254,
+        "micro_dice": 0.9410100495890852,
+        "micro_iou": 0.8885920487006979,
+        "samples": 79,
+        "total_fn": 315910,
+        "total_fp": 731630,
+        "total_tp": 8355200
+      },
+      "val": {
+        "loss": 0.2924491210681636,
+        "macro_dice": 0.9331951781017024,
+        "macro_iou": 0.8753824539300872,
+        "micro_dice": 0.9372555989418997,
+        "micro_iou": 0.8819200534095872,
+        "samples": 41,
+        "total_fn": 169305,
+        "total_fp": 364126,
+        "total_tp": 3984110
+      }
+    },
+    {
+      "epoch": 12,
+      "learning_rate": 0.0007938926261462365,
+      "train": {
+        "loss": 0.2877344111853008,
+        "macro_dice": 0.935328613353681,
+        "macro_iou": 0.880754633794857,
+        "micro_dice": 0.9420414015919124,
+        "micro_iou": 0.8904331445572672,
+        "samples": 79,
+        "total_fn": 289380,
+        "total_fp": 741983,
+        "total_tp": 8381730
+      },
+      "val": {
+        "loss": 0.2689743154659504,
+        "macro_dice": 0.9407658969483724,
+        "macro_iou": 0.8886336015491951,
+        "micro_dice": 0.9439846348242663,
+        "micro_iou": 0.8939118368482981,
+        "samples": 41,
+        "total_fn": 158068,
+        "total_fp": 316094,
+        "total_tp": 3995347
+      }
+    },
+    {
+      "epoch": 13,
+      "learning_rate": 0.0007612492823579742,
+      "train": {
+        "loss": 0.31572694171078597,
+        "macro_dice": 0.928626597682132,
+        "macro_iou": 0.8687821098520786,
+        "micro_dice": 0.9336273382261646,
+        "micro_iou": 0.8755169479618333,
+        "samples": 79,
+        "total_fn": 458290,
+        "total_fp": 709428,
+        "total_tp": 8212820
+      },
+      "val": {
+        "loss": 0.2931134904303202,
+        "macro_dice": 0.932535510237624,
+        "macro_iou": 0.874041868419182,
+        "micro_dice": 0.9329587858253946,
+        "micro_iou": 0.8743418468114857,
+        "samples": 41,
+        "total_fn": 274094,
+        "total_fp": 283432,
+        "total_tp": 3879321
+      }
+    },
+    {
+      "epoch": 14,
+      "learning_rate": 0.0007269952498697732,
+      "train": {
+        "loss": 0.2750810931755018,
+        "macro_dice": 0.9383553794667691,
+        "macro_iou": 0.8848817046684555,
+        "micro_dice": 0.9437633263167305,
+        "micro_iou": 0.8935150140410048,
+        "samples": 79,
+        "total_fn": 352915,
+        "total_fp": 638409,
+        "total_tp": 8318195
+      },
+      "val": {
+        "loss": 0.26208698422443577,
+        "macro_dice": 0.9415300633849167,
+        "macro_iou": 0.8901841393331202,
+        "micro_dice": 0.9467158812160856,
+        "micro_iou": 0.8988228952973593,
+        "samples": 41,
+        "total_fn": 77841,
+        "total_fp": 380931,
+        "total_tp": 4075574
+      }
+    },
+    {
+      "epoch": 15,
+      "learning_rate": 0.0006913417161825447,
+      "train": {
+        "loss": 0.24598965727830235,
+        "macro_dice": 0.9441895032230812,
+        "macro_iou": 0.8952081324178961,
+        "micro_dice": 0.9512417886367881,
+        "micro_iou": 0.9070172498581264,
+        "samples": 79,
+        "total_fn": 238567,
+        "total_fp": 625894,
+        "total_tp": 8432543
+      },
+      "val": {
+        "loss": 0.2512048083107646,
+        "macro_dice": 0.9430209732637173,
+        "macro_iou": 0.8927707977411223,
+        "micro_dice": 0.9477543357533905,
+        "micro_iou": 0.900696831506516,
+        "samples": 41,
+        "total_fn": 110803,
+        "total_fp": 334901,
+        "total_tp": 4042612
+      }
+    },
+    {
+      "epoch": 16,
+      "learning_rate": 0.0006545084971874736,
+      "train": {
+        "loss": 0.24580870663063437,
+        "macro_dice": 0.9431741720513452,
+        "macro_iou": 0.8941298466694506,
+        "micro_dice": 0.9515543917753406,
+        "micro_iou": 0.9075858435676168,
+        "samples": 79,
+        "total_fn": 271030,
+        "total_fp": 584301,
+        "total_tp": 8400080
+      },
+      "val": {
+        "loss": 0.278405991269321,
+        "macro_dice": 0.9357885529355305,
+        "macro_iou": 0.8797681898605533,
+        "micro_dice": 0.9372718777981345,
+        "micro_iou": 0.8819488806376946,
+        "samples": 41,
+        "total_fn": 238010,
+        "total_fp": 286077,
+        "total_tp": 3915405
+      }
+    },
+    {
+      "epoch": 17,
+      "learning_rate": 0.0006167226819279527,
+      "train": {
+        "loss": 0.2583425128007237,
+        "macro_dice": 0.9406515676763993,
+        "macro_iou": 0.8888416592078873,
+        "micro_dice": 0.9473580320398941,
+        "micro_iou": 0.8999812480170827,
+        "samples": 79,
+        "total_fn": 305769,
+        "total_fp": 623907,
+        "total_tp": 8365341
+      },
+      "val": {
+        "loss": 0.255307674407959,
+        "macro_dice": 0.9415505833742095,
+        "macro_iou": 0.8902335835666191,
+        "micro_dice": 0.9472226064926724,
+        "micro_iou": 0.8997368411730428,
+        "samples": 41,
+        "total_fn": 89606,
+        "total_fp": 363249,
+        "total_tp": 4063809
+      }
+    },
+    {
+      "epoch": 18,
+      "learning_rate": 0.0005782172325201154,
+      "train": {
+        "loss": 0.25496236131161076,
+        "macro_dice": 0.9421865849555293,
+        "macro_iou": 0.8919421147696579,
+        "micro_dice": 0.9487050195800258,
+        "micro_iou": 0.9024156276300631,
+        "samples": 79,
+        "total_fn": 241189,
+        "total_fp": 670396,
+        "total_tp": 8429921
+      },
+      "val": {
+        "loss": 0.2573808624250133,
+        "macro_dice": 0.9410379325471273,
+        "macro_iou": 0.889034703010466,
+        "micro_dice": 0.9433463256650669,
+        "micro_iou": 0.8927677521765276,
+        "samples": 41,
+        "total_fn": 198461,
+        "total_fp": 276577,
+        "total_tp": 3954954
+      }
+    },
+    {
+      "epoch": 19,
+      "learning_rate": 0.0005392295478639224,
+      "train": {
+        "loss": 0.2506236045420924,
+        "macro_dice": 0.9416556841210474,
+        "macro_iou": 0.8905950256540806,
+        "micro_dice": 0.9484809903633683,
+        "micro_iou": 0.9020103123871533,
+        "samples": 79,
+        "total_fn": 310684,
+        "total_fp": 597549,
+        "total_tp": 8360426
+      },
+      "val": {
+        "loss": 0.2498603063385661,
+        "macro_dice": 0.9423961421338524,
+        "macro_iou": 0.8915327176815127,
+        "micro_dice": 0.9457514661101195,
+        "micro_iou": 0.8970858727406171,
+        "samples": 41,
+        "total_fn": 163866,
+        "total_fp": 293817,
+        "total_tp": 3989549
+      }
+    },
+    {
+      "epoch": 20,
+      "learning_rate": 0.0004999999999999999,
+      "train": {
+        "loss": 0.25529642120192325,
+        "macro_dice": 0.9409071735188931,
+        "macro_iou": 0.8897790425940405,
+        "micro_dice": 0.9477765848472396,
+        "micro_iou": 0.9007370214334592,
+        "samples": 79,
+        "total_fn": 304643,
+        "total_fp": 617358,
+        "total_tp": 8366467
+      },
+      "val": {
+        "loss": 0.26794830873245146,
+        "macro_dice": 0.9367879018550966,
+        "macro_iou": 0.8820036489789079,
+        "micro_dice": 0.9441414867111547,
+        "micro_iou": 0.8941931848144044,
+        "samples": 41,
+        "total_fn": 53254,
+        "total_fp": 431904,
+        "total_tp": 4100161
+      }
+    },
+    {
+      "epoch": 21,
+      "learning_rate": 0.0004607704521360775,
+      "train": {
+        "loss": 0.25829984191097793,
+        "macro_dice": 0.9390367586401445,
+        "macro_iou": 0.8866714495646802,
+        "micro_dice": 0.947637451407211,
+        "micro_iou": 0.9004857239307731,
+        "samples": 79,
+        "total_fn": 295170,
+        "total_fp": 630470,
+        "total_tp": 8375940
+      },
+      "val": {
+        "loss": 0.25921974203935483,
+        "macro_dice": 0.9410405798656184,
+        "macro_iou": 0.8893207573309178,
+        "micro_dice": 0.9459644722783885,
+        "micro_iou": 0.8974692478565426,
+        "samples": 41,
+        "total_fn": 60292,
+        "total_fp": 407324,
+        "total_tp": 4093123
+      }
+    },
+    {
+      "epoch": 22,
+      "learning_rate": 0.0004217827674798846,
+      "train": {
+        "loss": 0.23864280838000623,
+        "macro_dice": 0.945662589012822,
+        "macro_iou": 0.8977665991722783,
+        "micro_dice": 0.9522572833501839,
+        "micro_iou": 0.908865571879183,
+        "samples": 79,
+        "total_fn": 219759,
+        "total_fp": 627681,
+        "total_tp": 8451351
+      },
+      "val": {
+        "loss": 0.24379824356334964,
+        "macro_dice": 0.9447363774950911,
+        "macro_iou": 0.8958722629198214,
+        "micro_dice": 0.9495967085944808,
+        "micro_iou": 0.9040305912635217,
+        "samples": 41,
+        "total_fn": 82106,
+        "total_fp": 350093,
+        "total_tp": 4071309
+      }
+    },
+    {
+      "epoch": 23,
+      "learning_rate": 0.0003832773180720472,
+      "train": {
+        "loss": 0.22730753523639485,
+        "macro_dice": 0.9479074508328981,
+        "macro_iou": 0.9019151005563857,
+        "micro_dice": 0.9548462938829965,
+        "micro_iou": 0.9135941328959921,
+        "samples": 79,
+        "total_fn": 217174,
+        "total_fp": 582382,
+        "total_tp": 8453936
+      },
+      "val": {
+        "loss": 0.24347843520525025,
+        "macro_dice": 0.9441769268454575,
+        "macro_iou": 0.8946830644840147,
+        "micro_dice": 0.947233153849264,
+        "micro_iou": 0.8997558740690418,
+        "samples": 41,
+        "total_fn": 158938,
+        "total_fp": 286097,
+        "total_tp": 3994477
+      }
+    },
+    {
+      "epoch": 24,
+      "learning_rate": 0.0003454915028125262,
+      "train": {
+        "loss": 0.2319499063718168,
+        "macro_dice": 0.9456965832770625,
+        "macro_iou": 0.8980304983597768,
+        "micro_dice": 0.9537411383181116,
+        "micro_iou": 0.9115728174430445,
+        "samples": 79,
+        "total_fn": 252323,
+        "total_fp": 564342,
+        "total_tp": 8418787
+      },
+      "val": {
+        "loss": 0.23590215531791128,
+        "macro_dice": 0.9465505190011931,
+        "macro_iou": 0.8990499333637517,
+        "micro_dice": 0.9504487451560839,
+        "micro_iou": 0.9055763029862033,
+        "samples": 41,
+        "total_fn": 91275,
+        "total_fp": 332281,
+        "total_tp": 4062140
+      }
+    },
+    {
+      "epoch": 25,
+      "learning_rate": 0.00030865828381745506,
+      "train": {
+        "loss": 0.21839566679694986,
+        "macro_dice": 0.9495894395852391,
+        "macro_iou": 0.90492354767232,
+        "micro_dice": 0.956805471293011,
+        "micro_iou": 0.9171879692265498,
+        "samples": 79,
+        "total_fn": 217117,
+        "total_fp": 546186,
+        "total_tp": 8453993
+      },
+      "val": {
+        "loss": 0.23389075914534127,
+        "macro_dice": 0.9465668448587743,
+        "macro_iou": 0.8990171188261451,
+        "micro_dice": 0.9501240792327025,
+        "micro_iou": 0.9049870184071925,
+        "samples": 41,
+        "total_fn": 128878,
+        "total_fp": 293651,
+        "total_tp": 4024537
+      }
+    },
+    {
+      "epoch": 26,
+      "learning_rate": 0.0002730047501302265,
+      "train": {
+        "loss": 0.2188107818365097,
+        "macro_dice": 0.9500498107717007,
+        "macro_iou": 0.9055782300007494,
+        "micro_dice": 0.9567056667281966,
+        "micro_iou": 0.9170045654594308,
+        "samples": 79,
+        "total_fn": 191931,
+        "total_fp": 575495,
+        "total_tp": 8479179
+      },
+      "val": {
+        "loss": 0.23177557602161314,
+        "macro_dice": 0.9466637576498637,
+        "macro_iou": 0.8992579637504206,
+        "micro_dice": 0.9509219040193386,
+        "micro_iou": 0.9064357626592443,
+        "samples": 41,
+        "total_fn": 106754,
+        "total_fp": 310951,
+        "total_tp": 4046661
+      }
+    },
+    {
+      "epoch": 27,
+      "learning_rate": 0.0002387507176420255,
+      "train": {
+        "loss": 0.21979893687405164,
+        "macro_dice": 0.9495050333723237,
+        "macro_iou": 0.904652999926217,
+        "micro_dice": 0.9565314113561459,
+        "micro_iou": 0.9166844328292659,
+        "samples": 79,
+        "total_fn": 217767,
+        "total_fp": 550540,
+        "total_tp": 8453343
+      },
+      "val": {
+        "loss": 0.2308062122362416,
+        "macro_dice": 0.9473171234130859,
+        "macro_iou": 0.9004217560698347,
+        "micro_dice": 0.9513078544467615,
+        "micro_iou": 0.907137388680353,
+        "samples": 41,
+        "total_fn": 98705,
+        "total_fp": 316371,
+        "total_tp": 4054710
+      }
+    },
+    {
+      "epoch": 28,
+      "learning_rate": 0.0002061073738537634,
+      "train": {
+        "loss": 0.21306183424931538,
+        "macro_dice": 0.9514418251906769,
+        "macro_iou": 0.9081808736052694,
+        "micro_dice": 0.9580317871955235,
+        "micro_iou": 0.9194443510104435,
+        "samples": 79,
+        "total_fn": 197281,
+        "total_fp": 545140,
+        "total_tp": 8473829
+      },
+      "val": {
+        "loss": 0.2302850572074332,
+        "macro_dice": 0.9469558727450487,
+        "macro_iou": 0.8998341167845377,
+        "micro_dice": 0.9515431741183492,
+        "micro_iou": 0.9075654339111136,
+        "samples": 41,
+        "total_fn": 87923,
+        "total_fp": 326143,
+        "total_tp": 4065492
+      }
+    },
+    {
+      "epoch": 29,
+      "learning_rate": 0.00017527597583490815,
+      "train": {
+        "loss": 0.21168145593963092,
+        "macro_dice": 0.9514679305161102,
+        "macro_iou": 0.9081260524218595,
+        "micro_dice": 0.9583544857926445,
+        "micro_iou": 0.9200389890047271,
+        "samples": 79,
+        "total_fn": 197757,
+        "total_fp": 538666,
+        "total_tp": 8473353
+      },
+      "val": {
+        "loss": 0.22818294022141433,
+        "macro_dice": 0.9476299867397402,
+        "macro_iou": 0.9009963244926639,
+        "micro_dice": 0.9517967883947013,
+        "micro_iou": 0.9080269721145452,
+        "samples": 41,
+        "total_fn": 102121,
+        "total_fp": 308230,
+        "total_tp": 4051294
+      }
+    },
+    {
+      "epoch": 30,
+      "learning_rate": 0.0001464466094067262,
+      "train": {
+        "loss": 0.20898566611959965,
+        "macro_dice": 0.9517207900180092,
+        "macro_iou": 0.9086237979840629,
+        "micro_dice": 0.9588705932424743,
+        "micro_iou": 0.9209907884830216,
+        "samples": 79,
+        "total_fn": 200090,
+        "total_fp": 526615,
+        "total_tp": 8471020
+      },
+      "val": {
+        "loss": 0.23263969145170071,
+        "macro_dice": 0.9465462768950114,
+        "macro_iou": 0.8991294474136539,
+        "micro_dice": 0.9513488505473338,
+        "micro_iou": 0.9072119465504629,
+        "samples": 41,
+        "total_fn": 69585,
+        "total_fp": 348102,
+        "total_tp": 4083830
+      }
+    },
+    {
+      "epoch": 31,
+      "learning_rate": 0.00011979701719998454,
+      "train": {
+        "loss": 0.2179066893420642,
+        "macro_dice": 0.949617244020293,
+        "macro_iou": 0.9049426362484316,
+        "micro_dice": 0.9567013514726315,
+        "micro_iou": 0.9169966364118555,
+        "samples": 79,
+        "total_fn": 191124,
+        "total_fp": 576455,
+        "total_tp": 8479986
+      },
+      "val": {
+        "loss": 0.22884582310188106,
+        "macro_dice": 0.9474143153283654,
+        "macro_iou": 0.9005636369309774,
+        "micro_dice": 0.9512008249506343,
+        "micro_iou": 0.9069427661457328,
+        "samples": 41,
+        "total_fn": 115470,
+        "total_fp": 298845,
+        "total_tp": 4037945
+      }
+    },
+    {
+      "epoch": 32,
+      "learning_rate": 9.549150281252629e-05,
+      "train": {
+        "loss": 0.21615579648862912,
+        "macro_dice": 0.9497045022022875,
+        "macro_iou": 0.9050881530665145,
+        "micro_dice": 0.9571877791375203,
+        "micro_iou": 0.9178908340236539,
+        "samples": 79,
+        "total_fn": 203400,
+        "total_fp": 554072,
+        "total_tp": 8467710
+      },
+      "val": {
+        "loss": 0.22758602768909642,
+        "macro_dice": 0.9478025727155732,
+        "macro_iou": 0.9013169218854207,
+        "micro_dice": 0.9520956833490956,
+        "micro_iou": 0.9085712008439732,
+        "samples": 41,
+        "total_fn": 95289,
+        "total_fp": 313077,
+        "total_tp": 4058126
+      }
+    },
+    {
+      "epoch": 33,
+      "learning_rate": 7.367991782295388e-05,
+      "train": {
+        "loss": 0.21133904970144923,
+        "macro_dice": 0.9511986140963398,
+        "macro_iou": 0.9076433906072303,
+        "micro_dice": 0.9581502754185665,
+        "micro_iou": 0.9196626469364442,
+        "samples": 79,
+        "total_fn": 232372,
+        "total_fp": 504796,
+        "total_tp": 8438738
+      },
+      "val": {
+        "loss": 0.2339245509810564,
+        "macro_dice": 0.9460055886245355,
+        "macro_iou": 0.8981801358664908,
+        "micro_dice": 0.9510615824504797,
+        "micro_iou": 0.9066896269013621,
+        "samples": 41,
+        "total_fn": 65982,
+        "total_fp": 354669,
+        "total_tp": 4087433
+      }
+    },
+    {
+      "epoch": 34,
+      "learning_rate": 5.449673790581608e-05,
+      "train": {
+        "loss": 0.2103030404335336,
+        "macro_dice": 0.9516158888611612,
+        "macro_iou": 0.9084487232980849,
+        "micro_dice": 0.9585176398997256,
+        "micro_iou": 0.920339773980847,
+        "samples": 79,
+        "total_fn": 174732,
+        "total_fp": 560674,
+        "total_tp": 8496378
+      },
+      "val": {
+        "loss": 0.2266732963120065,
+        "macro_dice": 0.9478858302279216,
+        "macro_iou": 0.9014662140753211,
+        "micro_dice": 0.9521199549353794,
+        "micro_iou": 0.9086154082423281,
+        "samples": 41,
+        "total_fn": 94749,
+        "total_fp": 313454,
+        "total_tp": 4058666
+      }
+    },
+    {
+      "epoch": 35,
+      "learning_rate": 3.806023374435661e-05,
+      "train": {
+        "loss": 0.20993689325036882,
+        "macro_dice": 0.9514589792565454,
+        "macro_iou": 0.9082362350029282,
+        "micro_dice": 0.9584379933928865,
+        "micro_iou": 0.920192928806031,
+        "samples": 79,
+        "total_fn": 183705,
+        "total_fp": 552396,
+        "total_tp": 8487405
+      },
+      "val": {
+        "loss": 0.2275048065476301,
+        "macro_dice": 0.9476261749500181,
+        "macro_iou": 0.9010397413881813,
+        "micro_dice": 0.9522143857996612,
+        "micro_iou": 0.9087874207228769,
+        "samples": 41,
+        "total_fn": 84472,
+        "total_fp": 323917,
+        "total_tp": 4068943
+      }
+    },
+    {
+      "epoch": 36,
+      "learning_rate": 2.447174185242322e-05,
+      "train": {
+        "loss": 0.21176133691510068,
+        "macro_dice": 0.9506888751742206,
+        "macro_iou": 0.9068112584609019,
+        "micro_dice": 0.9583070823628115,
+        "micro_iou": 0.9199516154304703,
+        "samples": 79,
+        "total_fn": 204856,
+        "total_fp": 531824,
+        "total_tp": 8466254
+      },
+      "val": {
+        "loss": 0.22584296944664745,
+        "macro_dice": 0.9481717115495263,
+        "macro_iou": 0.9019808856452384,
+        "micro_dice": 0.9523911192028586,
+        "micro_iou": 0.9091094364131104,
+        "samples": 41,
+        "total_fn": 94105,
+        "total_fp": 311735,
+        "total_tp": 4059310
+      }
+    },
+    {
+      "epoch": 37,
+      "learning_rate": 1.3815039801161714e-05,
+      "train": {
+        "loss": 0.20600146658812898,
+        "macro_dice": 0.952475381802909,
+        "macro_iou": 0.9100315118137794,
+        "micro_dice": 0.9596332190019485,
+        "micro_iou": 0.9223989428818047,
+        "samples": 79,
+        "total_fn": 192620,
+        "total_fp": 520672,
+        "total_tp": 8478490
+      },
+      "val": {
+        "loss": 0.22730330032546345,
+        "macro_dice": 0.9477723546144439,
+        "macro_iou": 0.9012989285515576,
+        "micro_dice": 0.9522828606587203,
+        "micro_iou": 0.9089121719030377,
+        "samples": 41,
+        "total_fn": 82491,
+        "total_fp": 325482,
+        "total_tp": 4070924
+      }
+    },
+    {
+      "epoch": 38,
+      "learning_rate": 6.155829702431168e-06,
+      "train": {
+        "loss": 0.2073236986806121,
+        "macro_dice": 0.9524057092545908,
+        "macro_iou": 0.9098627416393424,
+        "micro_dice": 0.9592905610783526,
+        "micro_iou": 0.9217659850114758,
+        "samples": 79,
+        "total_fn": 189413,
+        "total_fp": 530463,
+        "total_tp": 8481697
+      },
+      "val": {
+        "loss": 0.22650906807038843,
+        "macro_dice": 0.9479016850634319,
+        "macro_iou": 0.901517135340993,
+        "micro_dice": 0.9523222042004994,
+        "micro_iou": 0.9089838574595028,
+        "samples": 41,
+        "total_fn": 87732,
+        "total_fp": 319363,
+        "total_tp": 4065683
+      }
+    },
+    {
+      "epoch": 39,
+      "learning_rate": 1.5413331334360176e-06,
+      "train": {
+        "loss": 0.20910378743576097,
+        "macro_dice": 0.9520534080795094,
+        "macro_iou": 0.9091632788694357,
+        "micro_dice": 0.9585582673073287,
+        "micro_iou": 0.9204146878471583,
+        "samples": 79,
+        "total_fn": 191150,
+        "total_fp": 542085,
+        "total_tp": 8479960
+      },
+      "val": {
+        "loss": 0.22649748041862394,
+        "macro_dice": 0.9478916889283715,
+        "macro_iou": 0.9014986637161999,
+        "micro_dice": 0.9523141101362633,
+        "micro_iou": 0.9089691093006154,
+        "samples": 41,
+        "total_fn": 88217,
+        "total_fp": 318902,
+        "total_tp": 4065198
+      }
+    },
+    {
+      "epoch": 40,
+      "learning_rate": 0.0,
+      "train": {
+        "loss": 0.2026174094858049,
+        "macro_dice": 0.9534103417698341,
+        "macro_iou": 0.9116330116609984,
+        "micro_dice": 0.9601998297496103,
+        "micro_iou": 0.9234465017623422,
+        "samples": 79,
+        "total_fn": 208963,
+        "total_fp": 492547,
+        "total_tp": 8462147
+      },
+      "val": {
+        "loss": 0.2266262544364464,
+        "macro_dice": 0.9478641007004714,
+        "macro_iou": 0.9014515775005992,
+        "micro_dice": 0.9523100432124911,
+        "micro_iou": 0.9089616990626908,
+        "samples": 41,
+        "total_fn": 87323,
+        "total_fp": 319922,
+        "total_tp": 4066092
+      }
+    }
+  ],
+  "metric_definitions": {
+    "macro_dice": "mean over images of exact 2TP/(2TP+FP+FN), padding excluded",
+    "micro_dice": "pixels pooled across the whole split before the ratio is taken",
+    "note": "No epsilon smoothing is applied to reported metrics."
+  },
+  "split_check": {
+    "clean": true,
+    "group_by": "well",
+    "groups_per_split": {
+      "test": 1,
+      "train": 2,
+      "val": 1
+    },
+    "overlaps": {}
+  },
+  "test": {
+    "loss": 0.2268745094537735,
+    "macro_dice": 0.9515212138493856,
+    "macro_iou": 0.9080763816833496,
+    "micro_dice": 0.9562523701744963,
+    "micro_iou": 0.9161720159636338,
+    "samples": 60,
+    "total_fn": 195530,
+    "total_fp": 416338,
+    "total_tp": 6687222
+  },
+  "validation": {
+    "loss": 0.22584296944664745,
+    "macro_dice": 0.9481717115495263,
+    "macro_iou": 0.9019808856452384,
+    "micro_dice": 0.9523911192028586,
+    "micro_iou": 0.9091094364131104,
+    "samples": 41,
+    "total_fn": 94105,
+    "total_fp": 311735,
+    "total_tp": 4059310
+  }
+}

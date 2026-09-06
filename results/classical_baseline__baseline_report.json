@@ -1,0 +1,87 @@
+{
+  "by_group": {
+    "cell_type": {
+      "A172": {
+        "count_mae": 56.166666666666664,
+        "images": 60,
+        "macro_dice": 0.42511187024179525,
+        "macro_iou": 0.2746632719955061,
+        "matching_score_50_95": 0.010085080490313727,
+        "micro_dice": 0.3948784993542914,
+        "micro_iou": 0.24601159425964927,
+        "total_fn": 9781474,
+        "total_fp": 154120,
+        "total_tp": 3241789
+      }
+    },
+    "well": {
+      "C7": {
+        "count_mae": 56.166666666666664,
+        "images": 60,
+        "macro_dice": 0.42511187024179525,
+        "macro_iou": 0.2746632719955061,
+        "matching_score_50_95": 0.010085080490313727,
+        "micro_dice": 0.3948784993542914,
+        "micro_iou": 0.24601159425964927,
+        "total_fn": 9781474,
+        "total_fp": 154120,
+        "total_tp": 3241789
+      }
+    }
+  },
+  "environment": {
+    "accelerators": {
+      "cuda": false,
+      "mps": true
+    },
+    "git": {
+      "branch": "master",
+      "commit": "f428dd529ba818f29d645714998a5fd05543c829",
+      "dirty": false
+    },
+    "machine": "arm64",
+    "packages": {
+      "numpy": "2.3.5",
+      "pillow": "11.3.0",
+      "pycocotools": "2.0.11",
+      "remotezip": "0.12.6",
+      "scipy": "1.16.3",
+      "torch": "2.11.0"
+    },
+    "platform": "macOS-15.6-arm64-arm-64bit-Mach-O",
+    "python": "3.13.9",
+    "recorded_at_utc": "2026-09-06T02:51:41+00:00",
+    "torch_threads": 4
+  },
+  "limitations": [
+    "Objects are predicted regions; with connected components, touching cells merge into one region, so per-object morphology is a region measurement.",
+    "LIVECell has no Tribonema treatment, viability, stress, necrosis, or clinical labels, so nothing here measures a drug effect.",
+    "Lengths and areas are in pixels unless micrometers_per_pixel was supplied.",
+    "Green pixels in overlays are ground truth; red pixels are baseline predictions."
+  ],
+  "manifest": "data/livecell/manifests/test.jsonl",
+  "method": "absolute local contrast + Otsu threshold + morphological closing",
+  "metric_definitions": {
+    "dice": "exact 2TP/(2TP+FP+FN); no epsilon smoothing",
+    "matching_score_50_95": "mean over IoU thresholds 0.50:0.05:0.95 of TP/(TP+FP+FN) after greedy one-to-one matching (the 2018 Data Science Bowl metric). This is NOT average precision: a fixed rule assigns no confidence, so there is no ranking and no precision-recall curve to integrate."
+  },
+  "overall": {
+    "count_mae": 56.166666666666664,
+    "images": 60,
+    "macro_dice": 0.42511187024179525,
+    "macro_iou": 0.2746632719955061,
+    "matching_score_50": 0.02821446940442886,
+    "matching_score_50_95": 0.010085080490313727,
+    "micro_dice": 0.3948784993542914,
+    "micro_iou": 0.24601159425964927,
+    "total_fn": 9781474,
+    "total_fp": 154120,
+    "total_tp": 3241789
+  },
+  "parameters": {
+    "background_radius": 7.0,
+    "instance_method": "connected_components",
+    "micrometers_per_pixel": null,
+    "min_area": 20
+  }
+}

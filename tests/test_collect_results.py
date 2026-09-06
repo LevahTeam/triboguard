@@ -61,6 +61,20 @@ def runs(tmp_path: Path) -> Path:
                     "macro_iou": 0.27,
                     "matching_score_50_95": 0.01,
                 },
+                "all_foreground": {
+                    "macro_dice": 0.71,
+                    "micro_dice": 0.74,
+                    "macro_iou": 0.59,
+                },
+                "all_background": {"macro_dice": 0.0, "micro_dice": 0.0, "macro_iou": 0.0},
+                "instance_ceiling": {"matching_score_50_95": 0.168},
+                "mean_foreground_fraction": 0.593,
+                "reference_floor_macro_dice": 0.71,
+                "margin_over_reference_floor": 0.24,
+                "independent_units": 33,
+                "units_where_neural_wins": 33,
+                "sign_test_unit": "acquisition group",
+                "sign_test_p_value_by_image_pseudoreplicated": 1.7e-18,
                 "dice_difference_mean": 0.52,
                 "dice_difference_sd": 0.10,
                 "images_where_neural_wins": 60,
@@ -121,3 +135,28 @@ def test_publishing_copies_the_evidence_out_of_the_ignored_run_directory(
 
 def test_publish_without_a_destination_is_an_error(runs: Path) -> None:
     assert main([str(runs), "--publish"]) == 1
+
+
+def test_every_reference_predictor_reaches_the_published_table(runs: Path) -> None:
+    """A silent no-op once dropped these rows while every other test still passed."""
+    report = format_report(runs)
+    for expected in (
+        "Every pixel labelled background",
+        "Every pixel labelled cell (no learning)",
+        "Classical local contrast + Otsu",
+        "TriboVision U-Net",
+        "The ground-truth mask itself",
+    ):
+        assert expected in report, f"missing reference row: {expected}"
+    assert "0.7103" in report or "0.7100" in report or "0.71" in report
+    assert "Reference floor" in report
+    assert "Instance ceiling" in report
+
+
+def test_the_published_p_value_is_the_group_level_one(runs: Path) -> None:
+    report = format_report(runs)
+    assert "33 independent units" in report
+    assert "2.33e-10" in report or "independent units" in report
+    # The inflated per-image value may appear only with its disclaimer.
+    if "1.7e-18" in report:
+        assert "pseudoreplication" in report
