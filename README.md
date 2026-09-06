@@ -57,10 +57,13 @@ the level of *biological* replication this is one well on one plate — n = 1.
 tribovision compare --checkpoint runs/baseline/best_model.pt
 ```
 
-Separating individual cells needs a model that predicts instances directly —
-Cellpose specifically, not StarDist, whose star-convex polygons cannot represent
-a ruffled adherent cell. See [docs/RESEARCH_PLAN.md](docs/RESEARCH_PLAN.md) for
-the measured ceilings, the brittleness stress test, and what remains to be done.
+Separating individual cells needs a model that predicts instances directly, and
+`tribovision instance-benchmark` measures exactly how much that is worth on this
+data — scoring this U-Net, the classical rule, Cellpose run with no training at
+all, and the ground-truth mask through the same instance step. See
+[docs/RESULTS.md](docs/RESULTS.md) for the table and
+[docs/RESEARCH_PLAN.md](docs/RESEARCH_PLAN.md) for the measured ceilings, the
+brittleness stress test, and what remains to be done.
 
 Across four seeds the test Dice is 0.9514 ± 0.0007, and training at 768 pixels
 instead of 512 adds +0.005 — the full table, the resolution ablation and each
@@ -194,7 +197,17 @@ tribovision compare --checkpoint runs/baseline/best_model.pt
 
 Exits 0 only if the trained model beats the classical baseline.
 
-### 7. Analyse a treatment experiment
+### 7. Measure instance separation
+
+```bash
+tribovision instance-benchmark
+```
+
+Optional: `pip install -e '.[cellpose]'` adds a zero-shot Cellpose column.
+Without it the command still reports the classical rule, this model, and the
+ceiling. Cellpose weights are ~1 GB and download on first use.
+
+### 8. Analyse a treatment experiment
 
 ```bash
 tribovision treatment-template --output data/treatment/manifest.csv
@@ -205,8 +218,10 @@ tribovision analyze-treatment --manifest data/treatment/manifest.csv \
 
 Produces per-well morphology, Spearman dose-response with Benjamini-Hochberg
 correction, 4-parameter-logistic IC50 fits with bootstrap confidence intervals,
-and a leave-one-experiment-day-out test of whether morphology predicts viability,
-against a within-day label-permutation null.
+a leave-one-experiment-day-out test of whether morphology predicts viability
+against a within-day label-permutation null, and — when the plates were imaged at
+three or more exposure times — the *rate* at which each feature changes, with a
+half-time where the response has visibly plateaued.
 
 The manifest schema and the experimental design it requires are described in
 [docs/EXPERIMENT_PROTOCOL.md](docs/EXPERIMENT_PROTOCOL.md). Manifests that cannot

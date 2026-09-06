@@ -26,6 +26,9 @@ be the confirmatory endpoint by accident.
 **Secondary hypothesis.** A model fitted to morphology features on one set of
 experiment days predicts MTS viability on a day it never saw, better than chance.
 
+**Kinetic hypothesis.** The *rate* at which cell circularity changes increases
+with extract concentration.
+
 **Null hypotheses.** Morphology is unrelated to concentration; morphology carries
 no information about viability beyond what day-to-day variation explains.
 
@@ -98,6 +101,28 @@ Blind the image analysis, not just the reader:
 
 The manifest schema supports this directly: `image_path` may point at renamed
 files, and every experimental column is filled in from the key afterwards.
+
+## 3a. Timepoints — image the same wells more than once
+
+"How quickly these changes occur" is one of the questions this project set out to
+answer, and it is answerable only if the plates are imaged repeatedly.
+
+- **At least four distinct exposure times.** Three is the minimum for any rate at
+  all; below four no saturating model can be fitted, so no half-time can be
+  quoted. A reasonable ladder is 0, 6, 12, 24 and 48 hours.
+- **Image the same wells at each timepoint.** Phase-contrast imaging is
+  non-destructive, so this costs nothing and is much the stronger design: the rate
+  is fitted *within* a well, and well-to-well variation cannot masquerade as a
+  time effect. The analysis detects which design you ran and reports it, because a
+  cross-sectional rate is confounded and the reader has to know.
+- **Take a t = 0 image before treatment.** Without it the starting value is
+  inferred rather than measured, and every rate depends on that inference.
+- The MTS assay is destructive, so it happens once, at the end. Only the imaging
+  is longitudinal.
+
+A half-time is reported only when the response has visibly plateaued inside the
+window you imaged. If it has not, the analysis reports a linear rate and says so
+rather than extrapolating a half-time past the last observation.
 
 ## 4. Imaging
 
@@ -180,9 +205,22 @@ Generate the template with `tribovision treatment-template`.
 - Bootstrap IC50 intervals with the resample convergence rate. Below 80%
   convergence no interval is reported, because one built from only the
   well-behaved resamples is biased narrow.
+- **Kinetics**: a rate of change per concentration, a half-time where the data
+  identify one, and a test of whether the rate itself depends on dose. The report
+  states whether rates were fitted within a well or across wells.
 
 ## 8. What the analysis will not report
 
+- Anything about an *individual* cell's history. Rates describe the population
+  average within a well. Following one cell through time needs instance
+  segmentation plus frame-to-frame tracking; the pipeline does neither yet, and
+  `tribovision instance-benchmark` measures how far the current segmenter is from
+  being able to.
+- Membrane damage. Nothing in a phase-contrast image measures membrane integrity.
+  That needs a dye — LDH release, propidium iodide, or trypan blue — and no image
+  analysis substitutes for one. Detachment is partially visible as confluency
+  loss, but confluency is also what contaminates the size features, so it must be
+  reported as its own endpoint rather than folded into morphology.
 - Any statement of mechanism. Morphology plus an MTS reading cannot distinguish
   apoptosis from necrosis from detachment. Establishing necrosis needs a specific
   assay (LDH release, membrane-permeability dyes, caspase activity).

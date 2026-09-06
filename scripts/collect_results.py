@@ -173,6 +173,63 @@ def format_report(runs: Path) -> str:
             "",
         ]
 
+    instance = load(runs / "instance_benchmark" / "instance_benchmark.json")
+    if instance:
+        labels = {
+            "classical": "Classical local contrast + Otsu",
+            "tribovision_unet": "TriboVision U-Net (semantic + watershed)",
+            "ceiling": "*Ground-truth mask, same instance step (ceiling)*",
+            "cellpose": "Cellpose, zero-shot (no training on this data)",
+        }
+        lines += [
+            "## Instance separation",
+            "",
+            "Pixel accuracy and cell separation are close to orthogonal here. Every row",
+            "below is scored on the same held-out images.",
+            "",
+            "| Method | Matching 0.50:0.95 | @0.50 | @0.75 | Dice | Objects found / true |",
+            "|---|---|---|---|---|---|",
+        ]
+        for key, label in labels.items():
+            row = instance["summary"].get(key)
+            if not row:
+                continue
+            lines.append(
+                f"| {label} | {row['matching_50_95']:.4f} | {row['matching_50']:.4f} | "
+                f"{row['matching_75']:.4f} | {row['dice']:.4f} | "
+                f"{row['predicted_objects']:.0f} / {row['true_objects']:.0f} |"
+            )
+        summary = instance["summary"]
+        lines += [""]
+        if "cellpose" in summary and "tribovision_unet" in summary:
+            ratio = summary["cellpose"]["matching_50_95"] / max(
+                summary["tribovision_unet"]["matching_50_95"], 1e-9
+            )
+            over_ceiling = summary["cellpose"]["matching_50_95"] / max(
+                summary["ceiling"]["matching_50_95"], 1e-9
+            )
+            lines += [
+                f"Cellpose, with **no training on this data at all**, separates cells "
+                f"{ratio:.1f}x better than the in-house model and "
+                f"{over_ceiling:.1f}x better than the ceiling a binary-mask "
+                "representation allows — while "
+                f"scoring *lower* pixel Dice ({summary['cellpose']['dice']:.4f} against "
+                f"{summary['tribovision_unet']['dice']:.4f}).",
+                "",
+                "That is the whole finding. The in-house model is not worse at seeing "
+                "cells; it is bound by predicting a binary foreground mask, and no amount "
+                "of further training on that objective moves the instance number. Note "
+                "also that the U-Net's object *count* is the closest to truth of any "
+                "method here, while its matching score is the second worst — getting the "
+                "count right by accident is not the same as getting the objects right, "
+                "which is why counts alone are not reported as a result.",
+                "",
+                f"Cellpose configuration: {instance['cellpose']['model']} "
+                f"v{instance['cellpose']['version']}, diameter "
+                f"{instance['cellpose']['diameter']} chosen on the training split.",
+                "",
+            ]
+
     ablation = load(runs / "baseline_768" / "metrics.json")
     if primary and ablation:
         lines += [
@@ -280,6 +337,7 @@ PUBLISHED = (
     "seed_1/metrics.json",
     "seed_2/metrics.json",
     "seed_3/metrics.json",
+    "instance_benchmark/instance_benchmark.json",
 )
 
 

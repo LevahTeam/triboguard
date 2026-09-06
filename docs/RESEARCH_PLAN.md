@@ -19,7 +19,8 @@ That is a real project. What it is not:
 - It is **not** nanotechnology. There is no nanoparticle, no delivery model, no
   nanorobot, and no simulation of one. Using that vocabulary would be branding.
 - It is **not** an instance segmenter yet. It labels cell pixels, and does not
-  reliably separate cells that touch.
+  reliably separate cells that touch. How much that costs is now measured rather
+  than estimated: 0.046 against 0.389 for an off-the-shelf instance model.
 - It is **not** a viability assay. Morphology may predict viability; that is a
   hypothesis the pipeline is built to test, not an assumption it makes.
 
@@ -30,6 +31,8 @@ That is a real project. What it is not:
 | The segmenter beats every non-learned reference on unseen data | Test Dice 0.951, against 0.710 for an all-foreground predictor and 0.425 for the classical rule, on held-out well C7; wins in all 33 independent acquisition groups, sign test p = 2.3e-10 | `results/comparison__comparison.json` |
 | The result is not from split leakage | Train = wells A7+D7, val = B7, test = C7; zero shared wells or acquisition groups, verified at load time | `tribovision verify`, `results/baseline__metrics.json` → `split_check` |
 | The result is not a lucky seed | Four seeds: 0.9514 ± 0.0007 test Dice, range 0.9507-0.9523 | `results/seed_*__metrics.json`, `docs/RESULTS.md` |
+| The instance gap is a representation limit, not a training limit | Zero-shot Cellpose reaches 0.389 where this model reaches 0.046 and the semantic ceiling is 0.168 — with lower pixel Dice | `results/instance_benchmark__instance_benchmark.json` |
+| Rates of change are measurable, and refused when the design cannot support them | Planted half-time recovered exactly; fewer than three timepoints reports no rate | `tests/test_treatment.py` |
 | Masks match the COCO reference exactly | Bit-identical to `pycocotools` on real LIVECell polygons | `tests/test_coco.py` |
 | The learning pipeline can learn | Tiny-dataset overfitting test reaches >0.9 train Dice | `tests/test_training.py` |
 | The statistics find real effects and reject noise | Synthetic dose response recovered; null experiment yields q > 0.05 | `tests/test_treatment.py` |
@@ -39,9 +42,14 @@ That is a real project. What it is not:
 
 In order, each step blocked by the one before it:
 
+0. **Switch the segmenter to Cellpose.** This is now the first step, not a later
+   one: it is measured, it needs no new data, and it is what makes per-cell
+   morphology per-cell instead of per-region. Until it happens, the size-derived
+   treatment features are confluency measurements.
 1. **Collect images.** The design in [EXPERIMENT_PROTOCOL.md](EXPERIMENT_PROTOCOL.md):
    ≥5 concentrations, vehicle and positive controls, ≥2 wells per condition,
-   ≥3 experiment days, fixed imaging protocol, recorded µm/pixel.
+   ≥3 experiment days, **≥4 exposure times with the same wells re-imaged**, fixed
+   imaging protocol, recorded µm/pixel.
 2. **Run the paired viability assay** on the same wells, with a
    reagent-interference control.
 3. **Fine-tune the segmenter** on a small annotated subset of those images. The
@@ -115,6 +123,19 @@ perimeter, which overestimates the true circumference; a perfectly round
 digitised object scores about 0.59, not 1.0. The constant is published in every
 report. Circularity is therefore valid for comparing conditions measured the same
 way, and invalid as an absolute shape constant.
+
+**Cell tracking is still absent.** The kinetics analysis measures how fast the
+*population average* in a well changes. It cannot say which cells changed first,
+or whether one cell rounded and recovered, because nothing matches cells between
+frames. Tracking is the natural next step after Cellpose and is meaningless
+before it: you cannot follow an object across frames if the segmenter merges it
+with its neighbours in each one.
+
+**Membrane damage is not measurable from these images at all.** It is one of the
+project's stated goals and no image-analysis method substitutes for a dye assay
+(LDH release, propidium iodide, trypan blue). Detachment is partly visible as
+confluency loss, but confluency is also what contaminates the size features, so
+it has to be reported as its own endpoint.
 
 **MTS is metabolic activity, not death.** Any correlation found between
 morphology and MTS is a correlation with metabolic activity. Calling it cell

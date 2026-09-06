@@ -39,6 +39,24 @@ These frames average 59.3% foreground, so labelling every pixel a cell already s
 - Sign test over 33 independent units — acquisition group (field of view at one timestamp): p = 2.33e-10 (the per-image value, 1.73e-18, is pseudoreplication and is not quoted)
 - Verdict: **neural beats every reference predictor**
 
+## Instance separation
+
+Pixel accuracy and cell separation are close to orthogonal here. Every row
+below is scored on the same held-out images.
+
+| Method | Matching 0.50:0.95 | @0.50 | @0.75 | Dice | Objects found / true |
+|---|---|---|---|---|---|
+| Classical local contrast + Otsu | 0.0072 | 0.0206 | 0.0044 | 0.4249 | 490 / 229 |
+| TriboVision U-Net (semantic + watershed) | 0.0455 | 0.1060 | 0.0386 | 0.9511 | 225 / 229 |
+| *Ground-truth mask, same instance step (ceiling)* | 0.1677 | 0.2852 | 0.1508 | 0.9999 | 476 / 229 |
+| Cellpose, zero-shot (no training on this data) | 0.3893 | 0.6895 | 0.3997 | 0.9239 | 188 / 229 |
+
+Cellpose, with **no training on this data at all**, separates cells 8.6x better than the in-house model and 2.3x better than the ceiling a binary-mask representation allows — while scoring *lower* pixel Dice (0.9239 against 0.9511).
+
+That is the whole finding. The in-house model is not worse at seeing cells; it is bound by predicting a binary foreground mask, and no amount of further training on that objective moves the instance number. Note also that the U-Net's object *count* is the closest to truth of any method here, while its matching score is the second worst — getting the count right by accident is not the same as getting the objects right, which is why counts alone are not reported as a result.
+
+Cellpose configuration: cpsam v4.2.1.1, diameter 15.0 chosen on the training split.
+
 ## Input resolution
 
 Letterboxing 704x520 into a square loses detail. Pushing the *ground truth*
