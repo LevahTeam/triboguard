@@ -463,3 +463,29 @@ def test_a_remote_failure_that_makes_no_progress_gives_up_with_advice(
     monkeypatch.setattr("tribovision.livecell._extract_remote_members", always_fails)
     with pytest.raises(PreparationError, match="re-running resumes|--images-zip"):
         prepare_demo(root, cell_types=["A172"], max_images=10, seed=42)
+
+
+def test_a_second_cell_type_can_be_prepared_without_clobbering_the_first(
+    tmp_path: Path, coco_payload: dict
+) -> None:
+    """A transfer test needs two manifests side by side, sharing one image tree."""
+    root, archive = _fake_source(tmp_path, coco_payload)
+    prepare_demo(root, cell_types=["A172"], max_images=10, seed=42, images_zip=archive)
+    original = (root / "manifests" / "test.jsonl").read_text()
+
+    prepare_demo(
+        root,
+        cell_types=["A172"],
+        max_images=6,
+        seed=7,
+        images_zip=archive,
+        manifests_dirname="manifests_other",
+    )
+    assert (root / "manifests_other" / "test.jsonl").is_file()
+    assert (root / "manifests" / "test.jsonl").read_text() == original
+    # Both manifests resolve images out of the same shared tree.
+    from tribovision.manifest import load_manifest
+
+    for name in ("manifests", "manifests_other"):
+        for record in load_manifest(root / name / "test.jsonl"):
+            assert record.image_path.is_file()

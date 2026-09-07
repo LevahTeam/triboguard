@@ -437,8 +437,9 @@ def _write_manifests(
     group_by: str,
     micrometers_per_pixel: float | None,
     caps: dict[str, int],
+    manifests_dirname: str = "manifests",
 ) -> dict[str, Any]:
-    manifests_dir = root / "manifests"
+    manifests_dir = root / manifests_dirname
     manifests_dir.mkdir(parents=True, exist_ok=True)
     records_by_split: dict[str, list[ManifestRecord]] = defaultdict(list)
     cell_counts: Counter[str] = Counter()
@@ -566,6 +567,7 @@ def prepare_demo(
     group_by: str = "well",
     val_fraction: float = 0.3,
     micrometers_per_pixel: float | None = None,
+    manifests_dirname: str = "manifests",
 ) -> dict[str, Any]:
     """Prepare deterministic, leakage-free samples from official LIVECell splits.
 
@@ -573,6 +575,10 @@ def prepare_demo(
     exists so that a training set can be grown while the held-out split is held
     byte-identical: a scaling experiment that also changes what it is measured on
     answers nothing.
+
+    ``manifests_dirname`` lets a second cell type be prepared alongside the first
+    instead of overwriting it, which is what a cross-cell-line transfer test
+    needs. Images stay in the shared tree, so nothing is downloaded twice.
     """
     caps = (
         {split: int(max_images) for split in ("train", "val", "test")}
@@ -683,7 +689,15 @@ def prepare_demo(
         for split, image in all_selected
     }
     result = _write_manifests(
-        root, selections, image_paths, assignment, seed, group_by, micrometers_per_pixel, caps
+        root,
+        selections,
+        image_paths,
+        assignment,
+        seed,
+        group_by,
+        micrometers_per_pixel,
+        caps,
+        manifests_dirname,
     )
     result["split_report"] = summarise(assignment, group_of)
     return result
