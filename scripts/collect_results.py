@@ -420,6 +420,90 @@ def format_report(runs: Path) -> str:
             "",
         ]
 
+    diversity = load(runs / "diversity" / "diversity.json")
+    if diversity:
+        design = diversity["design"]
+        mixed, control = diversity["mixed"], diversity["a172_only"]
+        gap = diversity["mixed_minus_a172"]
+        lines += [
+            "## Diversity versus volume",
+            "",
+            f"Both arms train on exactly {design['train_images_per_arm']} images with "
+            f"identical hyperparameters and {len(design['seeds'])} seeds each. The mixed arm "
+            f"draws from {', '.join(design['mixed_lines'])}; the control sees "
+            f"{design['mixed_lines'][0]} alone. Both are scored on "
+            f"{design['held_out_line']}, which neither arm ever saw. Matching the size is "
+            "the point: the scaling curve confounds volume with variety, and this does not.",
+            "",
+            "| Training set | Mean | Seed SD | 95% CI (seeds + images) | ÷ ceiling |",
+            "|---|---|---|---|---|",
+            f"| {design['mixed_lines'][0]} only | {control['mean']:.4f} | "
+            f"{control['seed_sd']:.4f} | [{control['ci_low']:.4f}, {control['ci_high']:.4f}] | "
+            f"{control['fraction_of_ceiling']:.2f} |",
+            f"| Three lines | {mixed['mean']:.4f} | {mixed['seed_sd']:.4f} | "
+            f"[{mixed['ci_low']:.4f}, {mixed['ci_high']:.4f}] | "
+            f"{mixed['fraction_of_ceiling']:.2f} |",
+            "",
+        ]
+        if gap.get("evaluated"):
+            verdict = (
+                "The interval excludes zero, so at matched training size the variety of the "
+                "training set — not its volume — accounts for the difference."
+                if gap.get("excludes_zero")
+                else "The interval includes zero. At this scale there is **no detectable "
+                "advantage** to training on three cell lines rather than one, which points "
+                "at capacity or at the representation as the binding constraint rather than "
+                "at the narrowness of the training data."
+            )
+            lines += [
+                f"Mixed minus single-line: **{gap['difference']:+.4f}** "
+                f"[{gap['ci_low']:+.4f}, {gap['ci_high']:+.4f}], resampling seeds and "
+                f"acquisition groups together. {verdict}",
+                "",
+                f"The held-out ceiling is {design['held_out_ceiling']:.4f}: the ground-truth "
+                "mask itself scores that through the same decoder, so both arms should be "
+                "read against it rather than against 1.0.",
+                "",
+            ]
+
+    across = load(runs / "mechanics" / "across_cell_lines.json")
+    if across:
+        lines += [
+            "## Does the mechanics result survive a change of cell line?",
+            "",
+            "The shape-index recovery was originally measured on A172 only. Re-measuring it "
+            "on three further lines tests whether the segmenter is doing something general "
+            "or something A172-shaped. The rasterised ground truth is a positive control: "
+            "where it fails, the limit is the measurement chain, not the segmenter. The "
+            "rho > 0.7 bar predates the three-class model and is unchanged.",
+            "",
+            "| Cell line | Median true q | Truth (control) | Cellpose | Three-class |",
+            "|---|---|---|---|---|",
+        ]
+        for key in ("mcf7", "shsy5y", "skbr3"):
+            row = across.get(key)
+            if not row:
+                continue
+
+            def _cell(entry: dict[str, Any]) -> str:
+                rho = entry.get("spearman_rho")
+                if rho is None:
+                    return "n/a"
+                return f"{rho:.3f}{' ✓' if entry.get('usable_for_trends') else ''}"
+
+            lines.append(
+                f"| {row['cell_line']} | {row['median_true_q']:.3f} | "
+                f"{_cell(row['ground_truth_raster'])} | {_cell(row['cellpose'])} | "
+                f"{_cell(row['three_class'])} |"
+            )
+        lines += [
+            "",
+            "A ✓ marks a method clearing the pre-set rho > 0.7 bar on that line. Lines are "
+            "reported individually and never averaged: the instance ceiling varies more than "
+            "fourfold across them, so an average would mostly record which lines were picked.",
+            "",
+        ]
+
     ablation = load(runs / "baseline_768" / "metrics.json")
     if primary and ablation:
         lines += [
@@ -539,6 +623,8 @@ PUBLISHED = (
     "scale_304/metrics.json",
     "scaling/scaling.json",
     "transfer/transfer.json",
+    "diversity/diversity.json",
+    "mechanics/across_cell_lines.json",
 )
 
 
