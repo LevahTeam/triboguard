@@ -167,6 +167,10 @@ correctly declines to claim transfer it cannot support. Two lessons follow:
 
 ## Statistical commitments made in advance
 
+The full record of what was fixed in advance, what was tuned and on which data,
+and every claim withdrawn after a stricter test, is in
+[PRE_SPECIFICATION.md](PRE_SPECIFICATION.md).
+
 - The **well** is the unit of analysis. Fields within a well are averaged first.
 - Every comparison is **blocked by experiment day**.
 - Correlations are **Spearman**, because a dose response need not be linear.

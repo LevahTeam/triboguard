@@ -1,0 +1,96 @@
+# What was decided in advance, and what was not
+
+A result is only as trustworthy as the decisions that preceded it. This file
+separates the choices fixed before the data could influence them from the ones
+made afterwards, and lists every claim that had to be withdrawn once it was
+tested properly. Both halves matter: the first is what makes the numbers
+credible, and the second is the evidence that the first was actually enforced
+rather than merely intended.
+
+Every item here is checkable against the git history and the test suite.
+
+## Fixed in advance
+
+**The held-out split.** The official LIVECell test split (well C7, 60 images) was
+chosen before any model was trained and never changed. The scaling experiment
+grew the *training* pool from 79 to 304 images while the test manifest stayed
+byte-identical, which `test_per_split_caps_hold_the_test_set_fixed_while_training_grows`
+asserts directly. No number in this project was ever produced by choosing a
+different test set.
+
+**Group-level separation.** Splits are separated by well, and the leakage check
+compares acquisition groups rather than file names, because LIVECell stores
+several crops of one field of view under different names. Training refuses to
+start on leaking splits; it is not a warning.
+
+**The trend threshold.** `agreement()` has judged a segmenter "usable for trends"
+at Spearman rho > 0.7 since before the three-class model existed. That model
+scored 0.65. The threshold was not moved.
+
+**The confirmatory endpoint.** `PRIMARY_FEATURE` in the treatment analysis is a
+single pre-specified shape feature. The multi-feature model is reported beside it
+and labelled exploratory, because eight correlated predictors at 20-60 wells
+roughly halves the power.
+
+**Statistical commitments.** The well is the unit of analysis; fields within a
+well are averaged first. Every comparison is blocked by experiment day.
+Correlations are Spearman. Multiplicity is corrected with Benjamini-Hochberg and
+uncorrected p-values stay visible. These are stated in
+[RESEARCH_PLAN.md](RESEARCH_PLAN.md) and enforced in code.
+
+## Tuned, and on what
+
+Two free parameters were chosen, both on training data and never on the split
+they were scored against:
+
+| Parameter | Value | Chosen on |
+|---|---|---|
+| Cellpose cell diameter | 15 px | 4 training images |
+| Three-class interior threshold | 0.7 | 6 training images |
+
+The Cellpose sweep spanned 0.34 to 0.37 across every value tried, so that
+parameter is nearly inert and is reported as such rather than presented as
+careful tuning.
+
+Model hyperparameters — learning rate, depth, channel width, epochs — were not
+tuned at all. They were set once by convention and left. That is a limitation,
+not a virtue: a tuned baseline might close some of the gap to Cellpose, and this
+project cannot say by how much.
+
+## Exploratory, and labelled so
+
+The jamming analysis was not pre-registered. The two-regime split at confluence
+0.5 was found by looking at a trajectory that did not behave as expected, and
+then applied uniformly. The cross-cell-line comparison of shape index was not
+predicted in advance. These are hypothesis-generating, and the honest next step
+for any of them is a fresh dataset rather than more analysis of this one.
+
+## Claims withdrawn after testing
+
+This is the part worth reading. Each of these was stated, then retracted when a
+better test was run. All are in the git history.
+
+| Claim | What it became | What caught it |
+|---|---|---|
+| "0.952 vs 0.425 for the classical rule" | The real floor is a predictor that labels every pixel a cell, at 0.710 | Measuring the trivial baseline |
+| A sign test at 1.7e-18 | 2.3e-10 over 33 acquisition groups | pseudoreplication: 60 crops are not 60 independent trials |
+| "5 of 5 wells jam as they crowd" | 10 of 14 | Replicating across wells instead of one per line |
+| "The three-class model beats a perfect binary mask" | Indistinguishable from it: +0.040 [-0.003, +0.078] | Paired bootstrap intervals |
+| "Every step of the scaling curve is significant" | The 152 vs 79 step is half the seed spread | Three seeds per endpoint |
+| "The bottleneck moved to boundary prediction" | It moved there and is data-limited, not architecture-limited | The scaling curve |
+| Transfer looked *better* on unseen cell lines | Raw scores are not comparable; the ceiling varies 4.4x | Normalising by each line's ceiling |
+| A power table for the experiment protocol | Did not survive simulation; within-day centring doubled the real power | Re-deriving it instead of trusting it |
+
+Eight retractions is not a sign the work is unreliable. Every one came from
+applying a stricter test to a number that had already been written down, and the
+stricter test is the one reported. A project with no retractions has usually not
+looked hard enough.
+
+## Still unverified
+
+- Whether the split-leakage observation about LIVECell's official train/val files
+  is novel. That is a literature check, not a computation, and it has not been
+  done.
+- Whether the instance results hold on a second plate or a second microscope.
+- Whether tuned hyperparameters would narrow the gap to Cellpose.
+- Everything about Tribonema. No treatment image has been collected or analysed.

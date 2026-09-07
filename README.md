@@ -111,7 +111,10 @@ Six other corrections changed reported numbers:
   measures against the stronger reference.
 
 A point-by-point response to the full audit is in
-[docs/AUDIT_RESPONSE.md](docs/AUDIT_RESPONSE.md).
+[docs/AUDIT_RESPONSE.md](docs/AUDIT_RESPONSE.md), and
+[docs/PRE_SPECIFICATION.md](docs/PRE_SPECIFICATION.md) separates what was decided
+before the data from what was decided after — including every claim that had to
+be withdrawn once it was tested properly.
 
 ## Install
 
