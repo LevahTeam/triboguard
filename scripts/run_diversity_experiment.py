@@ -18,7 +18,11 @@ from typing import Any
 sys.path.insert(0, "src")
 
 from tribovision import evaluation, provenance  # noqa: E402
-from tribovision.instance_model import InstanceConfig, score_on_manifest, train_instance_model  # noqa: E402
+from tribovision.instance_model import (  # noqa: E402
+    InstanceConfig,
+    score_on_manifest,
+    train_instance_model,
+)
 
 SEEDS = (42, 1, 2)
 TRAIN_LIMIT = 304
@@ -65,11 +69,13 @@ def main() -> None:
             )
         print(f"scoring mixed seed={seed} on SHSY5Y", flush=True)
         arms["mixed"][seed] = _score(checkpoint)
-        print(f"  mixed  seed={seed} -> {arms['mixed'][seed]['matching_50_95']:.4f}", flush=True)
+        score = arms["mixed"][seed]["matching_50_95"]
+        print(f"  mixed  seed={seed} -> {score:.4f}", flush=True)
 
         print(f"scoring a172-only seed={seed} on SHSY5Y", flush=True)
         arms["a172_only"][seed] = _score(Path(A172_RUNS[seed]) / "best_model.pt")
-        print(f"  a172   seed={seed} -> {arms['a172_only'][seed]['matching_50_95']:.4f}", flush=True)
+        score = arms["a172_only"][seed]["matching_50_95"]
+        print(f"  a172   seed={seed} -> {score:.4f}", flush=True)
 
     # Two-level interval: over seeds and over acquisition groups, so the
     # comparison is not resting on one lucky initialisation.
@@ -87,7 +93,8 @@ def main() -> None:
             "mixed_lines": ["A172", "MCF7", "SkBr3"],
         },
         "per_seed_score": {
-            arm: {str(s): r["matching_50_95"] for s, r in runs.items()} for arm, runs in arms.items()
+            arm: {str(s): r["matching_50_95"] for s, r in runs.items()}
+            for arm, runs in arms.items()
         },
         "mixed": evaluation.replicate_interval(per_seed["mixed"], groups=groups),
         "a172_only": evaluation.replicate_interval(per_seed["a172_only"], groups=groups),

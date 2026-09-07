@@ -466,6 +466,71 @@ def format_report(runs: Path) -> str:
                 "",
             ]
 
+    tissue = load(runs / "mechanics" / "mechanics.json")
+    if tissue:
+        by_line = tissue["cell_types"]
+        total = sum(entry["summary"]["cells"] for entry in by_line.values())
+        jam = tissue["jamming_threshold"]
+        lines += [
+            "## Tissue mechanics from cell outlines",
+            "",
+            "The vertex model of a confluent monolayer predicts a rigidity transition at a "
+            f"dimensionless shape index q* = {jam:.2f}, where q = P/sqrt(A). Below it a tissue "
+            "is jammed and solid-like; above it cells can exchange neighbours and the tissue "
+            "flows. That number is a *prediction of the theory*, not a fit to this data, which "
+            "is what makes it a test rather than a description.",
+            "",
+            f"Measured over **{total:,} annotated cells** across {len(by_line)} cell lines. "
+            f"For reference a circle sits at {tissue['circle_shape_index']:.4f} and a regular "
+            f"hexagon at {tissue['hexagon_shape_index']:.4f}; nothing can fall below the circle, "
+            "so a measurement that does is an artifact rather than a discovery.",
+            "",
+            "| Cell line | Cells | Median q | State | Unjammed | Wells jamming as they crowd |",
+            "|---|---|---|---|---|---|",
+        ]
+        jammed_lines = 0
+        for name in sorted(by_line):
+            entry = by_line[name]
+            summary = entry["summary"]
+            course = entry["time_course"]
+            if summary["median_q"] < jam:
+                jammed_lines += 1
+            wells = course.get("wells_reaching_crowded_regime", 0)
+            jamming = course.get("wells_that_jam_as_they_crowd", 0)
+            # A line whose wells never reach confluence 0.5 has no trajectory to
+            # judge. Printing "0 of 0" there reads as a failure rather than as an
+            # absence of evidence.
+            trajectory = f"{jamming} of {wells}" if wells else "not crowded"
+            lines.append(
+                f"| {name} | {summary['cells']:,} | {summary['median_q']:.3f} | "
+                f"{summary['state']} | {summary['fraction_unjammed'] * 100:.0f}% | "
+                f"{trajectory} |"
+            )
+        crowded = sum(
+            entry["time_course"].get("wells_reaching_crowded_regime", 0)
+            for entry in by_line.values()
+        )
+        jamming_wells = sum(
+            entry["time_course"].get("wells_that_jam_as_they_crowd", 0)
+            for entry in by_line.values()
+        )
+        lines += [
+            "",
+            f"{jammed_lines} of {len(by_line)} lines sit below q* on the median cell, and "
+            f"**{jamming_wells} of {crowded}** wells that reach confluence 0.5 move *toward* "
+            "the jammed side as they crowd, which is the direction the theory predicts. Each "
+            "well is one trajectory and one unit of analysis; fields imaged at the same "
+            "timestamp are averaged before the well is scored, so crops of one field cannot "
+            "count as independent measurements.",
+            "",
+            "A caution that belongs next to the result rather than in a footnote: for A172 the "
+            "density relationship **does not survive controlling for cell size**. Crowding and "
+            "cell area move together, and a partial correlation cannot separate them here. The "
+            "trajectory result is the stronger of the two, and the cross-sectional density "
+            "correlation should not be quoted on its own.",
+            "",
+        ]
+
     across = load(runs / "mechanics" / "across_cell_lines.json")
     if across:
         lines += [

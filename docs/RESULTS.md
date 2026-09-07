@@ -131,6 +131,27 @@ more than it measures the model.
 
 Cellpose beats the specialist on every line, seen or unseen, and the paired interval excludes zero every time. Specialising on one cell line costs about 1.6 times more generalisation than the generalist gives up.
 
+## Tissue mechanics from cell outlines
+
+The vertex model of a confluent monolayer predicts a rigidity transition at a dimensionless shape index q* = 3.81, where q = P/sqrt(A). Below it a tissue is jammed and solid-like; above it cells can exchange neighbours and the tissue flows. That number is a *prediction of the theory*, not a fit to this data, which is what makes it a test rather than a description.
+
+Measured over **458,187 annotated cells** across 8 cell lines. For reference a circle sits at 3.5449 and a regular hexagon at 3.7224; nothing can fall below the circle, so a measurement that does is an artifact rather than a discovery.
+
+| Cell line | Cells | Median q | State | Unjammed | Wells jamming as they crowd |
+|---|---|---|---|---|---|
+| A172 | 32,942 | 4.543 | unjammed (fluid-like) | 94% | 4 of 4 |
+| BT474 | 32,467 | 4.149 | unjammed (fluid-like) | 83% | not crowded |
+| BV2 | 87,383 | 3.733 | jammed (solid-like) | 35% | not crowded |
+| Huh7 | 12,509 | 4.085 | unjammed (fluid-like) | 78% | not crowded |
+| MCF7 | 96,629 | 4.195 | unjammed (fluid-like) | 91% | 1 of 2 |
+| SHSY5Y | 75,515 | 5.252 | unjammed (fluid-like) | 94% | 2 of 2 |
+| SKOV3 | 55,391 | 4.532 | unjammed (fluid-like) | 94% | 3 of 4 |
+| SkBr3 | 65,351 | 3.776 | jammed (solid-like) | 46% | 0 of 2 |
+
+2 of 8 lines sit below q* on the median cell, and **10 of 14** wells that reach confluence 0.5 move *toward* the jammed side as they crowd, which is the direction the theory predicts. Each well is one trajectory and one unit of analysis; fields imaged at the same timestamp are averaged before the well is scored, so crops of one field cannot count as independent measurements.
+
+A caution that belongs next to the result rather than in a footnote: for A172 the density relationship **does not survive controlling for cell size**. Crowding and cell area move together, and a partial correlation cannot separate them here. The trajectory result is the stronger of the two, and the cross-sectional density correlation should not be quoted on its own.
+
 ## Input resolution
 
 Letterboxing 704x520 into a square loses detail. Pushing the *ground truth*

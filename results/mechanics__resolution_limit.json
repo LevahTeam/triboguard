@@ -1,0 +1,66 @@
+{
+  "environment": {
+    "accelerators": {
+      "cuda": false,
+      "mps": true
+    },
+    "git": {
+      "branch": "master",
+      "commit": "3c8b001b3475d6bbc0f58ae837480eeb6783d5bc",
+      "dirty": true
+    },
+    "machine": "arm64",
+    "packages": {
+      "numpy": "2.3.5",
+      "pillow": "11.3.0",
+      "pycocotools": "2.0.11",
+      "remotezip": "0.12.6",
+      "scipy": "1.16.3",
+      "torch": "2.11.0"
+    },
+    "platform": "macOS-15.6-arm64-arm-64bit-Mach-O",
+    "python": "3.13.9",
+    "recorded_at_utc": "2026-09-07T17:22:43+00:00",
+    "torch_threads": 4
+  },
+  "note": "resolvable_near_threshold and discretisation_residual both predate this experiment; they were written for the A172 analysis and are applied here unchanged.",
+  "per_line": {
+    "A172": {
+      "cells": 13715,
+      "images": 60,
+      "median_diameter_px": 32.920224823761004,
+      "median_discretisation_residual": 0.03037646326395149,
+      "median_radius_px": 16.460112411880502,
+      "resolvable_near_threshold_fraction": 0.8852351440029165,
+      "tuned_diameter_ratio": 0.4556469489592723
+    },
+    "MCF7": {
+      "cells": 32102,
+      "images": 60,
+      "median_diameter_px": 16.929455872361405,
+      "median_discretisation_residual": 0.059068643886602205,
+      "median_radius_px": 8.464727936180703,
+      "resolvable_near_threshold_fraction": 0.6340103420347641,
+      "tuned_diameter_ratio": 0.886029658194072
+    },
+    "SHSY5Y": {
+      "cells": 27735,
+      "images": 60,
+      "median_diameter_px": 18.672346722920768,
+      "median_discretisation_residual": 0.053555132348333874,
+      "median_radius_px": 9.336173361460384,
+      "resolvable_near_threshold_fraction": 0.8619433928249505,
+      "tuned_diameter_ratio": 0.8033269852250081
+    },
+    "SkBr3": {
+      "cells": 22543,
+      "images": 60,
+      "median_diameter_px": 19.24266153605376,
+      "median_discretisation_residual": 0.05196786307997795,
+      "median_radius_px": 9.62133076802688,
+      "resolvable_near_threshold_fraction": 0.4151177749190436,
+      "tuned_diameter_ratio": 0.7795179461996693
+    }
+  },
+  "tuned_diameter_px": 15.0
+}

@@ -155,6 +155,9 @@ class InstanceConfig:
     #: Validation and test are never subsampled, so every point on a scaling
     #: curve is scored on exactly the same held-out images.
     train_limit: int | None = None
+    #: Which manifest directory to train from, so a mixed-cell-line set can sit
+    #: alongside the single-line one instead of replacing it.
+    manifests_dirname: str = "manifests"
 
 
 def _class_weights(boundary_weight: float, device: torch.device) -> torch.Tensor:
@@ -224,7 +227,7 @@ def train_instance_model(config: InstanceConfig, *, progress: bool = True) -> di
 
     seed_everything(config.seed)
     device = resolve_device(config.device)
-    manifests = Path(config.data_dir).resolve() / "manifests"
+    manifests = Path(config.data_dir).resolve() / config.manifests_dirname
     datasets = {
         split: ThreeClassDataset(manifests / f"{split}.jsonl", image_size=config.image_size)
         for split in ("train", "val", "test")

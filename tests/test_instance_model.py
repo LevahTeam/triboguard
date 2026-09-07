@@ -310,3 +310,29 @@ def test_the_lean_scorer_reports_repository_relative_paths(
         min_area=2,
     )
     assert "/Users/" not in result["checkpoint"] + result["manifest"]
+
+
+def test_training_can_read_a_different_manifest_directory(
+    tmp_path: Path, tiny_training_data: Path
+) -> None:
+    """A mixed-cell-line set must sit alongside the single-line one, not replace it."""
+    import shutil
+
+    alternate = tiny_training_data / "manifests_other"
+    shutil.copytree(tiny_training_data / "manifests", alternate)
+    result = train_instance_model(
+        InstanceConfig(
+            data_dir=tiny_training_data,
+            output_dir=tmp_path / "run",
+            epochs=1,
+            batch_size=1,
+            image_size=32,
+            base_channels=4,
+            depth=2,
+            device="cpu",
+            manifests_dirname="manifests_other",
+        ),
+        progress=False,
+    )
+    assert result["training_images_available"] == 2
+    assert (tmp_path / "run" / "best_model.pt").is_file()
