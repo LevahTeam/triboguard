@@ -1,0 +1,108 @@
+{
+  "a172_only": {
+    "accounts_for": [
+      "image sampling",
+      "training seed"
+    ],
+    "ci_high": 0.06540343273069638,
+    "ci_low": 0.05029071435916798,
+    "confidence": 0.95,
+    "evaluated": true,
+    "fraction_of_ceiling": 0.4692399240147503,
+    "images": 60,
+    "mean": 0.057013042725097586,
+    "seed_sd": 0.0020896157940014115,
+    "seed_values": {
+      "1": 0.057498594930216515,
+      "2": 0.05472339743799841,
+      "42": 0.05881713580707783
+    },
+    "seeds": 3
+  },
+  "design": {
+    "held_out_ceiling": 0.12150083530255071,
+    "held_out_line": "SHSY5Y",
+    "mixed_lines": [
+      "A172",
+      "MCF7",
+      "SkBr3"
+    ],
+    "seeds": [
+      42,
+      1,
+      2
+    ],
+    "train_images_per_arm": 304
+  },
+  "environment": {
+    "accelerators": {
+      "cuda": false,
+      "mps": true
+    },
+    "git": {
+      "branch": "master",
+      "commit": "4131773e902674f0e767db1a111ea9c2cc89743e",
+      "dirty": false
+    },
+    "machine": "arm64",
+    "packages": {
+      "numpy": "2.3.5",
+      "pillow": "11.3.0",
+      "pycocotools": "2.0.11",
+      "remotezip": "0.12.6",
+      "scipy": "1.16.3",
+      "torch": "2.11.0"
+    },
+    "platform": "macOS-15.6-arm64-arm-64bit-Mach-O",
+    "python": "3.13.9",
+    "recorded_at_utc": "2026-09-07T20:42:47+00:00",
+    "torch_threads": 4
+  },
+  "mixed": {
+    "accounts_for": [
+      "image sampling",
+      "training seed"
+    ],
+    "ci_high": 0.07024945012705723,
+    "ci_low": 0.048081246946354184,
+    "confidence": 0.95,
+    "evaluated": true,
+    "fraction_of_ceiling": 0.47410248950675576,
+    "images": 60,
+    "mean": 0.05760384849408961,
+    "seed_sd": 0.002733568084868345,
+    "seed_values": {
+      "1": 0.05452597364656369,
+      "2": 0.05974892888105207,
+      "42": 0.05853664295465306
+    },
+    "seeds": 3
+  },
+  "mixed_minus_a172": {
+    "accounts_for": [
+      "image sampling",
+      "training seed"
+    ],
+    "ci_high": 0.007046304242387225,
+    "ci_low": -0.005198622287911203,
+    "difference": 0.0005908057689920226,
+    "evaluated": true,
+    "excludes_zero": false,
+    "seeds": {
+      "first": 3,
+      "second": 3
+    }
+  },
+  "per_seed_score": {
+    "a172_only": {
+      "1": 0.057498594930216515,
+      "2": 0.05472339743799841,
+      "42": 0.05881713580707783
+    },
+    "mixed": {
+      "1": 0.05452597364656369,
+      "2": 0.05974892888105207,
+      "42": 0.05853664295465306
+    }
+  }
+}

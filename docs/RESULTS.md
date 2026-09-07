@@ -131,6 +131,23 @@ more than it measures the model.
 
 Cellpose beats the specialist on every line, seen or unseen, and the paired interval excludes zero every time. Specialising on one cell line costs about 1.6 times more generalisation than the generalist gives up.
 
+## Diversity versus volume
+
+Both arms train on exactly 304 images with identical hyperparameters and 3 seeds each. The mixed arm draws from A172, MCF7, SkBr3; the control sees A172 alone. Both are scored on SHSY5Y, which neither arm ever saw. Matching the size is the point: the scaling curve confounds volume with variety, and this does not.
+
+Two things that could have made this unfair were checked rather than assumed. The validation sets that drive early stopping are comparable in size (152 images for the single-line arm, 162 for the mixed one), so neither arm gets a cleaner stopping signal. And the mixed training subset stays balanced after the cap is applied — 102 / 94 / 108 images across the three lines — so the "mixed" arm is genuinely mixed rather than one line with a garnish.
+
+| Training set | Mean | Seed SD | 95% CI (seeds + images) | ÷ ceiling |
+|---|---|---|---|---|
+| A172 only | 0.0570 | 0.0021 | [0.0503, 0.0654] | 0.47 |
+| Three lines | 0.0576 | 0.0027 | [0.0481, 0.0702] | 0.47 |
+
+**A caveat that could explain a null result.** The three lines arm selected at epochs 5, 10, 20; the a172 only arm selected at epochs 22, 26, 30. Selection uses validation boundary recall alone, and a single noisy metric can spike early and never be beaten, ending training with an under-trained model. The mixed arm stopped consistently earlier, so its score may reflect less effective training rather than less useful data. The rule was identical for both arms and fixed before either ran, which makes this a fair protocol comparison — but not, on its own, a clean test of diversity. The cost is measurable from the training histories, with no re-training: decoding an instance needs interior probability to find cells and boundary to split them, and the saved checkpoint gives up 0.135 of the interior recall the mixed runs demonstrably reached, against 0.059 for the single-line runs. For the single-line arm, selecting on boundary recall lands within a few epochs of what valuing both recalls would have chosen; for the mixed arm it does not. So the rule is not neutral between the arms, and the comparison understates the mixed one by an amount this experiment cannot pin down without re-running both.
+
+Mixed minus single-line: **+0.0006** [-0.0052, +0.0070], resampling seeds and acquisition groups together. The interval includes zero. At this scale there is **no detectable advantage** to training on three cell lines rather than one, which points at capacity or at the representation as the binding constraint rather than at the narrowness of the training data.
+
+The held-out ceiling is 0.1215: the ground-truth mask itself scores that through the same decoder, so both arms should be read against it rather than against 1.0.
+
 ## Tissue mechanics from cell outlines
 
 The vertex model of a confluent monolayer predicts a rigidity transition at a dimensionless shape index q* = 3.81, where q = P/sqrt(A). Below it a tissue is jammed and solid-like; above it cells can exchange neighbours and the tissue flows. That number is a *prediction of the theory*, not a fit to this data, which is what makes it a test rather than a description.

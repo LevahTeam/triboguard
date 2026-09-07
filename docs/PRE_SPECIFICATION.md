@@ -101,14 +101,23 @@ It was designed after seeing one mixed run peak on boundary recall 29% of the wa
 through training, with interior recall still owing 0.18, where the single-line
 runs peaked 65-75% of the way through with 0.03-0.05 left.
 
-**One run, not the arm.** An earlier draft of this paragraph called the pattern
-systematic on the strength of two seeds. That was a misreading: the second seed's
-running maximum was inspected while it was still training, and it went on to
-improve twice more and to select an epoch in the same range as the single-line
-runs. The rule is capable of selecting a badly under-trained checkpoint, and did
-so once; it does not do so every time. That is a weaker problem than the one
-originally described, and it is still worth removing, because a three-seed mean
-that contains one badly selected checkpoint is dragged down by it.
+**What the three finished seeds actually show.** This paragraph was revised twice
+and both revisions are worth keeping visible. It first called the pattern
+systematic on two seeds, one of which was still training — a misreading, since
+that run went on to improve twice more and selected epoch 20 rather than 6. The
+correction said the rule had misfired once rather than systematically.
+
+With all three seeds finished, the asymmetry is consistent after all, though not
+by the mechanism first claimed. The mixed arm selected at epochs 5, 10 and 20;
+the single-line arm at 22, 26 and 30 — non-overlapping. The interior recall each
+saved checkpoint gave up was 0.088 to 0.183 for the mixed arm against 0.043 to
+0.073 for the single-line arm — also non-overlapping. So the rule is not neutral
+between the arms, but the severity varies more than twofold across seeds, and no
+mixed run repeated the epoch-5 collapse that prompted the investigation.
+
+The honest summary is that the first claim was right for the wrong reason, the
+correction was right about the reason and wrong about the conclusion, and only
+the finished data settles it. Both revisions stay in the history.
 
 What protects the second run from being a fishing expedition is that the decision
 rule is inherited unchanged from the first — diversity wins only if the

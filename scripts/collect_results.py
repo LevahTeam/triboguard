@@ -52,13 +52,14 @@ def _stopping(runs: Path, design: dict[str, Any]) -> str:
     if not all(epochs.values()):
         return ""
     described = "; ".join(
-        f"{arm} at epoch {', '.join(str(e) for e in values)}" for arm, values in epochs.items()
+        f"the {arm.lower()} arm selected at epochs {', '.join(str(e) for e in values)}"
+        for arm, values in epochs.items()
     )
     if max(epochs["Three lines"]) >= min(epochs[single]):
-        return f"Checkpoints were selected {described}. The arms trained comparably long."
+        return f"Checkpoint selection: {described}. The arms trained comparably long."
     caveat = (
-        f"**A caveat that could explain a null result.** Checkpoints were selected "
-        f"{described}. Selection uses validation boundary recall alone, and a single "
+        f"**A caveat that could explain a null result.** {described[0].upper()}{described[1:]}. "
+        "Selection uses validation boundary recall alone, and a single "
         "noisy metric can spike early and never be beaten, ending training with an "
         "under-trained model. The mixed arm stopped consistently earlier, so its score "
         "may reflect less effective training rather than less useful data. The rule was "

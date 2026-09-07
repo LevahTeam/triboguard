@@ -10,6 +10,8 @@ Model weights, overlays and downloaded data are intentionally not here: they are
 - `classical_baseline__baseline_report.json`
 - `classical_baseline__per_image_metrics.csv`
 - `comparison__comparison.json`
+- `diversity__diversity.json`
+- `diversity__selection_cost.json`
 - `instance_benchmark__instance_benchmark.json`
 - `instance_model__metrics.json`
 - `mechanics__across_cell_lines.json`

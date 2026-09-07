@@ -1,0 +1,96 @@
+{
+  "environment": {
+    "accelerators": {
+      "cuda": false,
+      "mps": true
+    },
+    "git": {
+      "branch": "master",
+      "commit": "4131773e902674f0e767db1a111ea9c2cc89743e",
+      "dirty": false
+    },
+    "machine": "arm64",
+    "packages": {
+      "numpy": "2.3.5",
+      "pillow": "11.3.0",
+      "pycocotools": "2.0.11",
+      "remotezip": "0.12.6",
+      "scipy": "1.16.3",
+      "torch": "2.11.0"
+    },
+    "platform": "macOS-15.6-arm64-arm-64bit-Mach-O",
+    "python": "3.13.9",
+    "recorded_at_utc": "2026-09-07T20:43:04+00:00",
+    "torch_threads": 4
+  },
+  "note": "balanced_* columns are what the sum of both recalls would have chosen from the same run. No checkpoint was saved at that epoch, so this bounds the cost of the rule rather than measuring a better model.",
+  "runs": {
+    "a172_1": {
+      "balanced_boundary_recall": 0.6936795948595302,
+      "balanced_epoch": 30,
+      "balanced_interior_recall": 0.8264393114977735,
+      "epochs_run": 38,
+      "interior_recall_available": 0.8593294725448312,
+      "interior_recall_forfeited": 0.04288043061864355,
+      "selected_boundary_recall": 0.7024583280886012,
+      "selected_epoch": 26,
+      "selected_interior_recall": 0.8164490419261876
+    },
+    "a172_2": {
+      "balanced_boundary_recall": 0.6669537043902287,
+      "balanced_epoch": 28,
+      "balanced_interior_recall": 0.8348251010885054,
+      "epochs_run": 34,
+      "interior_recall_available": 0.887445285457109,
+      "interior_recall_forfeited": 0.07250948442605509,
+      "selected_boundary_recall": 0.6849284503583948,
+      "selected_epoch": 22,
+      "selected_interior_recall": 0.8149358010310539
+    },
+    "a172_42": {
+      "balanced_boundary_recall": 0.6876507680874286,
+      "balanced_epoch": 30,
+      "balanced_interior_recall": 0.8178435899469298,
+      "epochs_run": 40,
+      "interior_recall_available": 0.8795187500051289,
+      "interior_recall_forfeited": 0.06167516005819906,
+      "selected_boundary_recall": 0.6876507680874286,
+      "selected_epoch": 30,
+      "selected_interior_recall": 0.8178435899469298
+    },
+    "mixed_1": {
+      "balanced_boundary_recall": 0.7457339716713413,
+      "balanced_epoch": 23,
+      "balanced_interior_recall": 0.7910068226636543,
+      "epochs_run": 32,
+      "interior_recall_available": 0.8477871538553599,
+      "interior_recall_forfeited": 0.08783148837174948,
+      "selected_boundary_recall": 0.7683054026031964,
+      "selected_epoch": 20,
+      "selected_interior_recall": 0.7599556654836104
+    },
+    "mixed_2": {
+      "balanced_boundary_recall": 0.7353544386935276,
+      "balanced_epoch": 19,
+      "balanced_interior_recall": 0.8050257520372845,
+      "epochs_run": 22,
+      "interior_recall_available": 0.8489520679577401,
+      "interior_recall_forfeited": 0.134563815795264,
+      "selected_boundary_recall": 0.7658637872610535,
+      "selected_epoch": 10,
+      "selected_interior_recall": 0.7143882521624761
+    },
+    "mixed_42": {
+      "balanced_boundary_recall": 0.7251067453711545,
+      "balanced_epoch": 14,
+      "balanced_interior_recall": 0.8056102829694212,
+      "epochs_run": 17,
+      "interior_recall_available": 0.8566426254968589,
+      "interior_recall_forfeited": 0.18334554225360444,
+      "selected_boundary_recall": 0.7466933375191563,
+      "selected_epoch": 5,
+      "selected_interior_recall": 0.6732970832432544
+    }
+  },
+  "selection_metric": "validation boundary recall"
+}
