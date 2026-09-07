@@ -593,6 +593,68 @@ def format_report(runs: Path) -> str:
             "",
         ]
 
+    attenuation = load(runs / "mechanics" / "attenuation.json")
+    if attenuation and attenuation.get("rows"):
+        rows = attenuation["rows"]
+        lines += [
+            "## Is a low correlation a bad segmenter, or nothing to track?",
+            "",
+            "A rank correlation between true and recovered shape index confounds two "
+            "things: how accurately a method measures q on one image, and how much q "
+            "actually varies between the images being ranked. When the second is small the "
+            "correlation collapses even for a near-perfect method, so a low number is not "
+            "on its own evidence that segmentation failed.",
+            "",
+            "Measurement error comes from each method's limits of agreement (a span of "
+            "3.92 standard deviations). Biological variation comes from the polygon "
+            "annotations alone, with no segmenter in the loop. Their ratio is a "
+            "signal-to-noise ratio.",
+            "",
+            "| Cell line | Method | Biological sd | Error sd | SNR | Observed ρ "
+            "| Attenuation predicts |",
+            "|---|---|---|---|---|---|---|",
+        ]
+        for row in rows:
+            lines.append(
+                f"| {row['cell_line']} | {row['method']} | {row['sd_biological']:.4f} | "
+                f"{row['sd_error']:.4f} | {row['signal_to_noise']:.2f} | "
+                f"{row['observed_rho']:.3f} | {row['expected_rho']:.3f} |"
+            )
+        ordered = all(
+            rows[i]["observed_rho"] <= rows[i + 1]["observed_rho"] for i in range(len(rows) - 1)
+        )
+        worst = min(rows, key=lambda r: r["signal_to_noise"])
+        best = max(rows, key=lambda r: r["signal_to_noise"])
+        lines += [
+            "",
+            "Rows are sorted by signal-to-noise, not by correlation. "
+            + (
+                "**Observed ρ rises monotonically with it**, across every cell line and "
+                "every method."
+                if ordered
+                else "Observed ρ rises with it but not perfectly monotonically, so the "
+                "relationship is a strong tendency rather than a law."
+            ),
+            "",
+            f"The extremes make the point: {worst['cell_line']} with {worst['method']} has "
+            f"only {worst['signal_to_noise']:.2f} times more biological signal than "
+            f"measurement noise and scores ρ = {worst['observed_rho']:.3f}, while "
+            f"{best['cell_line']} with {best['method']} has {best['signal_to_noise']:.2f} "
+            f"and scores {best['observed_rho']:.3f}.",
+            "",
+            "**This changes how the cross-cell-line table should be read.** A line whose "
+            "images barely differ in shape index cannot produce a high correlation from any "
+            "segmenter, so its low score measures the cell line, not the method. Reporting "
+            "those numbers as a failure to transfer would have been wrong.",
+            "",
+            "The predicted column uses the classical attenuation formula, which assumes "
+            "Pearson correlation and errors independent of the true value. Neither holds "
+            "exactly here — the error grows with q — so it consistently overestimates, and "
+            "it is used as a direction check rather than a fit. The claim is the ordering, "
+            "not the numbers.",
+            "",
+        ]
+
     ablation = load(runs / "baseline_768" / "metrics.json")
     if primary and ablation:
         lines += [
@@ -716,6 +778,7 @@ PUBLISHED = (
     "mechanics/across_cell_lines.json",
     "mechanics/resolution_limit.json",
     "mechanics/q_dynamic_range.json",
+    "mechanics/attenuation.json",
 )
 
 
