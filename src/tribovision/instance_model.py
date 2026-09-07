@@ -389,3 +389,69 @@ def load_instance_checkpoint(path: Any, device: torch.device) -> TriboUNet:
     model.load_state_dict(payload["model_state"])
     model.to(device).eval()
     return model
+
+
+def score_on_manifest(
+    checkpoint: Any,
+    manifest_path: Any,
+    *,
+    device: str = "auto",
+    interior_threshold: float = 0.7,
+    min_area: int = 20,
+    max_images: int | None = None,
+) -> dict[str, Any]:
+    """Instance score for one three-class checkpoint, with an interval.
+
+    A stripped-down alternative to the full benchmark, which re-derives the
+    ceiling and the classical rule for every call. Those are properties of the
+    data and do not change between seeds, so recomputing them for a replicate
+    wastes most of the runtime for no new information.
+    """
+    from PIL import Image
+
+    from tribovision import coco, evaluation, provenance
+    from tribovision.manifest import acquisition_group, load_manifest
+    from tribovision.training import resolve_device
+
+    torch_device = resolve_device(device)
+    model = load_instance_checkpoint(checkpoint, torch_device)
+    payload = torch.load(Path(checkpoint), map_location=torch_device, weights_only=True)
+    image_size = int((payload.get("preprocessing") or {}).get("image_size") or 512)
+
+    records = load_manifest(Path(manifest_path))
+    if max_images is not None:
+        records = records[:max_images]
+    cache: dict[Path, dict[int, dict[str, Any]]] = {}
+    scores: list[float] = []
+    groups: list[str] = []
+    for record in records:
+        if record.annotation_path not in cache:
+            source = json.loads(record.annotation_path.read_text(encoding="utf-8"))
+            cache[record.annotation_path] = {int(a["id"]): a for a in source.get("annotations", [])}
+        index = cache[record.annotation_path]
+        true_labels = coco.label_image(
+            [index[i] for i in record.annotation_ids], record.width, record.height
+        )
+        with Image.open(record.image_path) as handle:
+            image = handle.convert("L")
+        predicted = predict_instances(
+            model,
+            image,
+            image_size=image_size,
+            device=torch_device,
+            interior_threshold=interior_threshold,
+            min_area=min_area,
+        )
+        scores.append(evaluation.matching_score(predicted, true_labels)["mean"])
+        groups.append(acquisition_group(record))
+
+    return {
+        "checkpoint": provenance.relative_to_repo(Path(checkpoint)),
+        "manifest": provenance.relative_to_repo(Path(manifest_path)),
+        "images": len(scores),
+        "matching_50_95": float(np.mean(scores)) if scores else 0.0,
+        "interval": evaluation.bootstrap_interval(scores, groups=groups),
+        "per_image": scores,
+        "groups": groups,
+        "interior_threshold": interior_threshold,
+    }

@@ -244,3 +244,69 @@ def test_the_instance_benchmark_reports_intervals_and_paired_differences(
     assert "ceiling" in report["paired_differences"]
     assert "classical" in report["paired_differences"]["ceiling"]
     assert "resampled by acquisition group" in report["paired_difference_note"]
+
+
+def test_scoring_a_checkpoint_on_a_manifest_matches_the_full_benchmark(
+    tmp_path: Path, tiny_training_data: Path
+) -> None:
+    """The lean scorer must agree with the benchmark it is a shortcut for."""
+    from tribovision.instance_benchmark import run as run_benchmark
+    from tribovision.instance_model import score_on_manifest
+
+    train_instance_model(
+        InstanceConfig(
+            data_dir=tiny_training_data,
+            output_dir=tmp_path / "run",
+            epochs=6,
+            batch_size=1,
+            image_size=32,
+            base_channels=4,
+            depth=2,
+            device="cpu",
+        ),
+        progress=False,
+    )
+    checkpoint = tmp_path / "run" / "best_model.pt"
+    manifest = tiny_training_data / "manifests" / "test.jsonl"
+
+    lean = score_on_manifest(checkpoint, manifest, device="cpu", min_area=2)
+    full = run_benchmark(
+        manifest,
+        None,
+        three_class_checkpoint=checkpoint,
+        include_cellpose=False,
+        min_area=2,
+        device="cpu",
+    )
+    assert lean["matching_50_95"] == pytest.approx(
+        full["summary"]["tribovision_three_class"]["matching_50_95"], abs=1e-9
+    )
+    assert lean["images"] == full["images"]
+    assert len(lean["per_image"]) == len(lean["groups"])
+
+
+def test_the_lean_scorer_reports_repository_relative_paths(
+    tmp_path: Path, tiny_training_data: Path
+) -> None:
+    from tribovision.instance_model import score_on_manifest
+
+    train_instance_model(
+        InstanceConfig(
+            data_dir=tiny_training_data,
+            output_dir=tmp_path / "run",
+            epochs=2,
+            batch_size=1,
+            image_size=32,
+            base_channels=4,
+            depth=2,
+            device="cpu",
+        ),
+        progress=False,
+    )
+    result = score_on_manifest(
+        tmp_path / "run" / "best_model.pt",
+        tiny_training_data / "manifests" / "test.jsonl",
+        device="cpu",
+        min_area=2,
+    )
+    assert "/Users/" not in result["checkpoint"] + result["manifest"]
