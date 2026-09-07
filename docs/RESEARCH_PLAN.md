@@ -2,15 +2,25 @@
 
 ## Where the project actually stands
 
-TriboVision is a working, measured cell-segmentation system plus a complete,
-tested analysis pipeline for a treatment experiment that has not yet been run.
-The most defensible one-sentence description is:
+TriboVision is a working, measured cell-segmentation system; a tissue-mechanics
+measurement built on top of it and tested against a prediction the theory made in
+advance; and a complete, tested analysis pipeline for a treatment experiment that
+has not yet been run. The most defensible one-sentence description is:
 
-> A reproducible, leakage-audited segmentation system that measures cell
-> morphology from ordinary phase-contrast images, together with a pre-specified
-> statistical pipeline for testing whether those measurements track viability —
-> validated end to end on public data and on synthetic experiments with known
-> answers, and awaiting its own Tribonema imaging data.
+> A reproducible, leakage-audited segmentation system that recovers a mechanical
+> quantity — the shape index governing the vertex model's rigidity transition —
+> from ordinary phase-contrast images, with the conditions under which that
+> recovery succeeds or fails measured rather than assumed, together with a
+> pre-specified statistical pipeline for testing whether those measurements track
+> viability.
+
+The mechanics half is the part that answers a question rather than building a
+tool. It asks whether a vision model can measure something *physical* about a
+tissue, not merely outline its cells, and it answers with the boundary: the
+recovery works when the segmenter's measurement error is small relative to how
+much the shape index actually varies between images, and fails when it is not.
+That boundary is a property of the specimen as much as of the model, which is
+why a low correlation on one cell line is not evidence that the method is bad.
 
 That is a real project. What it is not:
 
@@ -36,6 +46,10 @@ That is a real project. What it is not:
 | Masks match the COCO reference exactly | Bit-identical to `pycocotools` on real LIVECell polygons | `tests/test_coco.py` |
 | The learning pipeline can learn | Tiny-dataset overfitting test reaches >0.9 train Dice | `tests/test_training.py` |
 | The statistics find real effects and reject noise | Synthetic dose response recovered; null experiment yields q > 0.05 | `tests/test_treatment.py` |
+| Cell shape index can be measured at scale against a predicted threshold | 458,187 annotated cells across 8 cell lines; 2 lines sit below the vertex model's q* = 3.81 and 10 of 14 wells reaching confluence 0.5 move toward the jammed side as they crowd | `results/mechanics__mechanics.json` |
+| The raster perimeter must be corrected or the physics is wrong | The uncorrected pixel perimeter inflates q by 24% and puts 100% of cells above q*, reversing the verdict for every line | `results/mechanics__segmenter_agreement.json` |
+| A segmenter can recover the shape index, within limits | On A172 the ordering across images is recovered at rho 0.767 (Cellpose) and 0.707 (three-class, one checkpoint; 0.679 across seeds, below the pre-set 0.70 bar) | `results/mechanics__segmenter_agreement.json` |
+| A low recovery correlation can be the cell line rather than the method | Correlation tracks the ratio of biological spread to measurement error, not segmentation quality; reported beside every correlation | `results/mechanics__attenuation.json` |
 | Results are reproducible | Same seed reproduces metrics to 1e-6, including with worker processes | `tests/test_training.py` |
 
 ## The gap between here and a Tribonema result
@@ -191,15 +205,22 @@ and every claim withdrawn after a stricter test, is in
 | Quantitative result on held-out data | Done — 0.952 against a 0.710 trivial-predictor floor (see `results/comparison.json`) |
 | Comparison against non-learned baselines | Done — `tribovision compare` gates on the *stronger* of the classical rule and the all-foreground predictor |
 | Repeated seeds with reported spread | Done — `docs/RESULTS.md` |
-| Automated test suite | Done — 280+ tests, 91% coverage |
+| Automated test suite | Done — 453 tests, 91% coverage |
 | Documented limitations | Done — this file, and every generated report |
 | Pre-specified analysis plan | Done — this file, section above |
-| Own experimental data | **Not started** — this is the critical path |
+| A result that answers a question, not only a tool that works | Done — the mechanics half, with the conditions for its own failure measured |
+| Own experimental data | **Not started** — this is the critical path for the *Tribonema* question specifically |
 | Paired viability assay | **Not started** |
 | Blinded analysis | Procedure defined; awaiting data |
 | SRC / biosafety forms | Owner action — see EXPERIMENT_PROTOCOL.md §9 |
 | Logbook | Owner action — keep dated records from the first culture session |
 
-The last five rows are the honest reason this is not yet a finished science-fair
-project: the engineering is done and measured, and the experiment has not been
-run. Nothing in the code will paper over that.
+The last five rows are the honest boundary of this project. They are the reason
+it cannot make any claim about Tribonema: that experiment has not been run, and
+nothing in the code will paper over it.
+
+What those rows do *not* mean is that the project has no result. The mechanics
+half asks a question and answers it on public data with held-out cell lines, a
+threshold the theory fixed in advance, and a measured account of when its own
+method stops working. The missing rows bound which question is answered, not
+whether one is.
