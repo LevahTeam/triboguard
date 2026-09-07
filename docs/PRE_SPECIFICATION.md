@@ -67,6 +67,18 @@ then applied uniformly. The cross-cell-line comparison of shape index was not
 predicted in advance. These are hypothesis-generating, and the honest next step
 for any of them is a fresh dataset rather than more analysis of this one.
 
+**The resolution-limit analysis is post-hoc.** It was written after the MCF7
+shape-index recovery came back far below A172's, to rule out the explanation
+that had to be excluded first: that the Cellpose diameter, tuned on A172, simply
+did not fit the other lines. That explanation failed in an informative
+direction — the tuned diameter is a *poor* match for A172, where recovery works,
+and a *good* match for the lines where it fails — so cell size in pixels
+survives as the candidate. `resolvable_near_threshold` and
+`discretisation_residual`, which do the measuring, were written for the original
+A172 analysis and are applied here unchanged; that is what makes this a test of
+an existing prediction rather than a curve fitted to four points. It is still
+post-hoc, it is still four cell lines, and it is reported as a hypothesis.
+
 ## Registered before the run, not yet answered
 
 Two experiments were specified, committed, and only then executed. This section
