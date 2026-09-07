@@ -88,6 +88,22 @@ show that a better checkpoint would have scored better, because no checkpoint wa
 saved at the epoch it identifies. It bounds the cost of the selection rule. It
 does not measure a model.
 
+**So the diversity experiment is being run twice, and both results will be
+reported.** The first run follows the protocol registered above, unchanged, and
+its answer stands as the answer to the question that was actually pre-registered.
+The second re-trains *both* arms with a checkpoint rule that averages interior and
+boundary recall, because reusing the existing single-line checkpoints would
+compare a model chosen by one rule against a model chosen by another and
+reintroduce the confound it exists to remove.
+
+The second run is not pre-registered and must not be presented as though it were.
+It was designed after seeing that boundary recall peaked 29% of the way through
+the mixed runs and 65-75% of the way through the single-line ones. What protects
+it from being a fishing expedition is that the decision rule is inherited
+unchanged from the first run — diversity wins only if the seed-and-image interval
+on the difference excludes zero — and that the rule was fixed before either arm
+of the second run had produced a number.
+
 **And the cell-size hypothesis died too, which is why the next one is a
 prediction.** SHSY5Y came back at rho 0.801 for the three-class model — better
 than A172's 0.707 — despite cells barely larger than MCF7's, where recovery
