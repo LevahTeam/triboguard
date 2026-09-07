@@ -158,6 +158,28 @@ class InstanceConfig:
     #: Which manifest directory to train from, so a mixed-cell-line set can sit
     #: alongside the single-line one instead of replacing it.
     manifests_dirname: str = "manifests"
+    #: Which validation quantity selects the checkpoint. ``boundary_recall`` is
+    #: the original rule and stays the default so every earlier run reproduces.
+    #: ``balanced`` adds interior recall to it, because decoding an instance
+    #: needs both -- interior probability finds the cells, the boundary splits
+    #: them -- and selecting on the boundary alone was measured buying
+    #: separation with detection on some runs. See scripts/measure_selection_cost.py.
+    selection_metric: str = "boundary_recall"
+
+
+#: Checkpoint-selection rules. ``boundary_recall`` is what every run before
+#: September 2026 used and is kept exactly so those runs reproduce; ``balanced``
+#: values both heads of the three-class output equally.
+SELECTION_METRICS = ("boundary_recall", "balanced")
+
+
+def _selection_score(val_metrics: dict[str, float], metric: str) -> float:
+    """The number that decides whether this epoch's weights are kept."""
+    if metric == "boundary_recall":
+        return float(val_metrics["boundary_recall"])
+    if metric == "balanced":
+        return float(val_metrics["boundary_recall"] + val_metrics["interior_recall"]) / 2.0
+    raise ValueError(f"selection_metric must be one of {SELECTION_METRICS}, got {metric!r}.")
 
 
 def _class_weights(boundary_weight: float, device: torch.device) -> torch.Tensor:
@@ -225,6 +247,13 @@ def train_instance_model(config: InstanceConfig, *, progress: bool = True) -> di
     """Train the three-class model. Same network, different question."""
     from tribovision.training import resolve_device, seed_everything
 
+    # Checked before anything expensive happens. A misspelled rule that only
+    # surfaced at the end of the first epoch would waste the dataset build and
+    # the model construction to report a typo.
+    if config.selection_metric not in SELECTION_METRICS:
+        raise ValueError(
+            f"selection_metric must be one of {SELECTION_METRICS}, got {config.selection_metric!r}."
+        )
     seed_everything(config.seed)
     device = resolve_device(config.device)
     manifests = Path(config.data_dir).resolve() / config.manifests_dirname
@@ -275,12 +304,12 @@ def train_instance_model(config: InstanceConfig, *, progress: bool = True) -> di
             val_metrics = _epoch(model, loaders["val"], device, weights)
         scheduler.step()
         history.append({"epoch": number, "train": train_metrics, "val": val_metrics})
-        # Boundary recall is what separates cells, so it selects the checkpoint.
-        score = val_metrics["boundary_recall"]
+        score = _selection_score(val_metrics, config.selection_metric)
         if progress:
             print(
                 f"epoch {number:>3}/{config.epochs}  loss {val_metrics['loss']:.4f}  "
-                f"interior {val_metrics['interior_recall']:.3f}  boundary {score:.3f}",
+                f"interior {val_metrics['interior_recall']:.3f}  "
+                f"boundary {val_metrics['boundary_recall']:.3f}",
                 flush=True,
             )
         if score > best:
@@ -321,6 +350,7 @@ def train_instance_model(config: InstanceConfig, *, progress: bool = True) -> di
         "training_images": len(train_dataset),
         "training_images_available": len(datasets["train"]),
         "best_epoch": best_epoch,
+        "selection_metric": config.selection_metric,
         "best_validation": checkpoint["val_metrics"],
         "test": test_metrics,
         "history": history,

@@ -15,6 +15,7 @@ from tribovision.instance_model import (
     INTERIOR,
     InstanceConfig,
     ThreeClassDataset,
+    _selection_score,
     decode_instances,
     three_class_target,
     train_instance_model,
@@ -336,3 +337,48 @@ def test_training_can_read_a_different_manifest_directory(
     )
     assert result["training_images_available"] == 2
     assert (tmp_path / "run" / "best_model.pt").is_file()
+
+
+class TestCheckpointSelection:
+    """Which epoch's weights get kept is a scientific choice, so it is tested."""
+
+    def test_the_default_rule_is_the_one_every_earlier_run_used(self) -> None:
+        """Changing this silently would make published runs irreproducible."""
+        assert InstanceConfig(data_dir=".", output_dir=".").selection_metric == ("boundary_recall")
+
+    def test_the_default_rule_ignores_interior_recall(self) -> None:
+        metrics = {"boundary_recall": 0.70, "interior_recall": 0.10}
+        better_interior = {"boundary_recall": 0.70, "interior_recall": 0.90}
+        assert _selection_score(metrics, "boundary_recall") == _selection_score(
+            better_interior, "boundary_recall"
+        )
+
+    def test_the_balanced_rule_values_both_heads(self) -> None:
+        """Decoding needs interior to find cells and boundary to split them."""
+        poor_interior = {"boundary_recall": 0.75, "interior_recall": 0.67}
+        both_decent = {"boundary_recall": 0.69, "interior_recall": 0.82}
+        assert _selection_score(both_decent, "balanced") > _selection_score(
+            poor_interior, "balanced"
+        )
+        # ...and the old rule makes the opposite choice, which is the whole point.
+        assert _selection_score(both_decent, "boundary_recall") < _selection_score(
+            poor_interior, "boundary_recall"
+        )
+
+    def test_the_balanced_rule_is_a_mean_not_a_sum(self) -> None:
+        """It has to stay on the same 0-1 scale as the rule it can replace."""
+        assert _selection_score(
+            {"boundary_recall": 0.4, "interior_recall": 0.8}, "balanced"
+        ) == pytest.approx(0.6)
+
+    def test_an_unknown_rule_is_refused_rather_than_defaulted(self) -> None:
+        with pytest.raises(ValueError, match="selection_metric"):
+            _selection_score({"boundary_recall": 0.5}, "f1")
+
+    def test_a_misspelled_rule_fails_before_any_training_work(self, tmp_path: Path) -> None:
+        """The error must not wait for the first epoch to finish."""
+        config = InstanceConfig(
+            data_dir=tmp_path, output_dir=tmp_path, selection_metric="boundry_recall"
+        )
+        with pytest.raises(ValueError, match="selection_metric"):
+            train_instance_model(config, progress=False)
