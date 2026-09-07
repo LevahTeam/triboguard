@@ -20,6 +20,7 @@ Model weights, overlays and downloaded data are intentionally not here: they are
 - `scale_304__metrics.json`
 - `scale_79__bench__instance_benchmark.json`
 - `scale_79__metrics.json`
+- `scaling__scaling.json`
 - `seed_1__metrics.json`
 - `seed_2__metrics.json`
 - `seed_3__metrics.json`

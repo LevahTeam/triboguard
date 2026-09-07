@@ -1,0 +1,124 @@
+{
+  "caveats": [
+    "Every point is a single seed, so the shape of the curve is provisional even though the direction is not.",
+    "All training images come from the same two wells, so this measures more samples of the same conditions rather than more diversity."
+  ],
+  "environment": {
+    "accelerators": {
+      "cuda": false,
+      "mps": true
+    },
+    "git": {
+      "branch": "master",
+      "commit": "a8bb542a95ae07ded8161ba05303f289b96282f7",
+      "dirty": true
+    },
+    "machine": "arm64",
+    "packages": {
+      "numpy": "2.3.5",
+      "pillow": "11.3.0",
+      "pycocotools": "2.0.11",
+      "remotezip": "0.12.6",
+      "scipy": "1.16.3",
+      "torch": "2.11.0"
+    },
+    "platform": "macOS-15.6-arm64-arm-64bit-Mach-O",
+    "python": "3.13.9",
+    "recorded_at_utc": "2026-09-07T03:11:27+00:00",
+    "torch_threads": 4
+  },
+  "held_out": "data/livecell/manifests/test.jsonl, byte-identical across every point",
+  "paired_differences": {
+    "152_vs_79": {
+      "ci_high": 0.009226351406142842,
+      "ci_low": 0.0012311436449032836,
+      "clusters": 33,
+      "confidence": 0.95,
+      "difference": 0.0054533022331728995,
+      "evaluated": true,
+      "excludes_zero": true,
+      "resamples": 2000,
+      "resampling_unit": "acquisition group"
+    },
+    "304_vs_152": {
+      "ci_high": 0.06848363110699995,
+      "ci_low": 0.05209534601836814,
+      "clusters": 33,
+      "confidence": 0.95,
+      "difference": 0.06056568531374562,
+      "evaluated": true,
+      "excludes_zero": true,
+      "resamples": 2000,
+      "resampling_unit": "acquisition group"
+    },
+    "304_vs_79": {
+      "ci_high": 0.07389998250071896,
+      "ci_low": 0.05867057055015962,
+      "clusters": 33,
+      "confidence": 0.95,
+      "difference": 0.06601898754691853,
+      "evaluated": true,
+      "excludes_zero": true,
+      "resamples": 2000,
+      "resampling_unit": "acquisition group"
+    }
+  },
+  "points": [
+    {
+      "best_epoch": 24,
+      "boundary_recall": 0.6463749347012888,
+      "ci": {
+        "ci_high": 0.16642805555191129,
+        "ci_low": 0.12194475458630558,
+        "clusters": 33,
+        "confidence": 0.95,
+        "evaluated": true,
+        "mean": 0.141739159930439,
+        "resamples": 2000,
+        "resampling_unit": "acquisition group"
+      },
+      "matching_50": 0.30839374205177267,
+      "matching_50_95": 0.141739159930439,
+      "seed": 42,
+      "training_images": 79
+    },
+    {
+      "best_epoch": 14,
+      "boundary_recall": 0.675832002163466,
+      "ci": {
+        "ci_high": 0.1690577713303134,
+        "ci_low": 0.12951877884668228,
+        "clusters": 33,
+        "confidence": 0.95,
+        "evaluated": true,
+        "mean": 0.1471924621636119,
+        "resamples": 2000,
+        "resampling_unit": "acquisition group"
+      },
+      "matching_50": 0.32271555980767214,
+      "matching_50_95": 0.1471924621636119,
+      "seed": 42,
+      "training_images": 152
+    },
+    {
+      "best_epoch": 30,
+      "boundary_recall": 0.6926484149420248,
+      "ci": {
+        "ci_high": 0.2340295014490353,
+        "ci_low": 0.1840057215345123,
+        "clusters": 33,
+        "confidence": 0.95,
+        "evaluated": true,
+        "mean": 0.20775814747735757,
+        "resamples": 2000,
+        "resampling_unit": "acquisition group"
+      },
+      "matching_50": 0.42677633165200124,
+      "matching_50_95": 0.20775814747735757,
+      "seed": 42,
+      "training_images": 304
+    }
+  ],
+  "question": "Is training data the binding constraint on the three-class model?",
+  "seeds_per_point": 1
+}

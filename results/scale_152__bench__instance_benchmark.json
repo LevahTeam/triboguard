@@ -33,6 +33,7 @@
   },
   "images": 60,
   "interpretation": "Read every row against 'ceiling', which is the ground-truth mask put through the same watershed step. A method that predicts instances directly is not bound by that ceiling; one that predicts a binary mask is.",
+  "interval_note": "Intervals computed after the fact from the per-image results stored in this same file. No model was re-run and no number changed.",
   "manifest": "data/livecell/manifests/test.jsonl",
   "min_area": 20,
   "per_image": [
@@ -1723,6 +1724,16 @@
       "dice": 0.9998770686709503,
       "matching_50": 0.28516308014128045,
       "matching_50_95": 0.16773269589838616,
+      "matching_50_95_ci": {
+        "ci_high": 0.22864852241068243,
+        "ci_low": 0.12298455311127401,
+        "clusters": 33,
+        "confidence": 0.95,
+        "evaluated": true,
+        "mean": 0.16773269589838616,
+        "resamples": 2000,
+        "resampling_unit": "acquisition group"
+      },
       "matching_75": 0.15081755579762254,
       "predicted_objects": 476.3666666666667,
       "true_objects": 228.58333333333334
@@ -1732,6 +1743,16 @@
       "dice": 0.4248642828882661,
       "matching_50": 0.02063768605837104,
       "matching_50_95": 0.00719440532294994,
+      "matching_50_95_ci": {
+        "ci_high": 0.014362133287423777,
+        "ci_low": 0.0027801675873918266,
+        "clusters": 33,
+        "confidence": 0.95,
+        "evaluated": true,
+        "mean": 0.00719440532294994,
+        "resamples": 2000,
+        "resampling_unit": "acquisition group"
+      },
       "matching_75": 0.004444918630215775,
       "predicted_objects": 490.26666666666665,
       "true_objects": 228.58333333333334
@@ -1741,6 +1762,16 @@
       "dice": 0.9527499394675615,
       "matching_50": 0.32271555980767214,
       "matching_50_95": 0.1471924621636119,
+      "matching_50_95_ci": {
+        "ci_high": 0.1690577713303134,
+        "ci_low": 0.12951877884668228,
+        "clusters": 33,
+        "confidence": 0.95,
+        "evaluated": true,
+        "mean": 0.1471924621636119,
+        "resamples": 2000,
+        "resampling_unit": "acquisition group"
+      },
       "matching_75": 0.1202864545026095,
       "predicted_objects": 327.15,
       "true_objects": 228.58333333333334

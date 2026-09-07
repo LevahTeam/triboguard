@@ -209,3 +209,27 @@ def test_the_instance_ceiling_is_reported_alongside_the_instance_score(
     # The ground truth cannot do worse than the model at separating its own cells.
     assert ceiling >= report["neural"]["matching_score_50_95"] - 1e-9
     assert "predicts instances directly" in report["instance_ceiling"]["explanation"]
+
+
+def test_the_comparison_reports_intervals_and_a_paired_margin(
+    crowded: tuple[Path, Path], tmp_path: Path
+) -> None:
+    """A headline number without uncertainty invites a question it cannot answer."""
+    checkpoint, data = crowded
+    report = compare(checkpoint, data / "manifests" / "test.jsonl", None, device="cpu")
+    for key in ("neural", "classical", "all_foreground"):
+        assert key in report["dice_intervals"]
+    margin = report["margin_over_best_reference"]
+    if margin.get("evaluated"):
+        # The margin is measured against the stronger reference, per image.
+        assert margin["ci_low"] <= margin["difference"] <= margin["ci_high"]
+        assert "excludes_zero" in margin
+
+
+def test_intervals_resample_acquisition_groups_not_crops(crowded: tuple[Path, Path]) -> None:
+    checkpoint, data = crowded
+    report = compare(checkpoint, data / "manifests" / "test.jsonl", None, device="cpu")
+    neural = report["dice_intervals"]["neural"]
+    if neural.get("evaluated"):
+        assert neural["resampling_unit"] == "acquisition group"
+        assert neural["clusters"] <= report["images"]

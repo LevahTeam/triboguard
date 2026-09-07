@@ -241,3 +241,99 @@ def aggregate(per_image: list[dict[str, Any]]) -> dict[str, float]:
         "micro_iou": iou_from_counts(totals),
         **{f"total_{key}": value for key, value in totals.items()},
     }
+
+
+def bootstrap_interval(
+    values: list[float],
+    *,
+    groups: list[str] | None = None,
+    resamples: int = 2000,
+    confidence: float = 0.95,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """Confidence interval for a mean, resampling whole clusters.
+
+    Resampling images independently would overstate precision for the same reason
+    a per-image sign test overstates significance: LIVECell tiles one capture into
+    several crops and a manifest is a time-lapse of one well, so images are
+    correlated. Passing *groups* resamples acquisition groups instead, which is
+    the unit that is actually exchangeable.
+
+    The interval still says nothing about a second plate, a second cell line, or a
+    second seed. It is uncertainty from the sample of images, and no more.
+    """
+    array = np.asarray([v for v in values if np.isfinite(v)], dtype=float)
+    if array.size == 0:
+        return {"evaluated": False, "reason": "No finite values."}
+    if array.size < 3:
+        return {"evaluated": False, "reason": "Fewer than three observations."}
+
+    rng = np.random.default_rng(seed)
+    if groups is None:
+        draws = [
+            float(rng.choice(array, size=array.size, replace=True).mean()) for _ in range(resamples)
+        ]
+        unit = "image"
+        clusters = array.size
+    else:
+        buckets: dict[str, list[float]] = {}
+        for value, group in zip(values, groups, strict=True):
+            if np.isfinite(value):
+                buckets.setdefault(str(group), []).append(float(value))
+        keys = list(buckets)
+        clusters = len(keys)
+        if clusters < 3:
+            return {"evaluated": False, "reason": "Fewer than three clusters."}
+        draws = []
+        for _ in range(resamples):
+            chosen = rng.integers(0, clusters, clusters)
+            pooled = [v for index in chosen for v in buckets[keys[index]]]
+            draws.append(float(np.mean(pooled)))
+        unit = "acquisition group"
+
+    tail = (1.0 - confidence) / 2.0
+    return {
+        "evaluated": True,
+        "mean": float(array.mean()),
+        "ci_low": float(np.percentile(draws, 100 * tail)),
+        "ci_high": float(np.percentile(draws, 100 * (1 - tail))),
+        "confidence": confidence,
+        "resamples": resamples,
+        "resampling_unit": unit,
+        "clusters": clusters,
+    }
+
+
+def paired_bootstrap(
+    first: list[float],
+    second: list[float],
+    *,
+    groups: list[str] | None = None,
+    resamples: int = 2000,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """Interval for the *difference* between two methods scored on the same images.
+
+    Paired rather than independent, because the two methods saw identical images:
+    an unpaired comparison throws away the pairing and widens the interval for no
+    reason. The question answered is whether the interval for the difference
+    excludes zero.
+    """
+    differences = [
+        a - b for a, b in zip(first, second, strict=True) if np.isfinite(a) and np.isfinite(b)
+    ]
+    keep = (
+        [
+            g
+            for g, a, b in zip(groups, first, second, strict=True)
+            if np.isfinite(a) and np.isfinite(b)
+        ]
+        if groups is not None
+        else None
+    )
+    interval = bootstrap_interval(differences, groups=keep, resamples=resamples, seed=seed)
+    if not interval.get("evaluated"):
+        return interval
+    interval["difference"] = interval.pop("mean")
+    interval["excludes_zero"] = bool(interval["ci_low"] > 0.0 or interval["ci_high"] < 0.0)
+    return interval

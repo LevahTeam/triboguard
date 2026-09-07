@@ -150,7 +150,7 @@ def run(
         per_image.append(row)
 
     methods = sorted({key for row in per_image for key in row if isinstance(row[key], dict)})
-    summary = {
+    summary: dict[str, dict[str, Any]] = {
         method: {
             metric: float(np.mean([row[method][metric] for row in per_image if method in row]))
             for metric in (
@@ -167,11 +167,45 @@ def run(
     for values in summary.values():
         values["count_error"] = values["predicted_objects"] - values["true_objects"]
 
+    # Uncertainty from the sample of images, resampled by acquisition group
+    # because crops of one field of view are not independent observations.
+    from tribovision.manifest import acquisition_group
+
+    groups = [acquisition_group(record) for record in records[: len(per_image)]]
+    for method in methods:
+        scores = [row[method]["matching_50_95"] for row in per_image if method in row]
+        if len(scores) == len(groups):
+            summary[method]["matching_50_95_ci"] = evaluation.bootstrap_interval(
+                scores, groups=groups
+            )
+    # Paired differences against two references: the binary model, which the
+    # representation claim rests on, and the ceiling, because "beats a perfect
+    # binary mask" is a headline claim and needs an interval of its own.
+    differences: dict[str, dict[str, Any]] = {}
+    for reference in ("tribovision_unet", "ceiling"):
+        if reference not in methods:
+            continue
+        baseline = [row[reference]["matching_50_95"] for row in per_image if reference in row]
+        against: dict[str, Any] = {}
+        for method in methods:
+            if method == reference:
+                continue
+            scores = [row[method]["matching_50_95"] for row in per_image if method in row]
+            if len(scores) == len(baseline):
+                against[method] = evaluation.paired_bootstrap(scores, baseline, groups=groups)
+        differences[reference] = against
+
     report: dict[str, Any] = {
         "manifest": provenance.relative_to_repo(Path(manifest_path)),
         "images": len(per_image),
         "min_area": min_area,
         "summary": summary,
+        "paired_differences": differences,
+        "paired_difference_note": (
+            "Keyed by the reference each difference is measured against. Paired "
+            "because every method saw identical images, and resampled by acquisition "
+            "group because crops of one field are not independent."
+        ),
         "three_class_model": {
             "used": three_class is not None,
             "checkpoint": provenance.relative_to_repo(Path(three_class_checkpoint))

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+
 import numpy as np
 import pytest
 
@@ -144,3 +146,75 @@ def test_instance_counts_use_the_same_inclusive_boundary() -> None:
     predicted[4:8, 2:10] = 1
     assert evaluation.instance_counts(predicted, truth, threshold=1 / 3)["tp"] == 1
     assert evaluation.instance_counts(predicted, truth, threshold=1 / 3 + 1e-9)["tp"] == 0
+
+
+# --------------------------------------------------------- bootstrap intervals
+
+
+def test_a_bootstrap_interval_brackets_the_mean() -> None:
+    rng = np.random.default_rng(0)
+    values = list(rng.normal(0.5, 0.1, 60))
+    result = evaluation.bootstrap_interval(values, resamples=500)
+    assert result["evaluated"]
+    assert result["ci_low"] < result["mean"] < result["ci_high"]
+    assert result["resampling_unit"] == "image"
+
+
+def test_clustered_resampling_gives_a_wider_interval_than_pretending_independence() -> None:
+    """The whole reason to cluster: correlated images do not carry n images of information.
+
+    Twelve groups of ten near-identical crops. Within a group the values are
+    effectively one observation repeated, so the honest sample size is 12 rather
+    than 120 and the interval should be about sqrt(10) times wider. Asserting the
+    theoretical ratio rather than an arbitrary factor makes this a real check.
+    """
+    rng = np.random.default_rng(1)
+    per_group = 10
+    values: list[float] = []
+    groups: list[str] = []
+    for group in range(12):
+        centre = rng.normal(0.5, 0.15)
+        for _ in range(per_group):
+            values.append(centre + rng.normal(0, 0.002))
+            groups.append(f"g{group}")
+    naive = evaluation.bootstrap_interval(values, resamples=1500)
+    clustered = evaluation.bootstrap_interval(values, groups=groups, resamples=1500)
+    ratio = (clustered["ci_high"] - clustered["ci_low"]) / (naive["ci_high"] - naive["ci_low"])
+    assert 0.6 * math.sqrt(per_group) < ratio < 1.6 * math.sqrt(per_group)
+    assert clustered["clusters"] == 12
+    assert clustered["resampling_unit"] == "acquisition group"
+
+
+def test_a_bootstrap_interval_declines_on_too_little_data() -> None:
+    assert evaluation.bootstrap_interval([])["evaluated"] is False
+    assert evaluation.bootstrap_interval([0.1, 0.2])["evaluated"] is False
+    assert (
+        evaluation.bootstrap_interval([0.1] * 9, groups=["a"] * 5 + ["b"] * 4)["evaluated"] is False
+    )
+
+
+def test_a_paired_interval_detects_a_real_difference_and_ignores_a_shared_one() -> None:
+    rng = np.random.default_rng(2)
+    shared = rng.normal(0.5, 0.2, 40)
+    better = [float(v) + 0.08 for v in shared]
+    same = [float(v) for v in shared]
+
+    real = evaluation.paired_bootstrap(better, list(shared), resamples=800)
+    assert real["difference"] == pytest.approx(0.08, abs=0.01)
+    assert real["excludes_zero"] is True
+
+    none = evaluation.paired_bootstrap(same, list(shared), resamples=800)
+    assert none["difference"] == pytest.approx(0.0, abs=1e-9)
+    assert none["excludes_zero"] is False
+
+
+def test_pairing_is_what_makes_a_small_consistent_difference_detectable() -> None:
+    """Unpaired, a tiny consistent gap drowns in between-image variance."""
+    rng = np.random.default_rng(3)
+    base = rng.normal(0.5, 0.3, 50)
+    better = [float(v) + 0.02 for v in base]
+    paired = evaluation.paired_bootstrap(better, list(base), resamples=1000)
+    assert paired["excludes_zero"] is True
+    # The same 0.02 gap against the spread of the values themselves is invisible.
+    spread = evaluation.bootstrap_interval(list(base), resamples=1000)
+    assert (spread["ci_high"] - spread["ci_low"]) > 0.02

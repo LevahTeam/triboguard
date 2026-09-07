@@ -230,6 +230,95 @@ def format_report(runs: Path) -> str:
                 "",
             ]
 
+    if instance and instance.get("paired_differences"):
+        summary = instance["summary"]
+        paired = instance["paired_differences"]
+        if "tribovision_three_class" in summary:
+            lines += [
+                "## A three-class instance model, and its uncertainty",
+                "",
+                "Same 2M-parameter U-Net body; only the output head and the target",
+                "change, from a binary mask to background / cell interior / touching-cell",
+                "boundary. Intervals resample acquisition groups, not crops.",
+                "",
+                "| Method | Matching 0.50:0.95 | 95% CI |",
+                "|---|---|---|",
+            ]
+            for key, label in (
+                ("tribovision_unet", "Same U-Net, binary target"),
+                ("ceiling", "*Perfect binary mask (ceiling)*"),
+                ("tribovision_three_class", "**Same U-Net, three-class target**"),
+                ("cellpose", "Cellpose, zero-shot"),
+            ):
+                row = summary.get(key)
+                if not row:
+                    continue
+                interval = row.get("matching_50_95_ci") or {}
+                bounds = (
+                    f"[{interval['ci_low']:.4f}, {interval['ci_high']:.4f}]"
+                    if interval.get("evaluated")
+                    else "-"
+                )
+                lines.append(f"| {label} | {row['matching_50_95']:.4f} | {bounds} |")
+            lines.append("")
+            versus_binary = paired.get("tribovision_unet", {}).get("tribovision_three_class")
+            versus_ceiling = paired.get("ceiling", {}).get("tribovision_three_class")
+            if versus_binary and versus_binary.get("evaluated"):
+                lines.append(
+                    f"- Against the binary target: **{versus_binary['difference']:+.4f}** "
+                    f"[{versus_binary['ci_low']:+.4f}, {versus_binary['ci_high']:+.4f}], "
+                    "which excludes zero. Changing the prediction target, and nothing "
+                    "else, is what produced this."
+                )
+            if versus_ceiling and versus_ceiling.get("evaluated"):
+                verdict = (
+                    "exceeds it"
+                    if versus_ceiling["excludes_zero"] and versus_ceiling["difference"] > 0
+                    else "is indistinguishable from it"
+                )
+                lines.append(
+                    f"- Against a *perfect* binary mask: "
+                    f"{versus_ceiling['difference']:+.4f} "
+                    f"[{versus_ceiling['ci_low']:+.4f}, {versus_ceiling['ci_high']:+.4f}] — "
+                    f"the model {verdict}. The point estimate is higher, and the interval "
+                    "includes zero, so the honest claim is a tie, not a win."
+                )
+            lines.append("")
+
+    curve = load(runs / "scaling" / "scaling.json")
+    if curve:
+        lines += [
+            "### Does more training data help?",
+            "",
+            "Same network, same hyperparameters, and a held-out manifest that is",
+            f"{curve['held_out'].split(', ')[-1]}, so the curve measures data alone.",
+            "",
+            "| Training images | Matching 0.50:0.95 | 95% CI | Boundary recall |",
+            "|---|---|---|---|",
+        ]
+        for point in curve["points"]:
+            interval = point.get("ci") or {}
+            bounds = (
+                f"[{interval['ci_low']:.4f}, {interval['ci_high']:.4f}]"
+                if interval.get("evaluated")
+                else "-"
+            )
+            lines.append(
+                f"| {point['training_images']} | {point['matching_50_95']:.4f} | "
+                f"{bounds} | {point['boundary_recall']:.4f} |"
+            )
+        lines += ["", "Paired differences, same images and same groups:", ""]
+        for name, difference in curve["paired_differences"].items():
+            if not difference.get("evaluated"):
+                continue
+            a, b = name.split("_vs_")
+            lines.append(
+                f"- **{a} vs {b} images**: {difference['difference']:+.4f} "
+                f"[{difference['ci_low']:+.4f}, {difference['ci_high']:+.4f}]"
+                + ("" if difference["excludes_zero"] else " — includes zero")
+            )
+        lines += [""] + [f"- {caveat}" for caveat in curve["caveats"]] + [""]
+
     ablation = load(runs / "baseline_768" / "metrics.json")
     if primary and ablation:
         lines += [
@@ -347,6 +436,7 @@ PUBLISHED = (
     "scale_79/metrics.json",
     "scale_152/metrics.json",
     "scale_304/metrics.json",
+    "scaling/scaling.json",
 )
 
 

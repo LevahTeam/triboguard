@@ -57,6 +57,42 @@ That is the whole finding. The in-house model is not worse at seeing cells; it i
 
 Cellpose configuration: cpsam v4.2.1.1, diameter 15.0 chosen on the training split.
 
+## A three-class instance model, and its uncertainty
+
+Same 2M-parameter U-Net body; only the output head and the target
+change, from a binary mask to background / cell interior / touching-cell
+boundary. Intervals resample acquisition groups, not crops.
+
+| Method | Matching 0.50:0.95 | 95% CI |
+|---|---|---|
+| Same U-Net, binary target | 0.0455 | [0.0223, 0.0794] |
+| *Perfect binary mask (ceiling)* | 0.1677 | [0.1230, 0.2286] |
+| **Same U-Net, three-class target** | 0.2078 | [0.1840, 0.2340] |
+| Cellpose, zero-shot | 0.3893 | [0.3533, 0.4259] |
+
+- Against the binary target: **+0.1623** [+0.1466, +0.1772], which excludes zero. Changing the prediction target, and nothing else, is what produced this.
+- Against a *perfect* binary mask: +0.0400 [-0.0031, +0.0781] — the model is indistinguishable from it. The point estimate is higher, and the interval includes zero, so the honest claim is a tie, not a win.
+
+### Does more training data help?
+
+Same network, same hyperparameters, and a held-out manifest that is
+byte-identical across every point, so the curve measures data alone.
+
+| Training images | Matching 0.50:0.95 | 95% CI | Boundary recall |
+|---|---|---|---|
+| 79 | 0.1417 | [0.1219, 0.1664] | 0.6464 |
+| 152 | 0.1472 | [0.1295, 0.1691] | 0.6758 |
+| 304 | 0.2078 | [0.1840, 0.2340] | 0.6926 |
+
+Paired differences, same images and same groups:
+
+- **152 vs 79 images**: +0.0055 [+0.0012, +0.0092]
+- **304 vs 152 images**: +0.0606 [+0.0521, +0.0685]
+- **304 vs 79 images**: +0.0660 [+0.0587, +0.0739]
+
+- Every point is a single seed, so the shape of the curve is provisional even though the direction is not.
+- All training images come from the same two wells, so this measures more samples of the same conditions rather than more diversity.
+
 ## Input resolution
 
 Letterboxing 704x520 into a square loses detail. Pushing the *ground truth*

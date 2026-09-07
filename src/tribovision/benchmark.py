@@ -146,8 +146,31 @@ def compare(
     floor = max(classical_summary.get("macro_dice", 0.0), trivial_summary.get("macro_dice", 0.0))
     passed = bool(n > 0 and neural_summary["macro_dice"] > floor)
 
+    group_labels = [row["acquisition_group"] for row in per_image]
+    intervals = {
+        "neural": evaluation.bootstrap_interval(
+            [row["dice"] for row in neural_rows], groups=group_labels
+        ),
+        "classical": evaluation.bootstrap_interval(
+            [row["dice"] for row in classical_rows], groups=group_labels
+        ),
+        "all_foreground": evaluation.bootstrap_interval(
+            [row["dice"] for row in all_foreground_rows], groups=group_labels
+        ),
+    }
+    margin = evaluation.paired_bootstrap(
+        [row["dice"] for row in neural_rows],
+        [
+            max(a["dice"], b["dice"])
+            for a, b in zip(classical_rows, all_foreground_rows, strict=True)
+        ],
+        groups=group_labels,
+    )
+
     report: dict[str, Any] = {
         "manifest": provenance.relative_to_repo(Path(manifest_path)),
+        "dice_intervals": intervals,
+        "margin_over_best_reference": margin,
         "checkpoint": provenance.relative_to_repo(Path(checkpoint)),
         "images": n,
         "neural": {

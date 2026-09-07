@@ -220,3 +220,27 @@ def test_an_invalid_cap_is_rejected(tmp_path: Path, tiny_training_data: Path) ->
             ),
             progress=False,
         )
+
+
+def test_the_instance_benchmark_reports_intervals_and_paired_differences(
+    tmp_path: Path, tiny_training_data: Path
+) -> None:
+    """Every method gets an interval; every comparison gets a paired difference."""
+    from tribovision.instance_benchmark import run as run_benchmark
+
+    report = run_benchmark(
+        tiny_training_data / "manifests" / "test.jsonl",
+        None,
+        include_cellpose=False,
+        min_area=2,
+    )
+    for method, values in report["summary"].items():
+        interval = values.get("matching_50_95_ci")
+        assert interval is not None, f"{method} has no interval"
+        if interval.get("evaluated"):
+            assert interval["ci_low"] <= values["matching_50_95"] <= interval["ci_high"]
+    # No checkpoint was given, so only the ground-truth ceiling and the classical
+    # rule are scored; the ceiling comparison is always available.
+    assert "ceiling" in report["paired_differences"]
+    assert "classical" in report["paired_differences"]["ceiling"]
+    assert "resampled by acquisition group" in report["paired_difference_note"]
