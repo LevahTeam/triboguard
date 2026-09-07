@@ -84,15 +84,15 @@ byte-identical across every point, so the curve measures data alone.
 | 152 | 0.1472 | [0.1295, 0.1691] | 0.6758 |
 | 304 | 0.2078 | [0.1840, 0.2340] | 0.6926 |
 
+- The endpoints have three seeds each; the middle point has one, so it is reported but not claimed.
+- All training images come from the same two wells, so this measures more samples of the same conditions rather than more diversity.
+- The paired differences below are over images only. See the seed section for what happens when training stochasticity is included.
+
 Paired differences, same images and same groups:
 
 - **152 vs 79 images**: +0.0055 [+0.0012, +0.0092]
 - **304 vs 152 images**: +0.0606 [+0.0521, +0.0685]
 - **304 vs 79 images**: +0.0660 [+0.0587, +0.0739]
-
-- The endpoints have three seeds each; the middle point has one, so it is reported but not claimed.
-- All training images come from the same two wells, so this measures more samples of the same conditions rather than more diversity.
-- The paired differences below are over images only. See the seed section for what happens when training stochasticity is included.
 
 ### How much of that is the seed?
 

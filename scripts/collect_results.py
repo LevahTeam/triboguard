@@ -337,6 +337,11 @@ def format_report(runs: Path) -> str:
                 f"| {point['training_images']} | {point['matching_50_95']:.4f} | "
                 f"{bounds} | {point['boundary_recall']:.4f} |"
             )
+        # The artifact's caveats are worded as if they precede the differences
+        # ("the paired differences below"), so they are rendered where they say
+        # they are. Reordering the prose is right; rewriting a run's recorded
+        # caveats to match a layout choice would be editing evidence.
+        lines += [""] + [f"- {caveat}" for caveat in curve["caveats"]]
         lines += ["", "Paired differences, same images and same groups:", ""]
         for name, difference in curve["paired_differences"].items():
             if not difference.get("evaluated"):
@@ -347,7 +352,7 @@ def format_report(runs: Path) -> str:
                 f"[{difference['ci_low']:+.4f}, {difference['ci_high']:+.4f}]"
                 + ("" if difference["excludes_zero"] else " — includes zero")
             )
-        lines += [""] + [f"- {caveat}" for caveat in curve["caveats"]] + [""]
+        lines += [""]
 
     seeds = load(runs / "seeds" / "seeds.json")
     if seeds:
