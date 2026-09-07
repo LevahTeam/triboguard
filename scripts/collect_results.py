@@ -480,6 +480,25 @@ def format_report(runs: Path) -> str:
             "| Cell line | Median true q | Truth (control) | Cellpose | Three-class |",
             "|---|---|---|---|---|",
         ]
+        # A172 is the line the method was developed on, and it belongs in the
+        # table as the reference row. Its numbers come from the original
+        # agreement artifact, which used the same checkpoint, the same polygon
+        # truth and the same per-image median, so the rows are comparable.
+        origin = load(runs / "mechanics" / "segmenter_agreement.json")
+        if origin:
+
+            def _origin(entry: dict[str, Any]) -> str:
+                rho = entry.get("spearman_rho")
+                if rho is None:
+                    return "n/a"
+                return f"{rho:.3f}{' ✓' if entry.get('usable_for_trends') else ''}"
+
+            truth_q = [row["truth_polygon"] for row in origin["images"]]
+            lines.append(
+                f"| A172 *(developed on)* | {sorted(truth_q)[len(truth_q) // 2]:.3f} | "
+                f"{_origin(origin['truth_raster'])} | {_origin(origin['cellpose'])} | "
+                f"{_origin(origin['three_class_304'])} |"
+            )
         for key in ("mcf7", "shsy5y", "skbr3"):
             row = across.get(key)
             if not row:
@@ -501,6 +520,11 @@ def format_report(runs: Path) -> str:
             "A ✓ marks a method clearing the pre-set rho > 0.7 bar on that line. Lines are "
             "reported individually and never averaged: the instance ceiling varies more than "
             "fourfold across them, so an average would mostly record which lines were picked.",
+            "",
+            "The A172 three-class figure is one checkpoint, the same one used on every other "
+            "line here, so the rows are comparable. Across three seeds that same arm averages "
+            "0.679, which is below the bar — the single-seed 0.707 is the optimistic reading "
+            "and is marked ✓ only because the table reports the checkpoint, not the mean.",
             "",
         ]
 
