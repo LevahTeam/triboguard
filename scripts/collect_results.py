@@ -715,6 +715,7 @@ PUBLISHED = (
     "diversity/diversity.json",
     "mechanics/across_cell_lines.json",
     "mechanics/resolution_limit.json",
+    "mechanics/q_dynamic_range.json",
 )
 
 

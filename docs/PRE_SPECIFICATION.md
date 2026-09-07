@@ -79,6 +79,23 @@ A172 analysis and are applied here unchanged; that is what makes this a test of
 an existing prediction rather than a curve fitted to four points. It is still
 post-hoc, it is still four cell lines, and it is reported as a hypothesis.
 
+**And the cell-size hypothesis died too, which is why the next one is a
+prediction.** SHSY5Y came back at rho 0.801 for the three-class model — better
+than A172's 0.707 — despite cells barely larger than MCF7's, where recovery
+failed at 0.181. Size cannot be the explanation. What separates the two is how
+much the shape index *varies between images*, measured from the polygons alone
+with no segmenter involved: SHSY5Y spans sd 0.672 and A172 sd 0.305, while MCF7
+manages 0.109. A rank correlation cannot detect tracking ability when there is
+almost nothing to track; that is range restriction, and it is a property of the
+cell line, not of the method.
+
+This was written while SkBr3 was still running, so it stands as a genuine
+out-of-sample prediction: **SkBr3 has sd 0.101, the narrowest of the four, so its
+three-class recovery should fail, and it should fail for reasons that have
+nothing to do with segmentation quality.** If instead SkBr3 clears the bar, the
+range-restriction account is wrong and the honest move is to say so. The commit
+that records this precedes the commit that reports SkBr3.
+
 ## Registered before the run, not yet answered
 
 Two experiments were specified, committed, and only then executed. This section
