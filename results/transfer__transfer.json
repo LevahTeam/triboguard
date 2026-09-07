@@ -1,0 +1,113 @@
+{
+  "environment": {
+    "accelerators": {
+      "cuda": false,
+      "mps": true
+    },
+    "git": {
+      "branch": "master",
+      "commit": "b23f542bd46e9c15d87cd17ca26105c2537a5a6f",
+      "dirty": false
+    },
+    "machine": "arm64",
+    "packages": {
+      "numpy": "2.3.5",
+      "pillow": "11.3.0",
+      "pycocotools": "2.0.11",
+      "remotezip": "0.12.6",
+      "scipy": "1.16.3",
+      "torch": "2.11.0"
+    },
+    "platform": "macOS-15.6-arm64-arm-64bit-Mach-O",
+    "python": "3.13.9",
+    "recorded_at_utc": "2026-09-07T05:30:57+00:00",
+    "torch_threads": 4
+  },
+  "generalist_fraction_of_ceiling": {
+    "relative_change_pct": -31.259772848327938,
+    "seen": 2.320837424467371,
+    "unseen_mean": 1.5953489173998865
+  },
+  "per_line": {
+    "a172": {
+      "ceiling": 0.16773269589838616,
+      "cellpose": 0.38928031794777934,
+      "cellpose_minus_three_class": {
+        "ci_high": 0.196826028844998,
+        "ci_low": 0.16603536786933137,
+        "clusters": 33,
+        "confidence": 0.95,
+        "difference": 0.18152217047042185,
+        "evaluated": true,
+        "excludes_zero": true,
+        "resamples": 2000,
+        "resampling_unit": "acquisition group"
+      },
+      "cellpose_over_ceiling": 2.320837424467371,
+      "three_class": 0.20775814747735757,
+      "three_class_over_ceiling": 1.2386264130829874
+    },
+    "mcf7": {
+      "ceiling": 0.2498664128145376,
+      "cellpose": 0.3834096790176221,
+      "cellpose_minus_three_class": {
+        "ci_high": 0.270451906230385,
+        "ci_low": 0.2331443074779711,
+        "clusters": 38,
+        "confidence": 0.95,
+        "difference": 0.25089264566248615,
+        "evaluated": true,
+        "excludes_zero": true,
+        "resamples": 2000,
+        "resampling_unit": "acquisition group"
+      },
+      "cellpose_over_ceiling": 1.5344586521206693,
+      "three_class": 0.1325170333551359,
+      "three_class_over_ceiling": 0.5303515260912485
+    },
+    "shsy5y": {
+      "ceiling": 0.12150083530255071,
+      "cellpose": 0.2497257985563936,
+      "cellpose_minus_three_class": {
+        "ci_high": 0.204248343877161,
+        "ci_low": 0.17819924948232688,
+        "clusters": 37,
+        "confidence": 0.95,
+        "difference": 0.19090866274931578,
+        "evaluated": true,
+        "excludes_zero": true,
+        "resamples": 2000,
+        "resampling_unit": "acquisition group"
+      },
+      "cellpose_over_ceiling": 2.05534223640972,
+      "three_class": 0.05881713580707783,
+      "three_class_over_ceiling": 0.4840883246655594
+    },
+    "skbr3": {
+      "ceiling": 0.5332009179146443,
+      "cellpose": 0.6378393925600515,
+      "cellpose_minus_three_class": {
+        "ci_high": 0.17732874065899326,
+        "ci_low": 0.15398011414731677,
+        "clusters": 38,
+        "confidence": 0.95,
+        "difference": 0.1660523934572708,
+        "evaluated": true,
+        "excludes_zero": true,
+        "resamples": 2000,
+        "resampling_unit": "acquisition group"
+      },
+      "cellpose_over_ceiling": 1.1962458636692705,
+      "three_class": 0.4717869991027807,
+      "three_class_over_ceiling": 0.884820305538756
+    }
+  },
+  "question": "How much does a model trained on one cell line lose on lines it never saw?",
+  "specialist_fraction_of_ceiling": {
+    "relative_change_pct": -48.88800108909259,
+    "seen": 1.2386264130829874,
+    "unseen_mean": 0.633086718765188
+  },
+  "trained_on": "A172 (glioblastoma), wells A7+D7, 304 images",
+  "warning": "Raw scores must not be compared across cell lines. The ceiling varies 4.4x between the easiest and hardest line here, so a raw average across lines measures which lines were chosen more than it measures the model."
+}

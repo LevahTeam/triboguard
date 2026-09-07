@@ -319,6 +319,52 @@ def format_report(runs: Path) -> str:
             )
         lines += [""] + [f"- {caveat}" for caveat in curve["caveats"]] + [""]
 
+    transfer = load(runs / "transfer" / "transfer.json")
+    if transfer:
+        lines += [
+            "## Cross-cell-line transfer",
+            "",
+            f"Every model was trained on {transfer['trained_on']} and tested on lines it",
+            "never saw. **Raw scores are not comparable across cell lines** — the ceiling,",
+            "which is how hard the instance task is for that line, varies more than",
+            "fourfold here, so an average of raw scores measures which lines were picked",
+            "more than it measures the model.",
+            "",
+            "| Cell line | Ceiling | Three-class | ÷ ceiling | Cellpose | ÷ ceiling |",
+            "|---|---|---|---|---|---|",
+        ]
+        names = {
+            "a172": "A172 *(seen in training)*",
+            "mcf7": "MCF7 (breast)",
+            "shsy5y": "SHSY5Y (neuroblastoma)",
+            "skbr3": "SkBr3 (breast)",
+        }
+        for key, label in names.items():
+            row = transfer["per_line"].get(key)
+            if not row:
+                continue
+            lines.append(
+                f"| {label} | {row['ceiling']:.4f} | {row['three_class']:.4f} | "
+                f"{row['three_class_over_ceiling']:.2f} | {row['cellpose']:.4f} | "
+                f"{row['cellpose_over_ceiling']:.2f} |"
+            )
+        specialist = transfer["specialist_fraction_of_ceiling"]
+        generalist = transfer["generalist_fraction_of_ceiling"]
+        lines += [
+            "",
+            f"- Specialist (A172-trained): {specialist['seen']:.2f} of ceiling on the line "
+            f"it saw, {specialist['unseen_mean']:.2f} on unseen lines "
+            f"(**{specialist['relative_change_pct']:+.0f}%**)",
+            f"- Generalist (Cellpose): {generalist['seen']:.2f} to "
+            f"{generalist['unseen_mean']:.2f} "
+            f"(**{generalist['relative_change_pct']:+.0f}%**)",
+            "",
+            "Cellpose beats the specialist on every line, seen or unseen, and the paired "
+            "interval excludes zero every time. Specialising on one cell line costs about "
+            "1.6 times more generalisation than the generalist gives up.",
+            "",
+        ]
+
     ablation = load(runs / "baseline_768" / "metrics.json")
     if primary and ablation:
         lines += [
@@ -437,6 +483,7 @@ PUBLISHED = (
     "scale_152/metrics.json",
     "scale_304/metrics.json",
     "scaling/scaling.json",
+    "transfer/transfer.json",
 )
 
 

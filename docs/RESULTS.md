@@ -93,6 +93,26 @@ Paired differences, same images and same groups:
 - Every point is a single seed, so the shape of the curve is provisional even though the direction is not.
 - All training images come from the same two wells, so this measures more samples of the same conditions rather than more diversity.
 
+## Cross-cell-line transfer
+
+Every model was trained on A172 (glioblastoma), wells A7+D7, 304 images and tested on lines it
+never saw. **Raw scores are not comparable across cell lines** — the ceiling,
+which is how hard the instance task is for that line, varies more than
+fourfold here, so an average of raw scores measures which lines were picked
+more than it measures the model.
+
+| Cell line | Ceiling | Three-class | ÷ ceiling | Cellpose | ÷ ceiling |
+|---|---|---|---|---|---|
+| A172 *(seen in training)* | 0.1677 | 0.2078 | 1.24 | 0.3893 | 2.32 |
+| MCF7 (breast) | 0.2499 | 0.1325 | 0.53 | 0.3834 | 1.53 |
+| SHSY5Y (neuroblastoma) | 0.1215 | 0.0588 | 0.48 | 0.2497 | 2.06 |
+| SkBr3 (breast) | 0.5332 | 0.4718 | 0.88 | 0.6378 | 1.20 |
+
+- Specialist (A172-trained): 1.24 of ceiling on the line it saw, 0.63 on unseen lines (**-49%**)
+- Generalist (Cellpose): 2.32 to 1.60 (**-31%**)
+
+Cellpose beats the specialist on every line, seen or unseen, and the paired interval excludes zero every time. Specialising on one cell line costs about 1.6 times more generalisation than the generalist gives up.
+
 ## Input resolution
 
 Letterboxing 704x520 into a square loses detail. Pushing the *ground truth*

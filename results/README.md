@@ -24,3 +24,4 @@ Model weights, overlays and downloaded data are intentionally not here: they are
 - `seed_1__metrics.json`
 - `seed_2__metrics.json`
 - `seed_3__metrics.json`
+- `transfer__transfer.json`
