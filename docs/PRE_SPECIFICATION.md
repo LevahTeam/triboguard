@@ -67,6 +67,45 @@ then applied uniformly. The cross-cell-line comparison of shape index was not
 predicted in advance. These are hypothesis-generating, and the honest next step
 for any of them is a fresh dataset rather than more analysis of this one.
 
+## Registered before the run, not yet answered
+
+Two experiments were specified, committed, and only then executed. This section
+was written while both were still training, so the decision rules below could not
+have been shaped by their results. The commit that introduced this section is the
+proof: it precedes the commit that reports the numbers.
+
+**Diversity versus volume.** Does a training set spanning three cell lines
+transfer better than a single-line set of the same size? Both arms train on
+exactly 304 images with identical hyperparameters and three seeds each (42, 1,
+2); the mixed arm draws from A172, MCF7 and SkBr3, the control from A172 alone.
+Both are scored on SHSY5Y, which neither arm ever sees.
+
+- *Decision rule.* Diversity wins only if the seed-and-image bootstrap interval
+  on the difference excludes zero. A gap smaller than the seed spread is not a
+  finding, and will be reported as "no detectable difference" rather than
+  quietly dropped.
+- *Why it is worth running.* Volume is confounded with diversity in the scaling
+  curve already reported: the 304-image arm saw both more images and more fields
+  of view. Matching the size isolates the part that is about variety.
+- *What would falsify the appealing answer.* If the mixed arm matches or loses,
+  the honest conclusion is that at this scale the model is limited by capacity or
+  by the representation, not by the narrowness of its training data.
+
+**Does the mechanics result survive a change of cell line?** The claim that a
+segmenter can recover tissue shape index well enough to track trends was measured
+on A172 only. It is now being re-measured on MCF7, SHSY5Y and SkBr3, against
+polygon-derived truth, with the rasterised ground truth included as a positive
+control.
+
+- *Decision rule.* The pre-existing rho > 0.7 bar is unchanged. A method counts
+  as usable for trends on a line only if it clears 0.7 on that line. Lines are
+  reported individually; no average across lines will be quoted as a headline,
+  because the instance ceiling varies more than fourfold between them and an
+  average would mostly measure which lines were chosen.
+- *The control is load-bearing.* If the rasterised ground truth itself fails to
+  clear the bar on a line, that line's failure is a limit of the measurement
+  chain, not of the segmenter, and will be reported that way.
+
 ## Claims withdrawn after testing
 
 This is the part worth reading. Each of these was stated, then retracted when a
