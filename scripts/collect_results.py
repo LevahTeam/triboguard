@@ -568,6 +568,64 @@ def format_report(runs: Path) -> str:
                 "",
             ]
 
+    balanced = load(runs / "diversity_balanced" / "diversity_balanced.json")
+    if balanced:
+        design = balanced["design"]
+        mixed, control = balanced["mixed"], balanced["a172_only"]
+        gap = balanced["mixed_minus_a172"]
+        epochs = balanced.get("selected_epochs") or {}
+        lines += [
+            "### The same question with a neutral checkpoint rule",
+            "",
+            "The result above used a checkpoint rule that was measurably not neutral "
+            "between the arms. This repeats the experiment with "
+            f'`selection_metric="{design["selection_metric"]}"`, which averages interior '
+            "and boundary recall. **Both** arms were re-trained: reusing the single-line "
+            "checkpoints would compare a model chosen by one rule against a model chosen "
+            "by another, which is the confound being removed.",
+            "",
+            "This run is **not pre-registered** and does not inherit the standing of the "
+            "one above. Its decision rule is inherited unchanged — the interval on the "
+            "difference must exclude zero — and was fixed before either arm produced a "
+            "number, which is what keeps it from being a fishing expedition.",
+            "",
+            "| Training set | Mean | Seed SD | 95% CI (seeds + images) | ÷ ceiling |",
+            "|---|---|---|---|---|",
+            f"| {design['mixed_lines'][0]} only | {control['mean']:.4f} | "
+            f"{control['seed_sd']:.4f} | [{control['ci_low']:.4f}, {control['ci_high']:.4f}] | "
+            f"{control['fraction_of_ceiling']:.2f} |",
+            f"| Three lines | {mixed['mean']:.4f} | {mixed['seed_sd']:.4f} | "
+            f"[{mixed['ci_low']:.4f}, {mixed['ci_high']:.4f}] | "
+            f"{mixed['fraction_of_ceiling']:.2f} |",
+            "",
+        ]
+        if epochs:
+            mixed_epochs = sorted(v for k, v in epochs.items() if k.startswith("mixed"))
+            single_epochs = sorted(v for k, v in epochs.items() if k.startswith("a172"))
+            lines += [
+                f"Checkpoints now select at epochs {mixed_epochs} for the mixed arm and "
+                f"{single_epochs} for the single-line arm. Whether the rule equalised the "
+                "two is visible here rather than assumed.",
+                "",
+            ]
+        if gap.get("evaluated"):
+            lines += [
+                f"Mixed minus single-line: **{gap['difference']:+.4f}** "
+                f"[{gap['ci_low']:+.4f}, {gap['ci_high']:+.4f}]. "
+                + (
+                    "The interval excludes zero. With the confounded rule removed, "
+                    "diversity does buy something at matched training size — and the "
+                    "pre-registered null above is then best read as an artifact of "
+                    "checkpoint selection rather than as an answer about data."
+                    if gap.get("excludes_zero")
+                    else "The interval still includes zero. The pre-registered null "
+                    "survives the removal of its main caveat, which makes it a good deal "
+                    "more convincing than it was: the answer was not an artifact of how "
+                    "checkpoints were chosen."
+                ),
+                "",
+            ]
+
     tissue = load(runs / "mechanics" / "mechanics.json")
     if tissue:
         by_line = tissue["cell_types"]
@@ -902,6 +960,7 @@ PUBLISHED = (
     "mechanics/q_dynamic_range.json",
     "mechanics/attenuation.json",
     "diversity/selection_cost.json",
+    "diversity_balanced/diversity_balanced.json",
 )
 
 
