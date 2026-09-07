@@ -90,8 +90,26 @@ Paired differences, same images and same groups:
 - **304 vs 152 images**: +0.0606 [+0.0521, +0.0685]
 - **304 vs 79 images**: +0.0660 [+0.0587, +0.0739]
 
-- Every point is a single seed, so the shape of the curve is provisional even though the direction is not.
+- The endpoints have three seeds each; the middle point has one, so it is reported but not claimed.
 - All training images come from the same two wells, so this measures more samples of the same conditions rather than more diversity.
+- The paired differences below are over images only. See the seed section for what happens when training stochasticity is included.
+
+### How much of that is the seed?
+
+Three seeds at each endpoint, all scored on the same 60 images. The
+differences above come from a bootstrap over *images*, which is silent on
+which initialisation a model was trained from - a separate question with a
+separate answer.
+
+| Training images | Seed scores | Mean | Seed SD | CI images only | CI images + seed |
+|---|---|---|---|---|---|
+| 79 | 0.1250, 0.1453, 0.1417 | 0.1373 | 0.0108 | [0.1171, 0.1622] | [0.1153, 0.1654] |
+| 304 | 0.2360, 0.2088, 0.2078 | 0.2175 | 0.0160 | [0.1914, 0.2465] | [0.1886, 0.2520] |
+
+- **304 vs 79 images, accounting for both sources**: +0.0802 [+0.0623, +0.1013] - the headline scaling result survives.
+- **The 152 vs 79 step does not.** It is +0.0055, about half the seed standard deviation of 0.0108 measured at that size. The image-level interval called it significant because it was never asked about training noise. Only one seed was run at 152, so that point is reported but not claimed.
+
+Adding seed uncertainty widens these intervals by roughly 11-15%, which is modest. The lesson is not that image-level intervals are useless, but that a difference smaller than the seed spread cannot be established by them however many images are tested.
 
 ## Cross-cell-line transfer
 

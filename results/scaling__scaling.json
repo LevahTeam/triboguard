@@ -1,7 +1,8 @@
 {
   "caveats": [
-    "Every point is a single seed, so the shape of the curve is provisional even though the direction is not.",
-    "All training images come from the same two wells, so this measures more samples of the same conditions rather than more diversity."
+    "The endpoints have three seeds each; the middle point has one, so it is reported but not claimed.",
+    "All training images come from the same two wells, so this measures more samples of the same conditions rather than more diversity.",
+    "The paired differences below are over images only. See the seed section for what happens when training stochasticity is included."
   ],
   "environment": {
     "accelerators": {
@@ -120,5 +121,9 @@
     }
   ],
   "question": "Is training data the binding constraint on the three-class model?",
-  "seeds_per_point": 1
+  "seeds_per_point": {
+    "152": 1,
+    "304": 3,
+    "79": 3
+  }
 }

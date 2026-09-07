@@ -337,3 +337,129 @@ def paired_bootstrap(
     interval["difference"] = interval.pop("mean")
     interval["excludes_zero"] = bool(interval["ci_low"] > 0.0 or interval["ci_high"] < 0.0)
     return interval
+
+
+def replicate_interval(
+    per_seed: dict[str, list[float]],
+    *,
+    groups: list[str] | None = None,
+    resamples: int = 2000,
+    confidence: float = 0.95,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """Uncertainty from *both* the images tested and the seed trained from.
+
+    A bootstrap over images answers "what if I had tested on different images?".
+    It is silent on "what if I had trained from a different initialisation?", and
+    those are separate questions with separate answers. Reporting only the first
+    understates the uncertainty of any claim about a training recipe, which is
+    exactly how a difference smaller than the seed spread gets called significant.
+
+    ``per_seed`` maps a seed label to that run's per-image scores, all scored on
+    the same images in the same order. Both levels are resampled together: seeds
+    with replacement, and image clusters with replacement.
+    """
+    labels = sorted(per_seed)
+    if len(labels) < 2:
+        return {"evaluated": False, "reason": "Fewer than two seeds."}
+    lengths = {len(per_seed[label]) for label in labels}
+    if len(lengths) != 1:
+        raise ValueError("Every seed must be scored on the same images.")
+    count = lengths.pop()
+    if count == 0:
+        return {"evaluated": False, "reason": "No images."}
+
+    seed_means = np.array([float(np.mean(per_seed[label])) for label in labels])
+    rng = np.random.default_rng(seed)
+
+    if groups is None:
+        index_by_group = {"all": list(range(count))}
+    else:
+        if len(groups) != count:
+            raise ValueError("groups must be one label per image.")
+        index_by_group = {}
+        for position, group in enumerate(groups):
+            index_by_group.setdefault(str(group), []).append(position)
+    keys = list(index_by_group)
+
+    draws = []
+    for _ in range(resamples):
+        picked_seeds = rng.integers(0, len(labels), len(labels))
+        picked_groups = rng.integers(0, len(keys), len(keys))
+        positions = [i for g in picked_groups for i in index_by_group[keys[g]]]
+        draws.append(
+            float(np.mean([per_seed[labels[s]][i] for s in picked_seeds for i in positions]))
+        )
+    tail = (1.0 - confidence) / 2.0
+    return {
+        "evaluated": True,
+        "seeds": len(labels),
+        "images": count,
+        "mean": float(seed_means.mean()),
+        "seed_values": {label: float(np.mean(per_seed[label])) for label in labels},
+        "seed_sd": float(seed_means.std(ddof=1)),
+        "ci_low": float(np.percentile(draws, 100 * tail)),
+        "ci_high": float(np.percentile(draws, 100 * (1 - tail))),
+        "confidence": confidence,
+        "accounts_for": ["image sampling", "training seed"],
+    }
+
+
+def replicate_difference(
+    first: dict[str, list[float]],
+    second: dict[str, list[float]],
+    *,
+    groups: list[str] | None = None,
+    resamples: int = 2000,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """Difference between two conditions, resampling seeds and images together.
+
+    Seeds are not paired across conditions - run *k* of one condition has no
+    special relationship to run *k* of the other - so seeds are drawn
+    independently for each side while the images stay shared.
+    """
+    if len(first) < 2 or len(second) < 2:
+        return {"evaluated": False, "reason": "Each condition needs at least two seeds."}
+    left, right = sorted(first), sorted(second)
+    count = len(first[left[0]])
+    if groups is not None and len(groups) != count:
+        raise ValueError("groups must be one label per image.")
+
+    index_by_group: dict[str, list[int]] = {}
+    for position in range(count):
+        key = str(groups[position]) if groups is not None else "all"
+        index_by_group.setdefault(key, []).append(position)
+    keys = list(index_by_group)
+
+    rng = np.random.default_rng(seed)
+    draws = []
+    for _ in range(resamples):
+        picked_groups = rng.integers(0, len(keys), len(keys))
+        positions = [i for g in picked_groups for i in index_by_group[keys[g]]]
+        a = np.mean(
+            [first[left[s]][i] for s in rng.integers(0, len(left), len(left)) for i in positions]
+        )
+        b = np.mean(
+            [
+                second[right[s]][i]
+                for s in rng.integers(0, len(right), len(right))
+                for i in positions
+            ]
+        )
+        draws.append(float(a - b))
+    observed = float(
+        np.mean([np.mean(first[label]) for label in left])
+        - np.mean([np.mean(second[label]) for label in right])
+    )
+    return {
+        "evaluated": True,
+        "difference": observed,
+        "ci_low": float(np.percentile(draws, 2.5)),
+        "ci_high": float(np.percentile(draws, 97.5)),
+        "excludes_zero": bool(
+            float(np.percentile(draws, 2.5)) > 0 or float(np.percentile(draws, 97.5)) < 0
+        ),
+        "seeds": {"first": len(left), "second": len(right)},
+        "accounts_for": ["image sampling", "training seed"],
+    }

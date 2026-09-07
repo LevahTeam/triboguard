@@ -319,6 +319,61 @@ def format_report(runs: Path) -> str:
             )
         lines += [""] + [f"- {caveat}" for caveat in curve["caveats"]] + [""]
 
+    seeds = load(runs / "seeds" / "seeds.json")
+    if seeds:
+        lines += [
+            "### How much of that is the seed?",
+            "",
+            "Three seeds at each endpoint, all scored on the same 60 images. The",
+            "differences above come from a bootstrap over *images*, which is silent on",
+            "which initialisation a model was trained from - a separate question with a",
+            "separate answer.",
+            "",
+            "| Training images | Seed scores | Mean | Seed SD | CI images only "
+            "| CI images + seed |",
+            "|---|---|---|---|---|---|",
+        ]
+        for size in ("79", "304"):
+            entry = seeds["per_size"].get(size)
+            if not entry:
+                continue
+            both, images_only = entry["seeds_and_images"], entry["images_only"]
+            values = ", ".join(f"{v:.4f}" for v in both["seed_values"].values())
+            lines.append(
+                f"| {size} | {values} | {both['mean']:.4f} | {both['seed_sd']:.4f} | "
+                f"[{images_only['ci_low']:.4f}, {images_only['ci_high']:.4f}] | "
+                f"[{both['ci_low']:.4f}, {both['ci_high']:.4f}] |"
+            )
+        difference = seeds.get("difference_304_vs_79", {})
+        seed_sd = seeds["per_size"]["79"]["seeds_and_images"]["seed_sd"]
+        small_step = (
+            (curve or {}).get("paired_differences", {}).get("152_vs_79", {}).get("difference")
+        )
+        lines += [""]
+        if difference.get("evaluated"):
+            lines.append(
+                f"- **304 vs 79 images, accounting for both sources**: "
+                f"{difference['difference']:+.4f} "
+                f"[{difference['ci_low']:+.4f}, {difference['ci_high']:+.4f}] - the "
+                "headline scaling result survives."
+            )
+        if small_step is not None:
+            lines.append(
+                f"- **The 152 vs 79 step does not.** It is {small_step:+.4f}, about half "
+                f"the seed standard deviation of {seed_sd:.4f} measured at that size. The "
+                "image-level interval called it significant because it was never asked "
+                "about training noise. Only one seed was run at 152, so that point is "
+                "reported but not claimed."
+            )
+        lines += [
+            "",
+            "Adding seed uncertainty widens these intervals by roughly 11-15%, which is "
+            "modest. The lesson is not that image-level intervals are useless, but that a "
+            "difference smaller than the seed spread cannot be established by them "
+            "however many images are tested.",
+            "",
+        ]
+
     transfer = load(runs / "transfer" / "transfer.json")
     if transfer:
         lines += [

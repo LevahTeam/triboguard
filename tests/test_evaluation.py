@@ -218,3 +218,73 @@ def test_pairing_is_what_makes_a_small_consistent_difference_detectable() -> Non
     # The same 0.02 gap against the spread of the values themselves is invisible.
     spread = evaluation.bootstrap_interval(list(base), resamples=1000)
     assert (spread["ci_high"] - spread["ci_low"]) > 0.02
+
+
+# ------------------------------------------- uncertainty from seeds AND images
+
+
+def _seeded_scores(
+    means: list[float], images: int = 40, spread: float = 0.02, seed: int = 0
+) -> dict[str, list[float]]:
+    rng = np.random.default_rng(seed)
+    return {f"s{index}": list(rng.normal(mean, spread, images)) for index, mean in enumerate(means)}
+
+
+def test_a_replicate_interval_reports_both_sources_of_uncertainty() -> None:
+    per_seed = _seeded_scores([0.20, 0.22, 0.24])
+    result = evaluation.replicate_interval(per_seed)
+    assert result["evaluated"]
+    assert result["seeds"] == 3
+    assert result["mean"] == pytest.approx(0.22, abs=0.01)
+    assert result["seed_sd"] == pytest.approx(0.02, abs=0.01)
+    assert result["ci_low"] < result["mean"] < result["ci_high"]
+    assert set(result["accounts_for"]) == {"image sampling", "training seed"}
+
+
+def test_ignoring_seed_variation_understates_the_interval() -> None:
+    """The specific error this exists to prevent.
+
+    Three runs whose per-image scores are almost noiseless but whose means differ
+    between seeds. Pooling the images pretends the spread is not there.
+    """
+    per_seed = _seeded_scores([0.14, 0.18, 0.22], images=60, spread=0.001)
+    pooled = [value for values in per_seed.values() for value in values]
+    image_only = evaluation.bootstrap_interval(pooled, resamples=1500)
+    both = evaluation.replicate_interval(per_seed, resamples=1500)
+    image_width = image_only["ci_high"] - image_only["ci_low"]
+    both_width = both["ci_high"] - both["ci_low"]
+    assert both_width > 4 * image_width
+
+
+def test_a_replicate_interval_needs_at_least_two_seeds() -> None:
+    assert evaluation.replicate_interval({"only": [0.2] * 10})["evaluated"] is False
+    assert evaluation.replicate_interval({})["evaluated"] is False
+
+
+def test_mismatched_image_counts_between_seeds_are_rejected() -> None:
+    with pytest.raises(ValueError, match="same images"):
+        evaluation.replicate_interval({"a": [0.1, 0.2], "b": [0.1]})
+
+
+def test_a_difference_smaller_than_the_seed_spread_is_not_declared_real() -> None:
+    """The scaling curve's small step, in miniature."""
+    first = _seeded_scores([0.140, 0.125, 0.145], images=60, spread=0.02, seed=1)
+    second = _seeded_scores([0.147, 0.130, 0.150], images=60, spread=0.02, seed=2)
+    result = evaluation.replicate_difference(first, second, resamples=1500)
+    assert result["evaluated"]
+    assert abs(result["difference"]) < 0.02
+    assert result["excludes_zero"] is False
+
+
+def test_a_difference_far_larger_than_the_seed_spread_is_declared_real() -> None:
+    small = _seeded_scores([0.137, 0.125, 0.145], images=60, spread=0.02, seed=1)
+    large = _seeded_scores([0.208, 0.236, 0.222], images=60, spread=0.02, seed=2)
+    result = evaluation.replicate_difference(large, small, resamples=1500)
+    assert result["difference"] == pytest.approx(0.086, abs=0.02)
+    assert result["excludes_zero"] is True
+
+
+def test_replicate_difference_needs_two_seeds_on_each_side() -> None:
+    one = {"a": [0.1] * 10}
+    two = {"a": [0.2] * 10, "b": [0.3] * 10}
+    assert evaluation.replicate_difference(one, two)["evaluated"] is False
