@@ -3,11 +3,15 @@
 The first run of this experiment used the original selection rule: keep the
 epoch with the best validation boundary recall. That rule turned out not to be
 neutral between the arms. Boundary *recall* rewards over-predicting boundaries,
-which an under-trained model does, so it peaks early -- and it peaked 29% of the
-way through the mixed runs, while interior recall still had 0.18 to gain, against
-65-75% of the way through the single-line runs with 0.03-0.05 left. The mixed arm
-was therefore compared while under-trained, and any null result from that
-comparison is confounded.
+which an under-trained model does, so it can peak early. On one mixed run it
+peaked 29% of the way through training with interior recall still owing 0.18,
+where the single-line runs peaked 65-75% of the way through with 0.03-0.05 left.
+
+That happened to one seed, not to every mixed run: another selected an epoch in
+the same range as the single-line runs. So the rule is not reliably hostile to
+this arm -- it is capable of selecting a badly under-trained checkpoint and did so
+once. A three-seed mean containing one such checkpoint is still dragged down by
+it, which is reason enough to remove the rule from the comparison.
 
 This re-runs both arms end to end with ``selection_metric="balanced"``, which
 averages interior and boundary recall. Both arms are re-trained: reusing the

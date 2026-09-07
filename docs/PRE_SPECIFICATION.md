@@ -97,12 +97,23 @@ compare a model chosen by one rule against a model chosen by another and
 reintroduce the confound it exists to remove.
 
 The second run is not pre-registered and must not be presented as though it were.
-It was designed after seeing that boundary recall peaked 29% of the way through
-the mixed runs and 65-75% of the way through the single-line ones. What protects
-it from being a fishing expedition is that the decision rule is inherited
-unchanged from the first run — diversity wins only if the seed-and-image interval
-on the difference excludes zero — and that the rule was fixed before either arm
-of the second run had produced a number.
+It was designed after seeing one mixed run peak on boundary recall 29% of the way
+through training, with interior recall still owing 0.18, where the single-line
+runs peaked 65-75% of the way through with 0.03-0.05 left.
+
+**One run, not the arm.** An earlier draft of this paragraph called the pattern
+systematic on the strength of two seeds. That was a misreading: the second seed's
+running maximum was inspected while it was still training, and it went on to
+improve twice more and to select an epoch in the same range as the single-line
+runs. The rule is capable of selecting a badly under-trained checkpoint, and did
+so once; it does not do so every time. That is a weaker problem than the one
+originally described, and it is still worth removing, because a three-seed mean
+that contains one badly selected checkpoint is dragged down by it.
+
+What protects the second run from being a fishing expedition is that the decision
+rule is inherited unchanged from the first — diversity wins only if the
+seed-and-image interval on the difference excludes zero — and that the rule was
+fixed before either arm of the second run had produced a number.
 
 **And the cell-size hypothesis died too, which is why the next one is a
 prediction.** SHSY5Y came back at rho 0.801 for the three-class model — better
