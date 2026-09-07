@@ -411,6 +411,11 @@ def time_course(
             file_name = str(image.get("file_name", ""))
             hours = parse_hours(file_name)
             parts = parse_file_name(file_name)
+            # The two checks are not independent today: parse_file_name already
+            # requires the timestamp, so hours is None only when parts is too.
+            # Kept anyway, because relying on that would couple this loop to an
+            # implementation detail of a function it does not own. A mutation
+            # test confirms the redundancy is real rather than assumed.
             if hours is None or parts is None:
                 continue
             images[int(image["id"])] = (

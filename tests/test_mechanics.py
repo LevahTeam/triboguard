@@ -457,3 +457,156 @@ def test_agreement_rejects_a_segmenter_that_scrambles_the_ordering() -> None:
 def test_agreement_needs_paired_images() -> None:
     assert mechanics.agreement([3.9], [4.0])["evaluated"] is False
     assert mechanics.agreement([], [])["evaluated"] is False
+
+
+def _timelapse_with(tmp_path: Path, extra: list[dict], name: str = "guards.json") -> Path:
+    """A clean 12-point trajectory plus whatever malformed records a test adds.
+
+    The clean part is what makes these tests meaningful: a guard that silently
+    dropped *everything* would also pass a test that only checked the bad record
+    was excluded, so each test asserts the good data survived alongside it.
+    """
+    images, annotations = [], []
+    for index, hours in enumerate(range(0, 72, 6), start=1):
+        days, rest = divmod(int(hours), 24)
+        images.append(
+            {
+                "id": index,
+                "file_name": f"A172_Phase_C7_1_{days:02d}d{rest:02d}h00m_1.tif",
+                "width": 704,
+                "height": 520,
+            }
+        )
+        for cell in range(40):
+            annotations.append(
+                {
+                    "id": index * 1000 + cell,
+                    "image_id": index,
+                    "segmentation": [_regular_polygon(6, radius=40.0)],
+                }
+            )
+    payload = {"images": images, "annotations": annotations}
+    for record in extra:
+        payload.setdefault(record.pop("_into"), []).append(record)
+    path = tmp_path / name
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    return path
+
+
+def _clean_trajectory(result: dict) -> dict:
+    assert result["wells_measured"] == 1
+    return result["wells"]["C7"]
+
+
+def test_an_image_with_no_recoverable_timestamp_is_skipped(tmp_path: Path) -> None:
+    """A file name without a timestamp has no place on a time axis.
+
+    Its cells are squares among hexagons, and numerous enough to move a median,
+    so removing the guard changes the answer instead of merely the record count.
+    """
+    path = _timelapse_with(
+        tmp_path,
+        [
+            {
+                "_into": "images",
+                "id": 999,
+                "file_name": "no_timestamp.tif",
+                "width": 704,
+                "height": 520,
+            },
+            *(
+                {
+                    "_into": "annotations",
+                    "id": 910000 + index,
+                    "image_id": 999,
+                    "segmentation": [_regular_polygon(4, radius=40.0)],
+                }
+                for index in range(60)
+            ),
+        ],
+    )
+    well = _clean_trajectory(mechanics.time_course([path], cell_type="A172"))
+    assert well["timepoints"] == 12
+    assert well["q_start"] == pytest.approx(HEXAGON_SHAPE_INDEX, rel=1e-3)
+
+
+def test_an_annotation_pointing_at_no_image_is_skipped(tmp_path: Path) -> None:
+    """An orphaned annotation has no well and no hour, so it cannot be placed."""
+    path = _timelapse_with(
+        tmp_path,
+        [
+            {
+                "_into": "annotations",
+                "id": 900001 + index,
+                "image_id": 4242,
+                "segmentation": [_regular_polygon(4, radius=40.0)],
+            }
+            for index in range(60)
+        ],
+    )
+    well = _clean_trajectory(mechanics.time_course([path], cell_type="A172"))
+    assert well["timepoints"] == 12
+    assert well["q_start"] == pytest.approx(HEXAGON_SHAPE_INDEX, rel=1e-3)
+
+
+@pytest.mark.parametrize(
+    "segmentation",
+    [
+        pytest.param({"counts": "abc", "size": [10, 10]}, id="run-length-encoded"),
+        pytest.param([], id="empty"),
+        pytest.param([[0.0, 0.0, 1.0, 1.0]], id="two-vertices"),
+    ],
+)
+def test_a_segmentation_that_is_not_a_usable_polygon_is_skipped(
+    tmp_path: Path, segmentation: object
+) -> None:
+    """These carry no perimeter, and guessing one would be silent fabrication."""
+    path = _timelapse_with(
+        tmp_path,
+        [{"_into": "annotations", "id": 900002, "image_id": 1, "segmentation": segmentation}],
+    )
+    well = _clean_trajectory(mechanics.time_course([path], cell_type="A172"))
+    assert well["timepoints"] == 12
+
+
+def test_debris_below_the_minimum_area_is_excluded(tmp_path: Path) -> None:
+    """A speck must not drag the median, and the speck has to differ in *shape*.
+
+    The first version of this test used small hexagons and passed vacuously: the
+    shape index is scale-invariant, so shrinking a hexagon changes nothing it
+    measures. Debris is therefore squares (q = 4.0) among hexagons (q = 3.72),
+    which the area floor can visibly include or exclude.
+    """
+    debris = [
+        {
+            "_into": "annotations",
+            "id": 900003 + index,
+            "image_id": 1,
+            "segmentation": [_regular_polygon(4, radius=1.0)],
+        }
+        for index in range(40)
+    ]
+    with_debris = mechanics.time_course(
+        [_timelapse_with(tmp_path, list(debris), "debris.json")], cell_type="A172"
+    )
+    clean = mechanics.time_course([_timelapse_with(tmp_path, [], "clean.json")], cell_type="A172")
+    assert _clean_trajectory(with_debris)["q_start"] == pytest.approx(
+        _clean_trajectory(clean)["q_start"]
+    )
+
+
+def test_lowering_the_area_floor_lets_the_debris_back_in(tmp_path: Path) -> None:
+    """The exclusion must be the threshold working, not the debris being inert."""
+    debris = [
+        {
+            "_into": "annotations",
+            "id": 900003 + index,
+            "image_id": 1,
+            "segmentation": [_regular_polygon(4, radius=1.0)],
+        }
+        for index in range(40)
+    ]
+    path = _timelapse_with(tmp_path, debris, "debris2.json")
+    admitted = mechanics.time_course([path], cell_type="A172", min_area_pixels=0.5)
+    excluded = mechanics.time_course([path], cell_type="A172")
+    assert admitted["wells"]["C7"]["q_start"] > excluded["wells"]["C7"]["q_start"]
