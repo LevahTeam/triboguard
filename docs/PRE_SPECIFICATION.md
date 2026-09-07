@@ -79,6 +79,15 @@ A172 analysis and are applied here unchanged; that is what makes this a test of
 an existing prediction rather than a curve fitted to four points. It is still
 post-hoc, it is still four cell lines, and it is reported as a hypothesis.
 
+**The selection-cost analysis is post-hoc too.** It was written after noticing
+that one arm of the diversity experiment saved its checkpoint at epoch 5 while
+its comparator saved at 22-30. Nothing about it was planned; it exists because a
+number looked wrong. It reads only the training histories that every run already
+recorded, so it costs no re-training and can invent no data — but it also cannot
+show that a better checkpoint would have scored better, because no checkpoint was
+saved at the epoch it identifies. It bounds the cost of the selection rule. It
+does not measure a model.
+
 **And the cell-size hypothesis died too, which is why the next one is a
 prediction.** SHSY5Y came back at rho 0.801 for the three-class model — better
 than A172's 0.707 — despite cells barely larger than MCF7's, where recovery

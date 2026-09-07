@@ -56,7 +56,7 @@ def _stopping(runs: Path, design: dict[str, Any]) -> str:
     )
     if max(epochs["Three lines"]) >= min(epochs[single]):
         return f"Checkpoints were selected {described}. The arms trained comparably long."
-    return (
+    caveat = (
         f"**A caveat that could explain a null result.** Checkpoints were selected "
         f"{described}. Selection uses validation boundary recall alone, and a single "
         "noisy metric can spike early and never be beaten, ending training with an "
@@ -64,6 +64,26 @@ def _stopping(runs: Path, design: dict[str, Any]) -> str:
         "may reflect less effective training rather than less useful data. The rule was "
         "identical for both arms and fixed before either ran, which makes this a fair "
         "protocol comparison — but not, on its own, a clean test of diversity."
+    )
+    cost = load(runs / "diversity" / "selection_cost.json")
+    if not cost or not cost.get("runs"):
+        return caveat
+    rows = cost["runs"]
+    mixed_lost = [r["interior_recall_forfeited"] for k, r in rows.items() if k.startswith("mixed")]
+    single_lost = [r["interior_recall_forfeited"] for k, r in rows.items() if k.startswith("a172")]
+    if not mixed_lost or not single_lost:
+        return caveat
+    return caveat + (
+        " The cost is measurable from the training histories, with no re-training: "
+        "decoding an instance needs interior probability to find cells and boundary to "
+        "split them, and the saved checkpoint gives up "
+        f"{sum(mixed_lost) / len(mixed_lost):.3f} of the interior recall the mixed runs "
+        f"demonstrably reached, against {sum(single_lost) / len(single_lost):.3f} for the "
+        "single-line runs. For the single-line arm, selecting on boundary recall lands "
+        "within a few epochs of what valuing both recalls would have chosen; for the "
+        "mixed arm it does not. So the rule is not neutral between the arms, and the "
+        "comparison understates the mixed one by an amount this experiment cannot pin "
+        "down without re-running both."
     )
 
 
@@ -880,6 +900,7 @@ PUBLISHED = (
     "mechanics/resolution_limit.json",
     "mechanics/q_dynamic_range.json",
     "mechanics/attenuation.json",
+    "diversity/selection_cost.json",
 )
 
 
