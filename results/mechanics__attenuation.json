@@ -1,0 +1,151 @@
+{
+  "environment": {
+    "accelerators": {
+      "cuda": false,
+      "mps": true
+    },
+    "git": {
+      "branch": "master",
+      "commit": "26414dbf795b4aec8a389a7cdba58fc64a764473",
+      "dirty": true
+    },
+    "machine": "arm64",
+    "packages": {
+      "numpy": "2.3.5",
+      "pillow": "11.3.0",
+      "pycocotools": "2.0.11",
+      "remotezip": "0.12.6",
+      "scipy": "1.16.3",
+      "torch": "2.11.0"
+    },
+    "platform": "macOS-15.6-arm64-arm-64bit-Mach-O",
+    "python": "3.13.9",
+    "recorded_at_utc": "2026-09-07T18:07:49+00:00",
+    "torch_threads": 4
+  },
+  "note": "expected_rho uses the classical attenuation formula, which assumes Pearson correlation and errors independent of the true value. Neither holds exactly here, so it is read as a direction check rather than a fit.",
+  "rows": [
+    {
+      "cell_line": "MCF7",
+      "expected_rho": 0.7227965511654427,
+      "method": "three-class",
+      "observed_rho": 0.18080273414823683,
+      "sd_biological": 0.10923972690909066,
+      "sd_error": 0.10444336257837779,
+      "signal_to_noise": 1.0459231128939719
+    },
+    {
+      "cell_line": "MCF7",
+      "expected_rho": 0.7514514459627476,
+      "method": "Cellpose",
+      "observed_rho": 0.3881633787163101,
+      "sd_biological": 0.10923972690909066,
+      "sd_error": 0.09591451892795982,
+      "signal_to_noise": 1.1389279551215727
+    },
+    {
+      "cell_line": "SHSY5Y",
+      "expected_rho": 0.7727481845476983,
+      "method": "three-class",
+      "observed_rho": 0.800761333243897,
+      "sd_biological": 0.6716118281110284,
+      "sd_error": 0.5516422841068007,
+      "signal_to_noise": 1.217477063417062
+    },
+    {
+      "cell_line": "A172",
+      "expected_rho": 0.8335102266305621,
+      "method": "three-class",
+      "observed_rho": 0.7070297304806892,
+      "sd_biological": 0.3053646526593533,
+      "sd_error": 0.20241527401750564,
+      "signal_to_noise": 1.5086047934947053
+    },
+    {
+      "cell_line": "SkBr3",
+      "expected_rho": 0.8530448274736697,
+      "method": "three-class",
+      "observed_rho": 0.7914976382328426,
+      "sd_biological": 0.10135006571088738,
+      "sd_error": 0.06199941360829699,
+      "signal_to_noise": 1.634693940029851
+    },
+    {
+      "cell_line": "SkBr3",
+      "expected_rho": 0.861229630156837,
+      "method": "Cellpose",
+      "observed_rho": 0.8173381494859685,
+      "sd_biological": 0.10135006571088738,
+      "sd_error": 0.05980719349860297,
+      "signal_to_noise": 1.694613302883955
+    },
+    {
+      "cell_line": "A172",
+      "expected_rho": 0.8953221736161744,
+      "method": "Cellpose",
+      "observed_rho": 0.7674353987218674,
+      "sd_biological": 0.3053646526593533,
+      "sd_error": 0.15191767089052494,
+      "signal_to_noise": 2.0100667082989014
+    },
+    {
+      "cell_line": "SkBr3",
+      "expected_rho": 0.9103128034885936,
+      "method": "ground truth (raster)",
+      "observed_rho": 0.8548326596081922,
+      "sd_biological": 0.10135006571088738,
+      "sd_error": 0.04608407249628733,
+      "signal_to_noise": 2.1992428234082926
+    },
+    {
+      "cell_line": "SHSY5Y",
+      "expected_rho": 0.9283378998731574,
+      "method": "Cellpose",
+      "observed_rho": 0.8934148374548488,
+      "sd_biological": 0.6716118281110284,
+      "sd_error": 0.26893578208940117,
+      "signal_to_noise": 2.497294420598027
+    },
+    {
+      "cell_line": "MCF7",
+      "expected_rho": 0.9457756754310229,
+      "method": "ground truth (raster)",
+      "observed_rho": 0.9272020005557102,
+      "sd_biological": 0.10923972690909066,
+      "sd_error": 0.03751767578894792,
+      "signal_to_noise": 2.9116869478698053
+    },
+    {
+      "cell_line": "A172",
+      "expected_rho": 0.9774920805325942,
+      "method": "ground truth (raster)",
+      "observed_rho": 0.9508196721311477,
+      "sd_biological": 0.3053646526593533,
+      "sd_error": 0.06590685215105159,
+      "signal_to_noise": 4.63327624811286
+    },
+    {
+      "cell_line": "SHSY5Y",
+      "expected_rho": 0.9848542148130712,
+      "method": "ground truth (raster)",
+      "observed_rho": 0.977604890247291,
+      "sd_biological": 0.6716118281110284,
+      "sd_error": 0.11823786840273907,
+      "signal_to_noise": 5.680175371763299
+    }
+  ],
+  "what_predicts_the_correlation": {
+    "biological_spread_alone": {
+      "p_value": 0.3768448236890315,
+      "spearman_rho": 0.2806917861068948
+    },
+    "measurement_error_alone": {
+      "p_value": 0.470531995381542,
+      "spearman_rho": -0.23076923076923078
+    },
+    "signal_to_noise": {
+      "p_value": 1.170222792865967e-05,
+      "spearman_rho": 0.9300699300699302
+    }
+  }
+}

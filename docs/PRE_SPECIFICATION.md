@@ -89,12 +89,36 @@ manages 0.109. A rank correlation cannot detect tracking ability when there is
 almost nothing to track; that is range restriction, and it is a property of the
 cell line, not of the method.
 
-This was written while SkBr3 was still running, so it stands as a genuine
+This was written while SkBr3 was still running, so it stood as a genuine
 out-of-sample prediction: **SkBr3 has sd 0.101, the narrowest of the four, so its
 three-class recovery should fail, and it should fail for reasons that have
 nothing to do with segmentation quality.** If instead SkBr3 clears the bar, the
 range-restriction account is wrong and the honest move is to say so. The commit
 that records this precedes the commit that reports SkBr3.
+
+### The prediction was wrong
+
+SkBr3 scored **0.791** and cleared the bar comfortably — the second-best of the
+four lines, on the narrowest dynamic range of the four. Biological spread alone
+does not predict recovery, and the account in the paragraph above is withdrawn.
+
+Across all twelve cell-line-by-method combinations, spread alone correlates with
+the observed rho at only +0.281 (p = 0.38), and measurement error alone at −0.231
+(p = 0.47). Neither term predicts anything on its own. Their **ratio** correlates
+at **+0.930 (p < 0.0001)**.
+
+That is why SkBr3 passed. Its shape index barely varies between images, but the
+segmenter measures it unusually precisely there — error sd 0.062, the smallest of
+any line — so the signal-to-noise ratio is 1.63. MCF7 has almost the same
+biological spread and nearly double the measurement error, giving 1.05, and it is
+MCF7 that fails. Two lines that look alike on the quantity I predicted from
+behave oppositely, and the quantity that separates them is the one I had not
+isolated.
+
+The method that produced this was committed *before* SkBr3 finished, so it was
+not built to rescue the failed prediction. That is the only reason the corrected
+account is worth more than the one it replaces — and it is still a fit to twelve
+points from four cell lines, so it is a hypothesis, not a law.
 
 ## Registered before the run, not yet answered
 
@@ -151,11 +175,23 @@ better test was run. All are in the git history.
 | Transfer looked *better* on unseen cell lines | Raw scores are not comparable; the ceiling varies 4.4x | Normalising by each line's ceiling |
 | A power table for the experiment protocol | Did not survive simulation; within-day centring doubled the real power | Re-deriving it instead of trusting it |
 | "The improved model now clears the 0.70 trend bar at 0.707" | Mean 0.679 ± 0.030 across seeds; 1 of 3 passes | Checking the other two seeds before claiming it |
+| "Recovery fails on MCF7 because its cells are too small to resolve a perimeter" | Withdrawn: SHSY5Y has cells nearly as small and recovers better than A172 | Extending to a third cell line |
+| "Recovery fails where the shape index barely varies between images" | Withdrawn: SkBr3 has the narrowest spread of all four and scores 0.791 | A prediction registered before the run, and falsified by it |
 
-Nine retractions is not a sign the work is unreliable. Every one came from
+Eleven retractions is not a sign the work is unreliable. Every one came from
 applying a stricter test to a number that had already been written down, and the
 stricter test is the one reported. A project with no retractions has usually not
 looked hard enough.
+
+The last two are the ones to read together. Both were explanations for the same
+observation, both were written down before the data that could refute them
+arrived, and both were refuted. What replaced them — that recovery tracks the
+*ratio* of biological variation to measurement error, at rank correlation +0.930
+across twelve combinations, where neither term alone reaches significance — was
+computed by a script committed before the second refutation landed. Getting an
+explanation wrong twice in public and having the third one hold is a better
+outcome than getting it right once by luck, and only the git history can tell
+those two apart.
 
 ## Still unverified
 

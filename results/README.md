@@ -12,7 +12,10 @@ Model weights, overlays and downloaded data are intentionally not here: they are
 - `comparison__comparison.json`
 - `instance_benchmark__instance_benchmark.json`
 - `instance_model__metrics.json`
+- `mechanics__across_cell_lines.json`
+- `mechanics__attenuation.json`
 - `mechanics__mechanics.json`
+- `mechanics__q_dynamic_range.json`
 - `mechanics__resolution_limit.json`
 - `mechanics__segmenter_agreement.json`
 - `scale_152__bench__instance_benchmark.json`

@@ -1,0 +1,56 @@
+{
+  "environment": {
+    "accelerators": {
+      "cuda": false,
+      "mps": true
+    },
+    "git": {
+      "branch": "master",
+      "commit": "76d53c0cfa0ea4aac8da7c86d32fcf7a6c2a7141",
+      "dirty": true
+    },
+    "machine": "arm64",
+    "packages": {
+      "numpy": "2.3.5",
+      "pillow": "11.3.0",
+      "pycocotools": "2.0.11",
+      "remotezip": "0.12.6",
+      "scipy": "1.16.3",
+      "torch": "2.11.0"
+    },
+    "platform": "macOS-15.6-arm64-arm-64bit-Mach-O",
+    "python": "3.13.9",
+    "recorded_at_utc": "2026-09-07T17:44:24+00:00",
+    "torch_threads": 4
+  },
+  "per_line": {
+    "A172": {
+      "images": 60,
+      "iqr_between_images": 0.315763382617992,
+      "median_q": 4.614910789659817,
+      "range_between_images": 1.377965804106637,
+      "sd_between_images": 0.3053646526593533
+    },
+    "MCF7": {
+      "images": 60,
+      "iqr_between_images": 0.13490784003730738,
+      "median_q": 4.182410403307785,
+      "range_between_images": 0.4952426111432855,
+      "sd_between_images": 0.10923972690909066
+    },
+    "SHSY5Y": {
+      "images": 60,
+      "iqr_between_images": 0.8685704007725343,
+      "median_q": 5.726017020644601,
+      "range_between_images": 3.0903224947857257,
+      "sd_between_images": 0.6716118281110284
+    },
+    "SkBr3": {
+      "images": 60,
+      "iqr_between_images": 0.15966625970787796,
+      "median_q": 3.7458664720834376,
+      "range_between_images": 0.38251532239460007,
+      "sd_between_images": 0.10135006571088738
+    }
+  }
+}

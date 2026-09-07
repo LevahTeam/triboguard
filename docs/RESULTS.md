@@ -152,6 +152,52 @@ Measured over **458,187 annotated cells** across 8 cell lines. For reference a c
 
 A caution that belongs next to the result rather than in a footnote: for A172 the density relationship **does not survive controlling for cell size**. Crowding and cell area move together, and a partial correlation cannot separate them here. The trajectory result is the stronger of the two, and the cross-sectional density correlation should not be quoted on its own.
 
+## Does the mechanics result survive a change of cell line?
+
+The shape-index recovery was originally measured on A172 only. Re-measuring it on three further lines tests whether the segmenter is doing something general or something A172-shaped. The rasterised ground truth is a positive control: where it fails, the limit is the measurement chain, not the segmenter. The rho > 0.7 bar predates the three-class model and is unchanged.
+
+| Cell line | Median true q | Truth (control) | Cellpose | Three-class |
+|---|---|---|---|---|
+| A172 *(developed on)* | 4.621 | 0.951 ✓ | 0.767 ✓ | 0.707 ✓ |
+| MCF7 | 4.182 | 0.927 ✓ | 0.388 | 0.181 |
+| SHSY5Y | 5.726 | 0.978 ✓ | 0.893 ✓ | 0.801 ✓ |
+| SkBr3 | 3.746 | 0.855 ✓ | 0.817 ✓ | 0.791 ✓ |
+
+A ✓ marks a method clearing the pre-set rho > 0.7 bar on that line. Lines are reported individually and never averaged: the instance ceiling varies more than fourfold across them, so an average would mostly record which lines were picked.
+
+The A172 three-class figure is one checkpoint, the same one used on every other line here, so the rows are comparable. Across three seeds that same arm averages 0.679, which is below the bar — the single-seed 0.707 is the optimistic reading and is marked ✓ only because the table reports the checkpoint, not the mean.
+
+## Is a low correlation a bad segmenter, or nothing to track?
+
+A rank correlation between true and recovered shape index confounds two things: how accurately a method measures q on one image, and how much q actually varies between the images being ranked. When the second is small the correlation collapses even for a near-perfect method, so a low number is not on its own evidence that segmentation failed.
+
+Measurement error comes from each method's limits of agreement (a span of 3.92 standard deviations). Biological variation comes from the polygon annotations alone, with no segmenter in the loop. Their ratio is a signal-to-noise ratio.
+
+| Cell line | Method | Biological sd | Error sd | SNR | Observed ρ | Attenuation predicts |
+|---|---|---|---|---|---|---|
+| MCF7 | three-class | 0.1092 | 0.1044 | 1.05 | 0.181 | 0.723 |
+| MCF7 | Cellpose | 0.1092 | 0.0959 | 1.14 | 0.388 | 0.751 |
+| SHSY5Y | three-class | 0.6716 | 0.5516 | 1.22 | 0.801 | 0.773 |
+| A172 | three-class | 0.3054 | 0.2024 | 1.51 | 0.707 | 0.834 |
+| SkBr3 | three-class | 0.1014 | 0.0620 | 1.63 | 0.791 | 0.853 |
+| SkBr3 | Cellpose | 0.1014 | 0.0598 | 1.69 | 0.817 | 0.861 |
+| A172 | Cellpose | 0.3054 | 0.1519 | 2.01 | 0.767 | 0.895 |
+| SkBr3 | ground truth (raster) | 0.1014 | 0.0461 | 2.20 | 0.855 | 0.910 |
+| SHSY5Y | Cellpose | 0.6716 | 0.2689 | 2.50 | 0.893 | 0.928 |
+| MCF7 | ground truth (raster) | 0.1092 | 0.0375 | 2.91 | 0.927 | 0.946 |
+| A172 | ground truth (raster) | 0.3054 | 0.0659 | 4.63 | 0.951 | 0.977 |
+| SHSY5Y | ground truth (raster) | 0.6716 | 0.1182 | 5.68 | 0.978 | 0.985 |
+
+Rows are sorted by signal-to-noise, not by correlation. Observed ρ rises with it but not perfectly monotonically, so the relationship is a strong tendency rather than a law.
+
+The extremes make the point: MCF7 with three-class has only 1.05 times more biological signal than measurement noise and scores ρ = 0.181, while SHSY5Y with ground truth (raster) has 5.68 and scores 0.978.
+
+Across all 12 cell-line-by-method combinations, the ratio predicts the observed correlation at Spearman **+0.930** (p < 0.0001). Neither term alone does: biological spread reaches only +0.281 (p = 0.38) and measurement error -0.231 (p = 0.47). Two earlier explanations — cell size, then biological spread on its own — were each written down in advance and each refuted by the next cell line; see docs/PRE_SPECIFICATION.md.
+
+**This changes how the cross-cell-line table should be read.** A low score is not automatically a failure of segmentation, but neither is a narrow dynamic range automatically an excuse: SkBr3 has the narrowest spread of the four lines and still recovers the ordering at 0.791, because the error there is smaller still. What has to be checked, line by line, is the ratio — which is why it is printed beside every correlation rather than left for a reader to infer.
+
+The predicted column uses the classical attenuation formula, which assumes Pearson correlation and errors independent of the true value. Neither holds exactly here — the error grows with q — so it consistently overestimates, and it is used as a direction check rather than a fit. The claim is the ordering, not the numbers.
+
 ## Input resolution
 
 Letterboxing 704x520 into a square loses detail. Pushing the *ground truth*

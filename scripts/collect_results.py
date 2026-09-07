@@ -31,6 +31,36 @@ def load(path: Path) -> dict[str, Any] | None:
         return None
 
 
+def _p(value: float) -> str:
+    """A p-value of 0.0000 is a rounding artifact, not a measurement."""
+    return f"p = {value:.4f}" if value >= 1e-4 else "p < 0.0001"
+
+
+def _predicts(attenuation: dict[str, Any]) -> str:
+    """Which candidate actually predicts the correlation, in one sentence.
+
+    Two explanations were written down and refuted before this one held, so the
+    losing candidates are reported rather than dropped: a reader cannot judge the
+    surviving claim without seeing what it beat.
+    """
+    entries = attenuation.get("what_predicts_the_correlation")
+    if not entries:
+        return ""
+    ratio = entries["signal_to_noise"]
+    spread = entries["biological_spread_alone"]
+    error = entries["measurement_error_alone"]
+    return (
+        f"Across all {len(attenuation['rows'])} cell-line-by-method combinations, the "
+        f"ratio predicts the observed correlation at Spearman "
+        f"**{ratio['spearman_rho']:+.3f}** ({_p(ratio['p_value'])}). Neither term "
+        f"alone does: biological spread reaches only {spread['spearman_rho']:+.3f} "
+        f"(p = {spread['p_value']:.2f}) and measurement error {error['spearman_rho']:+.3f} "
+        f"(p = {error['p_value']:.2f}). Two earlier explanations — cell size, then "
+        "biological spread on its own — were each written down in advance and each "
+        "refuted by the next cell line; see docs/PRE_SPECIFICATION.md."
+    )
+
+
 def seed_runs(runs: Path) -> list[tuple[str, dict[str, Any]]]:
     found = []
     for directory in sorted(runs.glob("seed_*")):
@@ -642,10 +672,14 @@ def format_report(runs: Path) -> str:
             f"{best['cell_line']} with {best['method']} has {best['signal_to_noise']:.2f} "
             f"and scores {best['observed_rho']:.3f}.",
             "",
-            "**This changes how the cross-cell-line table should be read.** A line whose "
-            "images barely differ in shape index cannot produce a high correlation from any "
-            "segmenter, so its low score measures the cell line, not the method. Reporting "
-            "those numbers as a failure to transfer would have been wrong.",
+            _predicts(attenuation),
+            "",
+            "**This changes how the cross-cell-line table should be read.** A low score is "
+            "not automatically a failure of segmentation, but neither is a narrow dynamic "
+            "range automatically an excuse: SkBr3 has the narrowest spread of the four lines "
+            "and still recovers the ordering at 0.791, because the error there is smaller "
+            "still. What has to be checked, line by line, is the ratio — which is why it is "
+            "printed beside every correlation rather than left for a reader to infer.",
             "",
             "The predicted column uses the classical attenuation formula, which assumes "
             "Pearson correlation and errors independent of the true value. Neither holds "

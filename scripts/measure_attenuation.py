@@ -97,8 +97,28 @@ def main() -> None:
             )
 
     rows.sort(key=lambda r: r["signal_to_noise"])
+
+    # Which of the three candidates actually predicts the correlation? The first
+    # prediction this project made here was that biological spread alone would,
+    # and SkBr3 falsified it. Reporting all three rank correlations keeps the
+    # failed candidates visible instead of quietly dropping them.
+    from scipy import stats
+
+    observed = [row["observed_rho"] for row in rows]
+    predicts = {
+        name: {
+            "spearman_rho": float(stats.spearmanr(values, observed).statistic),
+            "p_value": float(stats.spearmanr(values, observed).pvalue),
+        }
+        for name, values in (
+            ("signal_to_noise", [row["signal_to_noise"] for row in rows]),
+            ("biological_spread_alone", [row["sd_biological"] for row in rows]),
+            ("measurement_error_alone", [row["sd_error"] for row in rows]),
+        )
+    }
     report = {
         "rows": rows,
+        "what_predicts_the_correlation": predicts,
         "note": (
             "expected_rho uses the classical attenuation formula, which assumes "
             "Pearson correlation and errors independent of the true value. Neither "
@@ -118,6 +138,12 @@ def main() -> None:
             f"{r['cell_line']:8s} {r['method']:22s} {r['sd_biological']:7.4f} "
             f"{r['sd_error']:7.4f} {r['signal_to_noise']:6.2f} "
             f"{r['observed_rho']:6.3f} {r['expected_rho']:6.3f}"
+        )
+    print()
+    for name, entry in predicts.items():
+        print(
+            f"Spearman({name:24s}, observed rho) = "
+            f"{entry['spearman_rho']:+.3f}  p={entry['p_value']:.4f}"
         )
     print(f"WROTE {out}")
 

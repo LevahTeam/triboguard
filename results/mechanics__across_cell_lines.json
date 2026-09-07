@@ -1,0 +1,194 @@
+{
+  "environment": {
+    "accelerators": {
+      "cuda": false,
+      "mps": true
+    },
+    "git": {
+      "branch": "master",
+      "commit": "d91ce62ac8668fd1cc4997b23c8cf1adc51f2095",
+      "dirty": true
+    },
+    "machine": "arm64",
+    "packages": {
+      "numpy": "2.3.5",
+      "pillow": "11.3.0",
+      "pycocotools": "2.0.11",
+      "remotezip": "0.12.6",
+      "scipy": "1.16.3",
+      "torch": "2.11.0"
+    },
+    "platform": "macOS-15.6-arm64-arm-64bit-Mach-O",
+    "python": "3.13.9",
+    "recorded_at_utc": "2026-09-07T18:06:45+00:00",
+    "torch_threads": 4
+  },
+  "mcf7": {
+    "cell_line": "MCF7",
+    "cellpose": {
+      "bias": -0.16510851726828407,
+      "evaluated": true,
+      "images": 60,
+      "limits_of_agreement": [
+        -0.3531009743670853,
+        0.022883939830517203
+      ],
+      "mean_absolute_error": 0.16563908133134528,
+      "note": "A segmenter can be useless for the absolute value of q and still fine for a trend, because a constant bias cancels when conditions are compared. Both are reported because the two claims need different accuracy.",
+      "predicted_unjammed": 59,
+      "spearman_rho": 0.3881633787163101,
+      "true_unjammed": 60,
+      "usable_for_absolute_q": false,
+      "usable_for_trends": false,
+      "verdict_agreement": 0.9833333333333333
+    },
+    "ground_truth_raster": {
+      "bias": -0.07788582752766768,
+      "evaluated": true,
+      "images": 60,
+      "limits_of_agreement": [
+        -0.1514204720740056,
+        -0.0043511829813297626
+      ],
+      "mean_absolute_error": 0.07896558633824115,
+      "note": "A segmenter can be useless for the absolute value of q and still fine for a trend, because a constant bias cancels when conditions are compared. Both are reported because the two claims need different accuracy.",
+      "predicted_unjammed": 59,
+      "spearman_rho": 0.9272020005557102,
+      "true_unjammed": 60,
+      "usable_for_absolute_q": true,
+      "usable_for_trends": true,
+      "verdict_agreement": 0.9833333333333333
+    },
+    "images": 60,
+    "median_true_q": 4.182410403307785,
+    "three_class": {
+      "bias": -0.17801814880733685,
+      "evaluated": true,
+      "images": 60,
+      "limits_of_agreement": [
+        -0.3827271394609573,
+        0.02669084184628362
+      ],
+      "mean_absolute_error": 0.18074456893383964,
+      "note": "A segmenter can be useless for the absolute value of q and still fine for a trend, because a constant bias cancels when conditions are compared. Both are reported because the two claims need different accuracy.",
+      "predicted_unjammed": 60,
+      "spearman_rho": 0.18080273414823683,
+      "true_unjammed": 60,
+      "usable_for_absolute_q": false,
+      "usable_for_trends": false,
+      "verdict_agreement": 1.0
+    }
+  },
+  "shsy5y": {
+    "cell_line": "SHSY5Y",
+    "cellpose": {
+      "bias": -0.3621651957872378,
+      "evaluated": true,
+      "images": 60,
+      "limits_of_agreement": [
+        -0.8892793286824641,
+        0.1649489371079884
+      ],
+      "mean_absolute_error": 0.3868457039944087,
+      "note": "A segmenter can be useless for the absolute value of q and still fine for a trend, because a constant bias cancels when conditions are compared. Both are reported because the two claims need different accuracy.",
+      "predicted_unjammed": 58,
+      "spearman_rho": 0.8934148374548488,
+      "true_unjammed": 58,
+      "usable_for_absolute_q": false,
+      "usable_for_trends": true,
+      "verdict_agreement": 1.0
+    },
+    "ground_truth_raster": {
+      "bias": -0.054759466471776895,
+      "evaluated": true,
+      "images": 60,
+      "limits_of_agreement": [
+        -0.28650568854114544,
+        0.17698675559759167
+      ],
+      "mean_absolute_error": 0.10974627359271394,
+      "note": "A segmenter can be useless for the absolute value of q and still fine for a trend, because a constant bias cancels when conditions are compared. Both are reported because the two claims need different accuracy.",
+      "predicted_unjammed": 58,
+      "spearman_rho": 0.977604890247291,
+      "true_unjammed": 58,
+      "usable_for_absolute_q": true,
+      "usable_for_trends": true,
+      "verdict_agreement": 1.0
+    },
+    "images": 60,
+    "median_true_q": 5.726017020644601,
+    "three_class": {
+      "bias": -1.22214791220751,
+      "evaluated": true,
+      "images": 60,
+      "limits_of_agreement": [
+        -2.3033667890568394,
+        -0.1409290353581807
+      ],
+      "mean_absolute_error": 1.2289051168605338,
+      "note": "A segmenter can be useless for the absolute value of q and still fine for a trend, because a constant bias cancels when conditions are compared. Both are reported because the two claims need different accuracy.",
+      "predicted_unjammed": 59,
+      "spearman_rho": 0.800761333243897,
+      "true_unjammed": 58,
+      "usable_for_absolute_q": false,
+      "usable_for_trends": true,
+      "verdict_agreement": 0.9833333333333333
+    }
+  },
+  "skbr3": {
+    "cell_line": "SkBr3",
+    "cellpose": {
+      "bias": -0.03876840562207166,
+      "evaluated": true,
+      "images": 60,
+      "limits_of_agreement": [
+        -0.15599050487933347,
+        0.07845369363519017
+      ],
+      "mean_absolute_error": 0.04840018788544786,
+      "note": "A segmenter can be useless for the absolute value of q and still fine for a trend, because a constant bias cancels when conditions are compared. Both are reported because the two claims need different accuracy.",
+      "predicted_unjammed": 14,
+      "spearman_rho": 0.8173381494859685,
+      "true_unjammed": 22,
+      "usable_for_absolute_q": false,
+      "usable_for_trends": true,
+      "verdict_agreement": 0.8
+    },
+    "ground_truth_raster": {
+      "bias": -0.03972725515681737,
+      "evaluated": true,
+      "images": 60,
+      "limits_of_agreement": [
+        -0.1300520372495405,
+        0.05059752693590579
+      ],
+      "mean_absolute_error": 0.048502071232832754,
+      "note": "A segmenter can be useless for the absolute value of q and still fine for a trend, because a constant bias cancels when conditions are compared. Both are reported because the two claims need different accuracy.",
+      "predicted_unjammed": 15,
+      "spearman_rho": 0.8548326596081922,
+      "true_unjammed": 22,
+      "usable_for_absolute_q": false,
+      "usable_for_trends": true,
+      "verdict_agreement": 0.85
+    },
+    "images": 60,
+    "median_true_q": 3.7458664720834376,
+    "three_class": {
+      "bias": 0.0032418331462068,
+      "evaluated": true,
+      "images": 60,
+      "limits_of_agreement": [
+        -0.11827701752605531,
+        0.1247606838184689
+      ],
+      "mean_absolute_error": 0.04706748640616338,
+      "note": "A segmenter can be useless for the absolute value of q and still fine for a trend, because a constant bias cancels when conditions are compared. Both are reported because the two claims need different accuracy.",
+      "predicted_unjammed": 24,
+      "spearman_rho": 0.7914976382328426,
+      "true_unjammed": 22,
+      "usable_for_absolute_q": false,
+      "usable_for_trends": true,
+      "verdict_agreement": 0.8666666666666667
+    }
+  }
+}
