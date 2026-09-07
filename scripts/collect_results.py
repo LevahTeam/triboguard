@@ -31,6 +31,42 @@ def load(path: Path) -> dict[str, Any] | None:
         return None
 
 
+def _stopping(runs: Path, design: dict[str, Any]) -> str:
+    """When each arm's checkpoint was selected, and why that has to be reported.
+
+    The checkpoint is chosen on validation boundary recall alone. A single noisy
+    metric can spike early and never be beaten, which stops training with an
+    under-trained model. If that happened to one arm and not the other, it is an
+    alternative explanation for any difference between them -- or for the absence
+    of one -- and it belongs beside the result rather than in a footnote.
+    """
+    single = f"{design['mixed_lines'][0]} only"
+    arms = {
+        "Three lines": [runs / f"diversity/mixed_{seed}" for seed in design["seeds"]],
+        single: [runs / "scale_304", runs / "seedrun_304_1", runs / "seedrun_304_2"],
+    }
+    epochs: dict[str, list[int]] = {}
+    for arm, directories in arms.items():
+        found = [load(directory / "metrics.json") for directory in directories]
+        epochs[arm] = sorted(int(m["best_epoch"]) for m in found if m and "best_epoch" in m)
+    if not all(epochs.values()):
+        return ""
+    described = "; ".join(
+        f"{arm} at epoch {', '.join(str(e) for e in values)}" for arm, values in epochs.items()
+    )
+    if max(epochs["Three lines"]) >= min(epochs[single]):
+        return f"Checkpoints were selected {described}. The arms trained comparably long."
+    return (
+        f"**A caveat that could explain a null result.** Checkpoints were selected "
+        f"{described}. Selection uses validation boundary recall alone, and a single "
+        "noisy metric can spike early and never be beaten, ending training with an "
+        "under-trained model. The mixed arm stopped consistently earlier, so its score "
+        "may reflect less effective training rather than less useful data. The rule was "
+        "identical for both arms and fixed before either ran, which makes this a fair "
+        "protocol comparison — but not, on its own, a clean test of diversity."
+    )
+
+
 def _p(value: float) -> str:
     """A p-value of 0.0000 is a rounding artifact, not a measurement."""
     return f"p = {value:.4f}" if value >= 1e-4 else "p < 0.0001"
@@ -487,6 +523,9 @@ def format_report(runs: Path) -> str:
             f"{mixed['fraction_of_ceiling']:.2f} |",
             "",
         ]
+        stopping = _stopping(runs, design)
+        if stopping:
+            lines += [stopping, ""]
         if gap.get("evaluated"):
             verdict = (
                 "The interval excludes zero, so at matched training size the variety of the "
