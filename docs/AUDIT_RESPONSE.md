@@ -22,6 +22,23 @@ find) — `tests/test_treatment.py`.
 What remains is collecting real images. The protocol is
 [EXPERIMENT_PROTOCOL.md](EXPERIMENT_PROTOCOL.md). **Owner action.**
 
+**Since this response was written, the project stopped waiting on that.** The
+audit's underlying complaint was that the work was a tool in search of a result.
+It now has one that does not depend on Tribonema data at all: whether a
+segmenter can recover a *mechanical* quantity — the shape index governing the
+vertex model's rigidity transition at a threshold the theory fixed in advance —
+and under what conditions it stops being able to. Measured over 458,187
+annotated cells across 8 cell lines, then tested on three lines the method was
+not developed on, where it succeeds on two and fails on one for a reason that is
+measured rather than guessed at. See [RESULTS.md](RESULTS.md) and the retraction
+table in [PRE_SPECIFICATION.md](PRE_SPECIFICATION.md), which records two
+explanations for that failure that were written down in advance and then refuted
+by the next cell line.
+
+This does not close 1.1 as originally framed — there is still no Tribonema
+evidence, and there will not be until images exist. It changes which question
+the project answers today.
+
 Nanotechnology terminology is not used anywhere and should not be added; there is
 no nanoparticle data, model, or simulation in the project.
 
