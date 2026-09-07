@@ -167,7 +167,7 @@ The repository is now committed, in stages that reflect the actual work.
 
 ## 5. Missing tests
 
-All rows below now have coverage. Suite: **453 tests, 91% coverage** (was 27 tests,
+All rows below now have coverage. Suite: **475 tests, 91% coverage** (was 27 tests,
 71%, with CLI at 0%; CLI is now 94%). Three further tests are skipped on this
 machine because it has no CUDA device.
 
