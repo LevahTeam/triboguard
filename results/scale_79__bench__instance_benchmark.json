@@ -1,0 +1,1755 @@
+{
+  "cellpose": {
+    "diameter": null,
+    "model": null,
+    "note": "Cellpose is not installed; install the optional 'cellpose' extra.",
+    "trained_on_this_data": false,
+    "used": false,
+    "version": "4.2.1.1"
+  },
+  "environment": {
+    "accelerators": {
+      "cuda": false,
+      "mps": true
+    },
+    "git": {
+      "branch": "master",
+      "commit": "58f5812fd8cfdf5f3ecb12a9193ed88eb03ca83d",
+      "dirty": false
+    },
+    "machine": "arm64",
+    "packages": {
+      "numpy": "2.3.5",
+      "pillow": "11.3.0",
+      "pycocotools": "2.0.11",
+      "remotezip": "0.12.6",
+      "scipy": "1.16.3",
+      "torch": "2.11.0"
+    },
+    "platform": "macOS-15.6-arm64-arm-64bit-Mach-O",
+    "python": "3.13.9",
+    "recorded_at_utc": "2026-09-07T01:11:50+00:00",
+    "torch_threads": 4
+  },
+  "images": 60,
+  "interpretation": "Read every row against 'ceiling', which is the ground-truth mask put through the same watershed step. A method that predicts instances directly is not bound by that ceiling; one that predicts a binary mask is.",
+  "manifest": "data/livecell/manifests/test.jsonl",
+  "min_area": 20,
+  "per_image": [
+    {
+      "ceiling": {
+        "dice": 0.9999370716753617,
+        "matching_50": 0.39944521497919555,
+        "matching_50_95": 0.21595972797284085,
+        "matching_75": 0.19833729216152018,
+        "predicted_objects": 627,
+        "true_objects": 382
+      },
+      "classical": {
+        "dice": 0.339073910443059,
+        "matching_50": 0.0037914691943127963,
+        "matching_50_95": 0.0011365434963642805,
+        "matching_75": 0.0,
+        "predicted_objects": 677,
+        "true_objects": 382
+      },
+      "image_id": 236764,
+      "tribovision_three_class": {
+        "dice": 0.9590102283144575,
+        "matching_50": 0.24133148404993066,
+        "matching_50_95": 0.07773207080349467,
+        "matching_75": 0.03229527104959631,
+        "predicted_objects": 513,
+        "true_objects": 382
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.999921802063468,
+        "matching_50": 0.18806306306306306,
+        "matching_50_95": 0.07942586448894108,
+        "matching_75": 0.06243705941591138,
+        "predicted_objects": 710,
+        "true_objects": 345
+      },
+      "classical": {
+        "dice": 0.34386077734231896,
+        "matching_50": 0.00949367088607595,
+        "matching_50_95": 0.0030522067371757935,
+        "matching_75": 0.0010460251046025104,
+        "predicted_objects": 612,
+        "true_objects": 345
+      },
+      "image_id": 237486,
+      "tribovision_three_class": {
+        "dice": 0.980309962164986,
+        "matching_50": 0.3022452504317789,
+        "matching_50_95": 0.12096763126626611,
+        "matching_75": 0.06346967559943582,
+        "predicted_objects": 409,
+        "true_objects": 345
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9999245560121314,
+        "matching_50": 0.1977715877437326,
+        "matching_50_95": 0.06701467380920796,
+        "matching_75": 0.04116222760290557,
+        "predicted_objects": 303,
+        "true_objects": 127
+      },
+      "classical": {
+        "dice": 0.40947665348691537,
+        "matching_50": 0.0017513134851138354,
+        "matching_50_95": 0.0003502626970227671,
+        "matching_75": 0.0,
+        "predicted_objects": 445,
+        "true_objects": 127
+      },
+      "image_id": 237950,
+      "tribovision_three_class": {
+        "dice": 0.9670739951653214,
+        "matching_50": 0.2801556420233463,
+        "matching_50_95": 0.12242877896105772,
+        "matching_75": 0.10033444816053512,
+        "predicted_objects": 202,
+        "true_objects": 127
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9998942927407094,
+        "matching_50": 0.2777142857142857,
+        "matching_50_95": 0.14074478075232663,
+        "matching_75": 0.11911911911911911,
+        "predicted_objects": 740,
+        "true_objects": 378
+      },
+      "classical": {
+        "dice": 0.3138287883893638,
+        "matching_50": 0.0039603960396039604,
+        "matching_50_95": 0.0009897076664188158,
+        "matching_75": 0.0,
+        "predicted_objects": 636,
+        "true_objects": 378
+      },
+      "image_id": 238270,
+      "tribovision_three_class": {
+        "dice": 0.9474096795170635,
+        "matching_50": 0.28285714285714286,
+        "matching_50_95": 0.10238668728538372,
+        "matching_75": 0.05275498241500586,
+        "predicted_objects": 520,
+        "true_objects": 378
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9999851432782249,
+        "matching_50": 0.21718931475029035,
+        "matching_50_95": 0.0865980844565942,
+        "matching_75": 0.06395939086294417,
+        "predicted_objects": 699,
+        "true_objects": 349
+      },
+      "classical": {
+        "dice": 0.36918138041733545,
+        "matching_50": 0.003898635477582846,
+        "matching_50_95": 0.0009740894484398814,
+        "matching_75": 0.0,
+        "predicted_objects": 681,
+        "true_objects": 349
+      },
+      "image_id": 238650,
+      "tribovision_three_class": {
+        "dice": 0.982972810784718,
+        "matching_50": 0.29067930489731436,
+        "matching_50_95": 0.11885150579995515,
+        "matching_75": 0.07077326343381389,
+        "predicted_objects": 468,
+        "true_objects": 349
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9998625068490058,
+        "matching_50": 0.26382978723404255,
+        "matching_50_95": 0.1597988749977251,
+        "matching_75": 0.14524421593830333,
+        "predicted_objects": 637,
+        "true_objects": 254
+      },
+      "classical": {
+        "dice": 0.3436501433164513,
+        "matching_50": 0.011583011583011582,
+        "matching_50_95": 0.0023087075961463048,
+        "matching_75": 0.0,
+        "predicted_objects": 532,
+        "true_objects": 254
+      },
+      "image_id": 240468,
+      "tribovision_three_class": {
+        "dice": 0.9209825233421116,
+        "matching_50": 0.2915766738660907,
+        "matching_50_95": 0.11388685393334178,
+        "matching_75": 0.054673721340388004,
+        "predicted_objects": 344,
+        "true_objects": 254
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9999440656610261,
+        "matching_50": 0.4110032362459547,
+        "matching_50_95": 0.2068442962898326,
+        "matching_75": 0.18478260869565216,
+        "predicted_objects": 788,
+        "true_objects": 520
+      },
+      "classical": {
+        "dice": 0.3500366342465557,
+        "matching_50": 0.004149377593360996,
+        "matching_50_95": 0.001492126490170722,
+        "matching_75": 0.0008271298593879239,
+        "predicted_objects": 690,
+        "true_objects": 520
+      },
+      "image_id": 241612,
+      "tribovision_three_class": {
+        "dice": 0.9642958959095937,
+        "matching_50": 0.19932049830124576,
+        "matching_50_95": 0.05774480193681708,
+        "matching_75": 0.013397129186602871,
+        "predicted_objects": 539,
+        "true_objects": 520
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9998700226453504,
+        "matching_50": 0.3738425925925926,
+        "matching_50_95": 0.23472832703184604,
+        "matching_75": 0.2199383350462487,
+        "predicted_objects": 796,
+        "true_objects": 391
+      },
+      "classical": {
+        "dice": 0.35153275041009796,
+        "matching_50": 0.009081735620585268,
+        "matching_50_95": 0.002518447105544246,
+        "matching_75": 0.0,
+        "predicted_objects": 609,
+        "true_objects": 391
+      },
+      "image_id": 242134,
+      "tribovision_three_class": {
+        "dice": 0.94117626570209,
+        "matching_50": 0.26517571884984026,
+        "matching_50_95": 0.10136621839726057,
+        "matching_75": 0.05179282868525897,
+        "predicted_objects": 401,
+        "true_objects": 391
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.999922155588084,
+        "matching_50": 0.40226986128625475,
+        "matching_50_95": 0.25735325101481255,
+        "matching_75": 0.2424581005586592,
+        "predicted_objects": 721,
+        "true_objects": 391
+      },
+      "classical": {
+        "dice": 0.34425952211100735,
+        "matching_50": 0.0018066847335140017,
+        "matching_50_95": 0.00045142659609508247,
+        "matching_75": 0.0,
+        "predicted_objects": 718,
+        "true_objects": 391
+      },
+      "image_id": 243303,
+      "tribovision_three_class": {
+        "dice": 0.9470434989469042,
+        "matching_50": 0.26710526315789473,
+        "matching_50_95": 0.09302781033734234,
+        "matching_75": 0.03995680345572354,
+        "predicted_objects": 572,
+        "true_objects": 391
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9997037097581659,
+        "matching_50": 0.11899791231732777,
+        "matching_50_95": 0.046671585600755995,
+        "matching_75": 0.02681992337164751,
+        "predicted_objects": 373,
+        "true_objects": 163
+      },
+      "classical": {
+        "dice": 0.407627287151373,
+        "matching_50": 0.013937282229965157,
+        "matching_50_95": 0.004687237793847105,
+        "matching_75": 0.0,
+        "predicted_objects": 419,
+        "true_objects": 163
+      },
+      "image_id": 244264,
+      "tribovision_three_class": {
+        "dice": 0.9590654313413975,
+        "matching_50": 0.302158273381295,
+        "matching_50_95": 0.15511417407103228,
+        "matching_75": 0.13836477987421383,
+        "predicted_objects": 199,
+        "true_objects": 163
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9999165168250707,
+        "matching_50": 0.3023952095808383,
+        "matching_50_95": 0.15196267119952384,
+        "matching_75": 0.12403100775193798,
+        "predicted_objects": 308,
+        "true_objects": 127
+      },
+      "classical": {
+        "dice": 0.4171653377146044,
+        "matching_50": 0.008,
+        "matching_50_95": 0.002194823083826881,
+        "matching_75": 0.0,
+        "predicted_objects": 377,
+        "true_objects": 127
+      },
+      "image_id": 244429,
+      "tribovision_three_class": {
+        "dice": 0.9442041455436181,
+        "matching_50": 0.30603448275862066,
+        "matching_50_95": 0.1454858909820341,
+        "matching_75": 0.12639405204460966,
+        "predicted_objects": 176,
+        "true_objects": 127
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 1.0,
+        "matching_50": 0.20447284345047922,
+        "matching_50_95": 0.10754310330135997,
+        "matching_75": 0.1023391812865497,
+        "predicted_objects": 279,
+        "true_objects": 98
+      },
+      "classical": {
+        "dice": 0.4876210551434764,
+        "matching_50": 0.006211180124223602,
+        "matching_50_95": 0.001859083420959465,
+        "matching_75": 0.002061855670103093,
+        "predicted_objects": 388,
+        "true_objects": 98
+      },
+      "image_id": 244963,
+      "tribovision_three_class": {
+        "dice": 0.9723849536802052,
+        "matching_50": 0.2535211267605634,
+        "matching_50_95": 0.1519782274492287,
+        "matching_75": 0.13617021276595745,
+        "predicted_objects": 169,
+        "true_objects": 98
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9997657588795877,
+        "matching_50": 0.9175257731958762,
+        "matching_50_95": 0.7644076329993211,
+        "matching_75": 0.7714285714285715,
+        "predicted_objects": 96,
+        "true_objects": 90
+      },
+      "classical": {
+        "dice": 0.6265827047413793,
+        "matching_50": 0.18181818181818182,
+        "matching_50_95": 0.07791015649484845,
+        "matching_75": 0.061224489795918366,
+        "predicted_objects": 118,
+        "true_objects": 90
+      },
+      "image_id": 245241,
+      "tribovision_three_class": {
+        "dice": 0.9225906530283768,
+        "matching_50": 0.48120300751879697,
+        "matching_50_95": 0.3004402803584582,
+        "matching_75": 0.3493150684931507,
+        "predicted_objects": 107,
+        "true_objects": 90
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9998054901960785,
+        "matching_50": 0.26029411764705884,
+        "matching_50_95": 0.15172492463214063,
+        "matching_75": 0.13962765957446807,
+        "predicted_objects": 619,
+        "true_objects": 238
+      },
+      "classical": {
+        "dice": 0.36548042943263126,
+        "matching_50": 0.008032128514056224,
+        "matching_50_95": 0.002803215692072611,
+        "matching_75": 0.0013297872340425532,
+        "predicted_objects": 515,
+        "true_objects": 238
+      },
+      "image_id": 245333,
+      "tribovision_three_class": {
+        "dice": 0.9422253652241487,
+        "matching_50": 0.26339285714285715,
+        "matching_50_95": 0.11120637592678251,
+        "matching_75": 0.07604562737642585,
+        "predicted_objects": 328,
+        "true_objects": 238
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 1.0,
+        "matching_50": 0.7945205479452054,
+        "matching_50_95": 0.6568217476491205,
+        "matching_75": 0.6582278481012658,
+        "predicted_objects": 70,
+        "true_objects": 61
+      },
+      "classical": {
+        "dice": 0.6342242937315704,
+        "matching_50": 0.17985611510791366,
+        "matching_50_95": 0.0708917763250188,
+        "matching_75": 0.05806451612903226,
+        "predicted_objects": 103,
+        "true_objects": 61
+      },
+      "image_id": 245573,
+      "tribovision_three_class": {
+        "dice": 0.9316241625243138,
+        "matching_50": 0.5625,
+        "matching_50_95": 0.36041960171331344,
+        "matching_75": 0.3761467889908257,
+        "predicted_objects": 89,
+        "true_objects": 61
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9998933601664675,
+        "matching_50": 0.18398268398268397,
+        "matching_50_95": 0.08329807048272468,
+        "matching_75": 0.07045009784735812,
+        "predicted_objects": 418,
+        "true_objects": 129
+      },
+      "classical": {
+        "dice": 0.4578582250219281,
+        "matching_50": 0.010169491525423728,
+        "matching_50_95": 0.003038863154914663,
+        "matching_75": 0.0016806722689075631,
+        "predicted_objects": 467,
+        "true_objects": 129
+      },
+      "image_id": 245908,
+      "tribovision_three_class": {
+        "dice": 0.9642667542347372,
+        "matching_50": 0.336,
+        "matching_50_95": 0.1590578349678703,
+        "matching_75": 0.12080536912751678,
+        "predicted_objects": 205,
+        "true_objects": 129
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9999517301522431,
+        "matching_50": 0.31896551724137934,
+        "matching_50_95": 0.17248859191501265,
+        "matching_75": 0.15326633165829145,
+        "predicted_objects": 309,
+        "true_objects": 150
+      },
+      "classical": {
+        "dice": 0.4187809094929838,
+        "matching_50": 0.02620967741935484,
+        "matching_50_95": 0.00598617223856571,
+        "matching_75": 0.0039447731755424065,
+        "predicted_objects": 359,
+        "true_objects": 150
+      },
+      "image_id": 246042,
+      "tribovision_three_class": {
+        "dice": 0.9442944313053626,
+        "matching_50": 0.25,
+        "matching_50_95": 0.1154055274845965,
+        "matching_75": 0.08843537414965986,
+        "predicted_objects": 170,
+        "true_objects": 150
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9998654392889674,
+        "matching_50": 0.1824561403508772,
+        "matching_50_95": 0.07531366601689976,
+        "matching_75": 0.053125,
+        "predicted_objects": 701,
+        "true_objects": 310
+      },
+      "classical": {
+        "dice": 0.38151720759884,
+        "matching_50": 0.004305705059203444,
+        "matching_50_95": 0.0007524589179375118,
+        "matching_75": 0.0,
+        "predicted_objects": 623,
+        "true_objects": 310
+      },
+      "image_id": 246194,
+      "tribovision_three_class": {
+        "dice": 0.9778798921435949,
+        "matching_50": 0.292910447761194,
+        "matching_50_95": 0.12040202326510385,
+        "matching_75": 0.07608695652173914,
+        "predicted_objects": 383,
+        "true_objects": 310
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9995247689849233,
+        "matching_50": 0.21179039301310043,
+        "matching_50_95": 0.08845238089025312,
+        "matching_75": 0.05714285714285714,
+        "predicted_objects": 391,
+        "true_objects": 164
+      },
+      "classical": {
+        "dice": 0.5116612372484175,
+        "matching_50": 0.012618296529968454,
+        "matching_50_95": 0.003925677504652578,
+        "matching_75": 0.003125,
+        "predicted_objects": 478,
+        "true_objects": 164
+      },
+      "image_id": 246506,
+      "tribovision_three_class": {
+        "dice": 0.9649210498283336,
+        "matching_50": 0.32167832167832167,
+        "matching_50_95": 0.15056954265825742,
+        "matching_75": 0.1317365269461078,
+        "predicted_objects": 214,
+        "true_objects": 164
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9998098230901936,
+        "matching_50": 0.28183361629881154,
+        "matching_50_95": 0.16739914521213992,
+        "matching_75": 0.1579754601226994,
+        "predicted_objects": 542,
+        "true_objects": 213
+      },
+      "classical": {
+        "dice": 0.4186586165793242,
+        "matching_50": 0.006793478260869565,
+        "matching_50_95": 0.0023039011970503614,
+        "matching_75": 0.0013513513513513514,
+        "predicted_objects": 528,
+        "true_objects": 213
+      },
+      "image_id": 247128,
+      "tribovision_three_class": {
+        "dice": 0.950998256320837,
+        "matching_50": 0.31565656565656564,
+        "matching_50_95": 0.13501870836093588,
+        "matching_75": 0.10615711252653928,
+        "predicted_objects": 308,
+        "true_objects": 213
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9998691144559639,
+        "matching_50": 0.23255813953488372,
+        "matching_50_95": 0.1576187053469012,
+        "matching_75": 0.1572052401746725,
+        "predicted_objects": 195,
+        "true_objects": 70
+      },
+      "classical": {
+        "dice": 0.6332042772861357,
+        "matching_50": 0.02608695652173913,
+        "matching_50_95": 0.01035701219653117,
+        "matching_75": 0.005681818181818182,
+        "predicted_objects": 284,
+        "true_objects": 70
+      },
+      "image_id": 247343,
+      "tribovision_three_class": {
+        "dice": 0.9213312097429305,
+        "matching_50": 0.43410852713178294,
+        "matching_50_95": 0.2640352313165188,
+        "matching_75": 0.32142857142857145,
+        "predicted_objects": 115,
+        "true_objects": 70
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 1.0,
+        "matching_50": 0.3446601941747573,
+        "matching_50_95": 0.2393453788011945,
+        "matching_75": 0.22026431718061673,
+        "predicted_objects": 195,
+        "true_objects": 82
+      },
+      "classical": {
+        "dice": 0.6285894861313571,
+        "matching_50": 0.056291390728476824,
+        "matching_50_95": 0.019485232571745188,
+        "matching_75": 0.012698412698412698,
+        "predicted_objects": 237,
+        "true_objects": 82
+      },
+      "image_id": 247561,
+      "tribovision_three_class": {
+        "dice": 0.9331440168090126,
+        "matching_50": 0.5454545454545454,
+        "matching_50_95": 0.3546478785154283,
+        "matching_75": 0.4496124031007752,
+        "predicted_objects": 105,
+        "true_objects": 82
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9997907645282195,
+        "matching_50": 0.2967741935483871,
+        "matching_50_95": 0.16987694579393636,
+        "matching_75": 0.14857142857142858,
+        "predicted_objects": 706,
+        "true_objects": 299
+      },
+      "classical": {
+        "dice": 0.47919771963731245,
+        "matching_50": 0.009142857142857144,
+        "matching_50_95": 0.002278958662915708,
+        "matching_75": 0.0,
+        "predicted_objects": 584,
+        "true_objects": 299
+      },
+      "image_id": 247645,
+      "tribovision_three_class": {
+        "dice": 0.9350798708334674,
+        "matching_50": 0.2314410480349345,
+        "matching_50_95": 0.09731770441190343,
+        "matching_75": 0.062146892655367235,
+        "predicted_objects": 265,
+        "true_objects": 299
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 1.0,
+        "matching_50": 0.37714285714285717,
+        "matching_50_95": 0.31849872831932063,
+        "matching_75": 0.31693989071038253,
+        "predicted_objects": 80,
+        "true_objects": 161
+      },
+      "classical": {
+        "dice": 0.5379880940369287,
+        "matching_50": 0.07063197026022305,
+        "matching_50_95": 0.021057850936216975,
+        "matching_75": 0.010526315789473684,
+        "predicted_objects": 127,
+        "true_objects": 161
+      },
+      "image_id": 248158,
+      "tribovision_three_class": {
+        "dice": 0.948115732874002,
+        "matching_50": 0.3170731707317073,
+        "matching_50_95": 0.1964694540768156,
+        "matching_75": 0.20535714285714285,
+        "predicted_objects": 109,
+        "true_objects": 161
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9998817750932365,
+        "matching_50": 0.27941176470588236,
+        "matching_50_95": 0.1671745343733598,
+        "matching_75": 0.14473684210526316,
+        "predicted_objects": 247,
+        "true_objects": 101
+      },
+      "classical": {
+        "dice": 0.40539914197052856,
+        "matching_50": 0.019184652278177457,
+        "matching_50_95": 0.007383417098139578,
+        "matching_75": 0.004728132387706856,
+        "predicted_objects": 324,
+        "true_objects": 101
+      },
+      "image_id": 249162,
+      "tribovision_three_class": {
+        "dice": 0.938314161974001,
+        "matching_50": 0.3116279069767442,
+        "matching_50_95": 0.1511963755995495,
+        "matching_75": 0.13253012048192772,
+        "predicted_objects": 181,
+        "true_objects": 101
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9998625537513008,
+        "matching_50": 0.27524752475247527,
+        "matching_50_95": 0.14082112315332299,
+        "matching_75": 0.11902693310165074,
+        "predicted_objects": 891,
+        "true_objects": 397
+      },
+      "classical": {
+        "dice": 0.3052415210688592,
+        "matching_50": 0.008737864077669903,
+        "matching_50_95": 0.003488015203682239,
+        "matching_75": 0.0019286403085824494,
+        "predicted_objects": 642,
+        "true_objects": 397
+      },
+      "image_id": 249265,
+      "tribovision_three_class": {
+        "dice": 0.966942343073116,
+        "matching_50": 0.23579545454545456,
+        "matching_50_95": 0.08849963766566651,
+        "matching_75": 0.053268765133171914,
+        "predicted_objects": 473,
+        "true_objects": 397
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9999672378206599,
+        "matching_50": 0.32786885245901637,
+        "matching_50_95": 0.20162387172371204,
+        "matching_75": 0.18152350081037277,
+        "predicted_objects": 503,
+        "true_objects": 226
+      },
+      "classical": {
+        "dice": 0.3134337871602672,
+        "matching_50": 0.005420054200542005,
+        "matching_50_95": 0.0014877689973967253,
+        "matching_75": 0.0,
+        "predicted_objects": 516,
+        "true_objects": 226
+      },
+      "image_id": 249664,
+      "tribovision_three_class": {
+        "dice": 0.9386883846179107,
+        "matching_50": 0.2890792291220557,
+        "matching_50_95": 0.11739796195566579,
+        "matching_75": 0.06927175843694494,
+        "predicted_objects": 376,
+        "true_objects": 226
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9999639608583584,
+        "matching_50": 0.21602787456445993,
+        "matching_50_95": 0.09322550312520708,
+        "matching_75": 0.07274590163934426,
+        "predicted_objects": 707,
+        "true_objects": 340
+      },
+      "classical": {
+        "dice": 0.39356324379163915,
+        "matching_50": 0.004930966469428008,
+        "matching_50_95": 0.0014771563887806735,
+        "matching_75": 0.0009823182711198428,
+        "predicted_objects": 679,
+        "true_objects": 340
+      },
+      "image_id": 250018,
+      "tribovision_three_class": {
+        "dice": 0.9828530721060671,
+        "matching_50": 0.29256198347107437,
+        "matching_50_95": 0.11261057224081042,
+        "matching_75": 0.06684856753069578,
+        "predicted_objects": 442,
+        "true_objects": 340
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9999920200456454,
+        "matching_50": 0.313588850174216,
+        "matching_50_95": 0.20564333000470106,
+        "matching_75": 0.18553459119496854,
+        "predicted_objects": 261,
+        "true_objects": 116
+      },
+      "classical": {
+        "dice": 0.4067410527106266,
+        "matching_50": 0.01583710407239819,
+        "matching_50_95": 0.005632757600872259,
+        "matching_75": 0.002232142857142857,
+        "predicted_objects": 333,
+        "true_objects": 116
+      },
+      "image_id": 250360,
+      "tribovision_three_class": {
+        "dice": 0.9213139571227908,
+        "matching_50": 0.24413145539906103,
+        "matching_50_95": 0.10628190164392126,
+        "matching_75": 0.09504132231404959,
+        "predicted_objects": 149,
+        "true_objects": 116
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9998837483751193,
+        "matching_50": 0.18717948717948718,
+        "matching_50_95": 0.07720282420612841,
+        "matching_75": 0.053469852104664393,
+        "predicted_objects": 650,
+        "true_objects": 276
+      },
+      "classical": {
+        "dice": 0.403897134938157,
+        "matching_50": 0.0021390374331550803,
+        "matching_50_95": 0.0004278074866310161,
+        "matching_75": 0.0,
+        "predicted_objects": 661,
+        "true_objects": 276
+      },
+      "image_id": 251601,
+      "tribovision_three_class": {
+        "dice": 0.9792835638859001,
+        "matching_50": 0.35607675906183367,
+        "matching_50_95": 0.15865821381621786,
+        "matching_75": 0.12966252220248667,
+        "predicted_objects": 360,
+        "true_objects": 276
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9998721459958144,
+        "matching_50": 0.22006472491909385,
+        "matching_50_95": 0.11555051667843992,
+        "matching_75": 0.10557184750733138,
+        "predicted_objects": 274,
+        "true_objects": 103
+      },
+      "classical": {
+        "dice": 0.4250236037286067,
+        "matching_50": 0.006437768240343348,
+        "matching_50_95": 0.0017121528924104034,
+        "matching_75": 0.002136752136752137,
+        "predicted_objects": 366,
+        "true_objects": 103
+      },
+      "image_id": 251879,
+      "tribovision_three_class": {
+        "dice": 0.9430868280439119,
+        "matching_50": 0.2621359223300971,
+        "matching_50_95": 0.12925371643064193,
+        "matching_75": 0.10638297872340426,
+        "predicted_objects": 157,
+        "true_objects": 103
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9999681228075767,
+        "matching_50": 0.08490566037735849,
+        "matching_50_95": 0.02480978105943153,
+        "matching_75": 0.00546448087431694,
+        "predicted_objects": 536,
+        "true_objects": 384
+      },
+      "classical": {
+        "dice": 0.312000205703119,
+        "matching_50": 0.006024096385542169,
+        "matching_50_95": 0.0017031119416613294,
+        "matching_75": 0.000999000999000999,
+        "predicted_objects": 618,
+        "true_objects": 384
+      },
+      "image_id": 252356,
+      "tribovision_three_class": {
+        "dice": 0.9912011145996423,
+        "matching_50": 0.2880658436213992,
+        "matching_50_95": 0.10267767547824976,
+        "matching_75": 0.046822742474916385,
+        "predicted_objects": 555,
+        "true_objects": 384
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9997400419287211,
+        "matching_50": 0.21739130434782608,
+        "matching_50_95": 0.12455501685860033,
+        "matching_75": 0.11627906976744186,
+        "predicted_objects": 244,
+        "true_objects": 92
+      },
+      "classical": {
+        "dice": 0.49858164930337645,
+        "matching_50": 0.014925373134328358,
+        "matching_50_95": 0.006197377479676762,
+        "matching_75": 0.0049261083743842365,
+        "predicted_objects": 316,
+        "true_objects": 92
+      },
+      "image_id": 252742,
+      "tribovision_three_class": {
+        "dice": 0.9611015980540333,
+        "matching_50": 0.3048780487804878,
+        "matching_50_95": 0.17321048816352946,
+        "matching_75": 0.15053763440860216,
+        "predicted_objects": 122,
+        "true_objects": 92
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9998747440560942,
+        "matching_50": 0.22820037105751392,
+        "matching_50_95": 0.13364418463491504,
+        "matching_75": 0.13356164383561644,
+        "predicted_objects": 484,
+        "true_objects": 178
+      },
+      "classical": {
+        "dice": 0.4156933165518955,
+        "matching_50": 0.01507537688442211,
+        "matching_50_95": 0.005331217367996549,
+        "matching_75": 0.0033112582781456954,
+        "predicted_objects": 428,
+        "true_objects": 178
+      },
+      "image_id": 253652,
+      "tribovision_three_class": {
+        "dice": 0.9545182258791146,
+        "matching_50": 0.33762057877813506,
+        "matching_50_95": 0.15437320519737047,
+        "matching_75": 0.12737127371273713,
+        "predicted_objects": 238,
+        "true_objects": 178
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9997726473185546,
+        "matching_50": 0.28987993138936535,
+        "matching_50_95": 0.19365029034929707,
+        "matching_75": 0.17683881064162754,
+        "predicted_objects": 532,
+        "true_objects": 220
+      },
+      "classical": {
+        "dice": 0.36175682831554146,
+        "matching_50": 0.017857142857142856,
+        "matching_50_95": 0.004590072822535906,
+        "matching_75": 0.0,
+        "predicted_objects": 464,
+        "true_objects": 220
+      },
+      "image_id": 253832,
+      "tribovision_three_class": {
+        "dice": 0.9353224795924853,
+        "matching_50": 0.3424657534246575,
+        "matching_50_95": 0.13363858589750852,
+        "matching_75": 0.06986899563318777,
+        "predicted_objects": 270,
+        "true_objects": 220
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.999998616290413,
+        "matching_50": 0.12133333333333333,
+        "matching_50_95": 0.03678690163106573,
+        "matching_75": 0.014475271411338963,
+        "predicted_objects": 475,
+        "true_objects": 366
+      },
+      "classical": {
+        "dice": 0.4013342611308084,
+        "matching_50": 0.0035398230088495575,
+        "matching_50_95": 0.0007956004446541167,
+        "matching_75": 0.0,
+        "predicted_objects": 768,
+        "true_objects": 366
+      },
+      "image_id": 254054,
+      "tribovision_three_class": {
+        "dice": 0.9950105514115106,
+        "matching_50": 0.2867756315007429,
+        "matching_50_95": 0.09278231781326525,
+        "matching_75": 0.03961584633853541,
+        "predicted_objects": 500,
+        "true_objects": 366
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9997901055196796,
+        "matching_50": 0.23622047244094488,
+        "matching_50_95": 0.12625335530493134,
+        "matching_75": 0.10954063604240283,
+        "predicted_objects": 462,
+        "true_objects": 166
+      },
+      "classical": {
+        "dice": 0.4424537929470462,
+        "matching_50": 0.021848739495798318,
+        "matching_50_95": 0.0075145601783289636,
+        "matching_75": 0.0033003300330033004,
+        "predicted_objects": 442,
+        "true_objects": 166
+      },
+      "image_id": 254422,
+      "tribovision_three_class": {
+        "dice": 0.9503992997424128,
+        "matching_50": 0.3645833333333333,
+        "matching_50_95": 0.15931783595797425,
+        "matching_75": 0.1391304347826087,
+        "predicted_objects": 227,
+        "true_objects": 166
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9999655641453882,
+        "matching_50": 0.437125748502994,
+        "matching_50_95": 0.30088070237865894,
+        "matching_75": 0.2698412698412698,
+        "predicted_objects": 158,
+        "true_objects": 82
+      },
+      "classical": {
+        "dice": 0.6461805595220416,
+        "matching_50": 0.06405693950177936,
+        "matching_50_95": 0.02826757943392927,
+        "matching_75": 0.027491408934707903,
+        "predicted_objects": 217,
+        "true_objects": 82
+      },
+      "image_id": 254590,
+      "tribovision_three_class": {
+        "dice": 0.915190784737221,
+        "matching_50": 0.4217687074829932,
+        "matching_50_95": 0.23324671833448551,
+        "matching_75": 0.23668639053254437,
+        "predicted_objects": 127,
+        "true_objects": 82
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9996018186700744,
+        "matching_50": 0.24561403508771928,
+        "matching_50_95": 0.15293805305149377,
+        "matching_75": 0.1425287356321839,
+        "predicted_objects": 363,
+        "true_objects": 134
+      },
+      "classical": {
+        "dice": 0.43233670566514065,
+        "matching_50": 0.014059753954305799,
+        "matching_50_95": 0.00437436762149432,
+        "matching_75": 0.0034782608695652175,
+        "predicted_objects": 443,
+        "true_objects": 134
+      },
+      "image_id": 255101,
+      "tribovision_three_class": {
+        "dice": 0.9296730305536465,
+        "matching_50": 0.3134920634920635,
+        "matching_50_95": 0.12764172624174092,
+        "matching_75": 0.08169934640522876,
+        "predicted_objects": 197,
+        "true_objects": 134
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9998983876593185,
+        "matching_50": 0.12895377128953772,
+        "matching_50_95": 0.052032373207402616,
+        "matching_75": 0.04035874439461883,
+        "predicted_objects": 331,
+        "true_objects": 133
+      },
+      "classical": {
+        "dice": 0.42329991309874315,
+        "matching_50": 0.015414258188824663,
+        "matching_50_95": 0.004598547592077203,
+        "matching_75": 0.0038095238095238095,
+        "predicted_objects": 394,
+        "true_objects": 133
+      },
+      "image_id": 255326,
+      "tribovision_three_class": {
+        "dice": 0.9617663139975988,
+        "matching_50": 0.2896825396825397,
+        "matching_50_95": 0.12890958663465202,
+        "matching_75": 0.09797297297297297,
+        "predicted_objects": 192,
+        "true_objects": 133
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9995848507824444,
+        "matching_50": 0.18006993006993008,
+        "matching_50_95": 0.09916220336881135,
+        "matching_75": 0.08,
+        "predicted_objects": 512,
+        "true_objects": 163
+      },
+      "classical": {
+        "dice": 0.4479122218835721,
+        "matching_50": 0.009202453987730062,
+        "matching_50_95": 0.0021397597192952767,
+        "matching_75": 0.0015220700152207,
+        "predicted_objects": 495,
+        "true_objects": 163
+      },
+      "image_id": 255461,
+      "tribovision_three_class": {
+        "dice": 0.946395035222104,
+        "matching_50": 0.24012158054711247,
+        "matching_50_95": 0.11286194948998665,
+        "matching_75": 0.09090909090909091,
+        "predicted_objects": 245,
+        "true_objects": 163
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.999727132158991,
+        "matching_50": 0.14624505928853754,
+        "matching_50_95": 0.06306861986956068,
+        "matching_75": 0.05454545454545454,
+        "predicted_objects": 209,
+        "true_objects": 81
+      },
+      "classical": {
+        "dice": 0.43478106403765876,
+        "matching_50": 0.010050251256281407,
+        "matching_50_95": 0.0020062813834797527,
+        "matching_75": 0.0,
+        "predicted_objects": 321,
+        "true_objects": 81
+      },
+      "image_id": 256900,
+      "tribovision_three_class": {
+        "dice": 0.968970918172967,
+        "matching_50": 0.38,
+        "matching_50_95": 0.21507354966129907,
+        "matching_75": 0.21052631578947367,
+        "predicted_objects": 126,
+        "true_objects": 81
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9999254870168578,
+        "matching_50": 0.40417690417690416,
+        "matching_50_95": 0.21486713164635812,
+        "matching_75": 0.20189274447949526,
+        "predicted_objects": 716,
+        "true_objects": 427
+      },
+      "classical": {
+        "dice": 0.31846102024034795,
+        "matching_50": 0.0054694621695533276,
+        "matching_50_95": 0.001093063724781805,
+        "matching_75": 0.0,
+        "predicted_objects": 676,
+        "true_objects": 427
+      },
+      "image_id": 257198,
+      "tribovision_three_class": {
+        "dice": 0.9628847809747064,
+        "matching_50": 0.23803191489361702,
+        "matching_50_95": 0.08363601675569905,
+        "matching_75": 0.03215077605321508,
+        "predicted_objects": 504,
+        "true_objects": 427
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 1.0,
+        "matching_50": 0.782258064516129,
+        "matching_50_95": 0.6012145707272827,
+        "matching_75": 0.5673758865248227,
+        "predicted_objects": 117,
+        "true_objects": 104
+      },
+      "classical": {
+        "dice": 0.6509262931278681,
+        "matching_50": 0.17180616740088106,
+        "matching_50_95": 0.05848523761554699,
+        "matching_75": 0.031007751937984496,
+        "predicted_objects": 162,
+        "true_objects": 104
+      },
+      "image_id": 258188,
+      "tribovision_three_class": {
+        "dice": 0.92894280762565,
+        "matching_50": 0.5263157894736842,
+        "matching_50_95": 0.2979570345651182,
+        "matching_75": 0.30337078651685395,
+        "predicted_objects": 128,
+        "true_objects": 104
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9999369636989701,
+        "matching_50": 0.1568627450980392,
+        "matching_50_95": 0.0738957038310235,
+        "matching_75": 0.059880239520958084,
+        "predicted_objects": 500,
+        "true_objects": 208
+      },
+      "classical": {
+        "dice": 0.3922959895461805,
+        "matching_50": 0.0012755102040816326,
+        "matching_50_95": 0.0007653061224489796,
+        "matching_75": 0.0012755102040816326,
+        "predicted_objects": 577,
+        "true_objects": 208
+      },
+      "image_id": 258811,
+      "tribovision_three_class": {
+        "dice": 0.9764668589353398,
+        "matching_50": 0.34986945169712796,
+        "matching_50_95": 0.15402325442378487,
+        "matching_75": 0.12147505422993492,
+        "predicted_objects": 309,
+        "true_objects": 208
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9998179805681958,
+        "matching_50": 0.323943661971831,
+        "matching_50_95": 0.2073196961845069,
+        "matching_75": 0.19365079365079366,
+        "predicted_objects": 520,
+        "true_objects": 232
+      },
+      "classical": {
+        "dice": 0.416518088662268,
+        "matching_50": 0.01971830985915493,
+        "matching_50_95": 0.006016894716534014,
+        "matching_75": 0.0013831258644536654,
+        "predicted_objects": 492,
+        "true_objects": 232
+      },
+      "image_id": 259294,
+      "tribovision_three_class": {
+        "dice": 0.9335165899337989,
+        "matching_50": 0.2945945945945946,
+        "matching_50_95": 0.11615586661172919,
+        "matching_75": 0.07882882882882883,
+        "predicted_objects": 247,
+        "true_objects": 232
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9997820938487387,
+        "matching_50": 0.25328330206378985,
+        "matching_50_95": 0.13107989553084878,
+        "matching_75": 0.10596026490066225,
+        "predicted_objects": 482,
+        "true_objects": 186
+      },
+      "classical": {
+        "dice": 0.5590351282737588,
+        "matching_50": 0.006858710562414266,
+        "matching_50_95": 0.0020546096953734097,
+        "matching_75": 0.0,
+        "predicted_objects": 548,
+        "true_objects": 186
+      },
+      "image_id": 260493,
+      "tribovision_three_class": {
+        "dice": 0.9415380717230667,
+        "matching_50": 0.3253424657534247,
+        "matching_50_95": 0.13731921092794938,
+        "matching_75": 0.10571428571428572,
+        "predicted_objects": 201,
+        "true_objects": 186
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9999554562027237,
+        "matching_50": 0.3304964539007092,
+        "matching_50_95": 0.17436605427385032,
+        "matching_75": 0.15659679408138102,
+        "predicted_objects": 613,
+        "true_objects": 325
+      },
+      "classical": {
+        "dice": 0.3342099270167981,
+        "matching_50": 0.0032292787944025836,
+        "matching_50_95": 0.0012907860569759857,
+        "matching_75": 0.0010741138560687433,
+        "predicted_objects": 607,
+        "true_objects": 325
+      },
+      "image_id": 260681,
+      "tribovision_three_class": {
+        "dice": 0.9514428514100178,
+        "matching_50": 0.2076069730586371,
+        "matching_50_95": 0.07777483086547635,
+        "matching_75": 0.035326086956521736,
+        "predicted_objects": 437,
+        "true_objects": 325
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9999741881454756,
+        "matching_50": 0.09013398294762484,
+        "matching_50_95": 0.02583880326357535,
+        "matching_75": 0.007882882882882882,
+        "predicted_objects": 551,
+        "true_objects": 344
+      },
+      "classical": {
+        "dice": 0.3473750497149675,
+        "matching_50": 0.006802721088435374,
+        "matching_50_95": 0.0018438168775919209,
+        "matching_75": 0.0,
+        "predicted_objects": 692,
+        "true_objects": 344
+      },
+      "image_id": 261008,
+      "tribovision_three_class": {
+        "dice": 0.9899913810287982,
+        "matching_50": 0.28549618320610687,
+        "matching_50_95": 0.10600193331354464,
+        "matching_75": 0.05911949685534591,
+        "predicted_objects": 498,
+        "true_objects": 344
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 1.0,
+        "matching_50": 0.28774928774928776,
+        "matching_50_95": 0.1702798841867606,
+        "matching_75": 0.15306122448979592,
+        "predicted_objects": 305,
+        "true_objects": 147
+      },
+      "classical": {
+        "dice": 0.5344890969951435,
+        "matching_50": 0.020134228187919462,
+        "matching_50_95": 0.005994128979301695,
+        "matching_75": 0.0033003300330033004,
+        "predicted_objects": 461,
+        "true_objects": 147
+      },
+      "image_id": 262845,
+      "tribovision_three_class": {
+        "dice": 0.9396544534192174,
+        "matching_50": 0.26337448559670784,
+        "matching_50_95": 0.11739779995114627,
+        "matching_75": 0.11636363636363636,
+        "predicted_objects": 160,
+        "true_objects": 147
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9999843846132225,
+        "matching_50": 0.41739130434782606,
+        "matching_50_95": 0.2601309693958184,
+        "matching_75": 0.24563318777292575,
+        "predicted_objects": 726,
+        "true_objects": 415
+      },
+      "classical": {
+        "dice": 0.3407619873371779,
+        "matching_50": 0.007319304666056725,
+        "matching_50_95": 0.0014610275585508745,
+        "matching_75": 0.0,
+        "predicted_objects": 686,
+        "true_objects": 415
+      },
+      "image_id": 262994,
+      "tribovision_three_class": {
+        "dice": 0.9428330198041801,
+        "matching_50": 0.1951219512195122,
+        "matching_50_95": 0.06721776546676014,
+        "matching_75": 0.03215077605321508,
+        "predicted_objects": 516,
+        "true_objects": 415
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.999930553668427,
+        "matching_50": 0.24074074074074073,
+        "matching_50_95": 0.11283937401765991,
+        "matching_75": 0.10352941176470588,
+        "predicted_objects": 330,
+        "true_objects": 139
+      },
+      "classical": {
+        "dice": 0.43931222876809584,
+        "matching_50": 0.011299435028248588,
+        "matching_50_95": 0.0033743447540951154,
+        "matching_75": 0.0018656716417910447,
+        "predicted_objects": 398,
+        "true_objects": 139
+      },
+      "image_id": 263411,
+      "tribovision_three_class": {
+        "dice": 0.9630886010935162,
+        "matching_50": 0.3253012048192771,
+        "matching_50_95": 0.15716948107606574,
+        "matching_75": 0.13402061855670103,
+        "predicted_objects": 191,
+        "true_objects": 139
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9999488631065362,
+        "matching_50": 0.2087378640776699,
+        "matching_50_95": 0.08274530783544262,
+        "matching_75": 0.05620360551431601,
+        "predicted_objects": 658,
+        "true_objects": 338
+      },
+      "classical": {
+        "dice": 0.28956276948294907,
+        "matching_50": 0.003289473684210526,
+        "matching_50_95": 0.0009861215195711075,
+        "matching_75": 0.0,
+        "predicted_objects": 577,
+        "true_objects": 338
+      },
+      "image_id": 263973,
+      "tribovision_three_class": {
+        "dice": 0.9717483631215714,
+        "matching_50": 0.2173274596182085,
+        "matching_50_95": 0.0724683724524448,
+        "matching_75": 0.0323785803237858,
+        "predicted_objects": 491,
+        "true_objects": 338
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9999294954652765,
+        "matching_50": 0.3213751868460389,
+        "matching_50_95": 0.2121862945101925,
+        "matching_75": 0.1994572591587517,
+        "predicted_objects": 616,
+        "true_objects": 268
+      },
+      "classical": {
+        "dice": 0.33790329601448643,
+        "matching_50": 0.00903225806451613,
+        "matching_50_95": 0.0027007380232445975,
+        "matching_75": 0.0012804097311139564,
+        "predicted_objects": 514,
+        "true_objects": 268
+      },
+      "image_id": 265009,
+      "tribovision_three_class": {
+        "dice": 0.9382169132188909,
+        "matching_50": 0.3221476510067114,
+        "matching_50_95": 0.14284342339777728,
+        "matching_75": 0.11090225563909774,
+        "predicted_objects": 323,
+        "true_objects": 268
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9997822234980845,
+        "matching_50": 0.17158671586715868,
+        "matching_50_95": 0.07072746586045354,
+        "matching_75": 0.049586776859504134,
+        "predicted_objects": 454,
+        "true_objects": 181
+      },
+      "classical": {
+        "dice": 0.47540410100926506,
+        "matching_50": 0.004297994269340974,
+        "matching_50_95": 0.0012885790296294866,
+        "matching_75": 0.0,
+        "predicted_objects": 520,
+        "true_objects": 181
+      },
+      "image_id": 265337,
+      "tribovision_three_class": {
+        "dice": 0.9690040205212075,
+        "matching_50": 0.3374233128834356,
+        "matching_50_95": 0.15276649480617807,
+        "matching_75": 0.13838120104438642,
+        "predicted_objects": 255,
+        "true_objects": 181
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9999162081389827,
+        "matching_50": 0.20967741935483872,
+        "matching_50_95": 0.08500282318595831,
+        "matching_75": 0.059654631083202514,
+        "predicted_objects": 480,
+        "true_objects": 195
+      },
+      "classical": {
+        "dice": 0.44567906160229814,
+        "matching_50": 0.00392156862745098,
+        "matching_50_95": 0.0006529130557046809,
+        "matching_75": 0.0,
+        "predicted_objects": 573,
+        "true_objects": 195
+      },
+      "image_id": 265520,
+      "tribovision_three_class": {
+        "dice": 0.9682527002652966,
+        "matching_50": 0.35435435435435436,
+        "matching_50_95": 0.15514339321967302,
+        "matching_75": 0.12189054726368159,
+        "predicted_objects": 256,
+        "true_objects": 195
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9997223329407181,
+        "matching_50": 0.29226736566186107,
+        "matching_50_95": 0.18021643131528517,
+        "matching_75": 0.16136631330977622,
+        "predicted_objects": 686,
+        "true_objects": 300
+      },
+      "classical": {
+        "dice": 0.42665385034904013,
+        "matching_50": 0.009988901220865706,
+        "matching_50_95": 0.003432778302658361,
+        "matching_75": 0.0011001100110011,
+        "predicted_objects": 610,
+        "true_objects": 300
+      },
+      "image_id": 266756,
+      "tribovision_three_class": {
+        "dice": 0.9288307242148401,
+        "matching_50": 0.25363825363825365,
+        "matching_50_95": 0.10956476535940787,
+        "matching_75": 0.07678571428571429,
+        "predicted_objects": 303,
+        "true_objects": 300
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 1.0,
+        "matching_50": 0.2569906790945406,
+        "matching_50_95": 0.11179001284633397,
+        "matching_75": 0.09132947976878612,
+        "predicted_objects": 602,
+        "true_objects": 342
+      },
+      "classical": {
+        "dice": 0.3114273190140608,
+        "matching_50": 0.004188481675392671,
+        "matching_50_95": 0.0012558880000709783,
+        "matching_75": 0.0,
+        "predicted_objects": 617,
+        "true_objects": 342
+      },
+      "image_id": 267058,
+      "tribovision_three_class": {
+        "dice": 0.9665951309285621,
+        "matching_50": 0.29449838187702265,
+        "matching_50_95": 0.11058154808596479,
+        "matching_75": 0.059602649006622516,
+        "predicted_objects": 458,
+        "true_objects": 342
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9997640638145293,
+        "matching_50": 0.17573221757322174,
+        "matching_50_95": 0.07023169934060731,
+        "matching_75": 0.04460966542750929,
+        "predicted_objects": 756,
+        "true_objects": 368
+      },
+      "classical": {
+        "dice": 0.3907625107583318,
+        "matching_50": 0.000925925925925926,
+        "matching_50_95": 0.0001851851851851852,
+        "matching_75": 0.0,
+        "predicted_objects": 713,
+        "true_objects": 368
+      },
+      "image_id": 267726,
+      "tribovision_three_class": {
+        "dice": 0.9784944255610517,
+        "matching_50": 0.267741935483871,
+        "matching_50_95": 0.10806538387922411,
+        "matching_75": 0.05787348586810229,
+        "predicted_objects": 418,
+        "true_objects": 368
+      },
+      "well": "C7"
+    },
+    {
+      "ceiling": {
+        "dice": 0.9997502594136373,
+        "matching_50": 0.29155313351498635,
+        "matching_50_95": 0.17031529199744022,
+        "matching_75": 0.15048543689320387,
+        "predicted_objects": 328,
+        "true_objects": 146
+      },
+      "classical": {
+        "dice": 0.4403918107439314,
+        "matching_50": 0.02434077079107505,
+        "matching_50_95": 0.006849410482207821,
+        "matching_75": 0.0,
+        "predicted_objects": 359,
+        "true_objects": 146
+      },
+      "image_id": 268096,
+      "tribovision_three_class": {
+        "dice": 0.9325031552376946,
+        "matching_50": 0.250996015936255,
+        "matching_50_95": 0.11467018816666388,
+        "matching_75": 0.0979020979020979,
+        "predicted_objects": 168,
+        "true_objects": 146
+      },
+      "well": "C7"
+    }
+  ],
+  "summary": {
+    "ceiling": {
+      "count_error": 247.78333333333333,
+      "dice": 0.9998770686709503,
+      "matching_50": 0.28516308014128045,
+      "matching_50_95": 0.16773269589838616,
+      "matching_75": 0.15081755579762254,
+      "predicted_objects": 476.3666666666667,
+      "true_objects": 228.58333333333334
+    },
+    "classical": {
+      "count_error": 261.6833333333333,
+      "dice": 0.4248642828882661,
+      "matching_50": 0.02063768605837104,
+      "matching_50_95": 0.00719440532294994,
+      "matching_75": 0.004444918630215775,
+      "predicted_objects": 490.26666666666665,
+      "true_objects": 228.58333333333334
+    },
+    "tribovision_three_class": {
+      "count_error": 66.58333333333334,
+      "dice": 0.9531072882847572,
+      "matching_50": 0.30839374205177267,
+      "matching_50_95": 0.141739159930439,
+      "matching_75": 0.11503391597382613,
+      "predicted_objects": 295.1666666666667,
+      "true_objects": 228.58333333333334
+    }
+  },
+  "three_class_model": {
+    "checkpoint": "runs/scale_79/best_model.pt",
+    "interior_threshold": 0.7,
+    "note": "Same U-Net body as tribovision_unet; only the output head and the target differ. Any gap between the two rows is representation, not capacity. The decoder's interior threshold was chosen on the training split, never on the manifest scored here.",
+    "used": true
+  }
+}

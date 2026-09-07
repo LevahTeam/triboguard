@@ -340,6 +340,13 @@ PUBLISHED = (
     "instance_benchmark/instance_benchmark.json",
     "mechanics/mechanics.json",
     "mechanics/segmenter_agreement.json",
+    "instance_model/metrics.json",
+    "scale_79/bench/instance_benchmark.json",
+    "scale_152/bench/instance_benchmark.json",
+    "scale_304/bench/instance_benchmark.json",
+    "scale_79/metrics.json",
+    "scale_152/metrics.json",
+    "scale_304/metrics.json",
 )
 
 
