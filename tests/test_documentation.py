@@ -121,12 +121,15 @@ def test_the_documented_test_count_is_not_stale(request: pytest.FixtureRequest) 
     collected = request.session.testscollected
     if collected < 100:
         pytest.skip(f"only {collected} tests collected; this check is meaningful on a full run")
-    # Only current-state claims. A historical "27 passed" in a before/after column
-    # is correct and must not be flagged.
+    # Only current-state claims. A historical "was 27 tests" in a before/after
+    # column is correct and must not be flagged, so a preceding "was" excludes
+    # the match. Bold is not required: the count went stale in plain prose while
+    # a guard that only looked at "**N tests**" reported everything was fine.
+    current = re.compile(r"(?<!was )(?<!was \*\*)\b(\d{2,4}) tests[,.]")
     claims = [
         int(match)
         for document in DOCS
-        for match in re.findall(r"\*\*(\d{2,4}) tests[,.]", _text(document))
+        for match in current.findall(_text(document))
         + re.findall(r"(\d{2,4}) passed, \d+ skipped", _text(document))
     ]
     stale = [claim for claim in claims if not 0.9 * collected <= claim <= 1.1 * collected]
