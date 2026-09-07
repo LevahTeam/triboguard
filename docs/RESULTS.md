@@ -198,6 +198,21 @@ tribovision verify
 tribovision baseline --max-images 60
 tribovision train --epochs 40 --image-size 512 --batch-size 4 --patience 12
 tribovision compare --checkpoint runs/baseline/best_model.pt
+```
+
+The mechanics and cross-cell-line results, in order — each reads the artifacts the one before it wrote:
+
+```bash
+# Biological spread of shape index, from polygons alone. No segmenter involved.
+python scripts/measure_q_dynamic_range.py
+# Cell size and perimeter discretisation, per line.
+python scripts/measure_resolution_limit.py
+# The recovery on three lines the method was not developed on.
+python scripts/measure_across_cell_lines.py
+# Signal-to-noise beside every correlation. Needs across_cell_lines.json.
+python scripts/measure_attenuation.py
+# Diversity versus volume at matched training size. Trains three models.
+python scripts/run_diversity_experiment.py
 python scripts/collect_results.py runs > docs/RESULTS.md
 ```
 
