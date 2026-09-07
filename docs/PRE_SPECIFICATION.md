@@ -24,8 +24,10 @@ several crops of one field of view under different names. Training refuses to
 start on leaking splits; it is not a warning.
 
 **The trend threshold.** `agreement()` has judged a segmenter "usable for trends"
-at Spearman rho > 0.7 since before the three-class model existed. That model
-scored 0.65. The threshold was not moved.
+at Spearman rho > 0.7 since before the three-class model existed. The first
+version scored 0.65. The improved version scored 0.707 on one seed and 0.679 on
+average across three, so it still does not reliably clear the bar. The threshold
+was not moved either time, and the single passing seed was not reported alone.
 
 **The confirmatory endpoint.** `PRIMARY_FEATURE` in the treatment analysis is a
 single pre-specified shape feature. The multi-feature model is reported beside it
@@ -80,8 +82,9 @@ better test was run. All are in the git history.
 | "The bottleneck moved to boundary prediction" | It moved there and is data-limited, not architecture-limited | The scaling curve |
 | Transfer looked *better* on unseen cell lines | Raw scores are not comparable; the ceiling varies 4.4x | Normalising by each line's ceiling |
 | A power table for the experiment protocol | Did not survive simulation; within-day centring doubled the real power | Re-deriving it instead of trusting it |
+| "The improved model now clears the 0.70 trend bar at 0.707" | Mean 0.679 ± 0.030 across seeds; 1 of 3 passes | Checking the other two seeds before claiming it |
 
-Eight retractions is not a sign the work is unreliable. Every one came from
+Nine retractions is not a sign the work is unreliable. Every one came from
 applying a stricter test to a number that had already been written down, and the
 stricter test is the one reported. A project with no retractions has usually not
 looked hard enough.
