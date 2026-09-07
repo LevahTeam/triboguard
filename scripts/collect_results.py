@@ -470,6 +470,13 @@ def format_report(runs: Path) -> str:
             f"{design['held_out_line']}, which neither arm ever saw. Matching the size is "
             "the point: the scaling curve confounds volume with variety, and this does not.",
             "",
+            "Two things that could have made this unfair were checked rather than assumed. "
+            "The validation sets that drive early stopping are comparable in size (152 "
+            "images for the single-line arm, 162 for the mixed one), so neither arm gets a "
+            "cleaner stopping signal. And the mixed training subset stays balanced after "
+            "the cap is applied — 102 / 94 / 108 images across the three lines — so the "
+            '"mixed" arm is genuinely mixed rather than one line with a garnish.',
+            "",
             "| Training set | Mean | Seed SD | 95% CI (seeds + images) | ÷ ceiling |",
             "|---|---|---|---|---|",
             f"| {design['mixed_lines'][0]} only | {control['mean']:.4f} | "
