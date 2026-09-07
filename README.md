@@ -4,16 +4,27 @@ TriboVision turns ordinary phase-contrast microscope images into quantitative,
 auditable measurements of cell morphology, and provides the statistical machinery
 to test whether those visible changes track an independent viability assay.
 
-It has two halves, and the distinction between them matters:
+It has three parts, and the distinction between them matters:
 
 1. **A working cell segmenter**, trained and evaluated on the public
    [LIVECell](https://sartorius-research.github.io/LIVECell/) dataset. This part
    is finished and measured.
-2. **A Tribonema treatment-analysis pipeline** — manifest schema, segmentation,
+2. **Tissue mechanics measured from cell outlines** — the dimensionless shape
+   index q = P/sqrt(A), which the vertex model of a confluent monolayer predicts
+   will cross a rigidity transition at q* = 3.81. Measured over 458,187 annotated
+   cells across 8 cell lines, and then re-measured through the segmenter's own
+   output to ask whether a vision model can recover a mechanical quantity rather
+   than merely outline cells. Both results are in
+   [docs/RESULTS.md](docs/RESULTS.md).
+3. **A Tribonema treatment-analysis pipeline** — manifest schema, segmentation,
    per-cell morphometry, dose-response fitting, and viability linkage. The code
    and its statistics are complete and tested against synthetic data with a known
    answer. **No Tribonema images have been collected yet**, so this repository
    contains no evidence about Tribonema's effect on cancer cells.
+
+The second part is where the physics is. q* = 3.81 is a *prediction of the
+theory*, not a value fitted to this data, which is what makes comparing against
+it a test rather than a description.
 
 LIVECell has no Tribonema treatment, concentration, exposure-time, control, or
 viability labels. Nothing here can, or claims to, demonstrate an anti-tumour
@@ -253,6 +264,18 @@ full manifests. Full-scale instance segmentation needs substantially more comput
 than this laptop-oriented baseline.
 
 ## Research design boundaries
+
+**On the mechanics.** The shape index is measured from static images of cells in
+culture, not from a mechanical test. Reporting a monolayer as "jammed" describes
+where its cells sit relative to a threshold the vertex model predicts; it is not
+a measurement of stiffness, and no force was applied to anything. The
+cross-sectional relationship between crowding and shape index does not survive
+controlling for cell size, so the trajectory result — whether a well moves toward
+the jammed side as it crowds — is the one that carries weight. A low correlation
+on a given cell line is often a statement about that line rather than about the
+method: where the shape index barely varies between images, no segmenter can
+produce a high rank correlation, and [docs/RESULTS.md](docs/RESULTS.md) reports
+the signal-to-noise ratio next to every correlation for exactly that reason.
 
 LIVECell is appropriate for **pretraining a generic cell segmenter**. It cannot
 by itself say whether treated cells are healthy, stressed, or dying. A defensible
