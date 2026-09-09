@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'TriboVision Cell Morphology Explorer',
+  title: 'TriboGuard',
   description:
-    'Upload a microscope image and explore a transparent cell-segmentation baseline directly in your browser.',
+    'Work out whether a cell-treatment experiment can tell cell killing from growth inhibition, and what the answer would cost.',
 };
 
 export default function RootLayout({
