@@ -173,3 +173,34 @@ class TestTheStatement:
         report = case_study.report(PAPER)
         assert report["unsupported"] > report["supported"]
         assert report["supported"] >= 1, "a case study that supports nothing is not credible"
+
+
+class TestTheTwoFactors:
+    """The ratio and the width are reported side by side and never interchanged.
+
+    An earlier version printed the relative width under the heading "factor",
+    which understated the gap at three wells from 146 to 39. Both numbers are
+    real; they answer different questions.
+    """
+
+    def test_both_are_reported_for_every_well_count(self) -> None:
+        for row in case_study.resolving_power():
+            assert row["turnover_ratio"] is not None
+            assert row["relative_turnover_width"] is not None
+
+    def test_they_are_not_the_same_number(self) -> None:
+        row = next(r for r in case_study.resolving_power() if r["wells"] == 3)
+        assert row["turnover_ratio"] > 3 * row["relative_turnover_width"]
+
+    def test_the_ratio_at_three_wells_matches_the_statement(self) -> None:
+        """The table and the prose must not disagree with each other."""
+        report = case_study.report(PAPER)
+        row = next(r for r in report["resolving_power"] if r["wells"] == 3)
+        assert round(row["turnover_ratio"]) == 146
+        assert "factor of about 146" in report["statement"]
+
+    def test_both_columns_improve_with_wells(self) -> None:
+        rows = case_study.resolving_power()
+        for key in ("turnover_ratio", "relative_turnover_width"):
+            values = [r[key] for r in rows]
+            assert values == sorted(values, reverse=True), key

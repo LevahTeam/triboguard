@@ -137,18 +137,24 @@ def resolving_power(
     well count alone. That is the only reason a study which never reported its
     replicate count can be analysed at all.
     """
-    return [
-        {
-            "wells": wells,
-            "relative_turnover_width": (
-                width
-                if (width := design.relative_turnover_width(wells, confidence)) < 1e6
-                else None
-            ),
-            "mechanism_estimable": wells >= design.MINIMUM_USEFUL_WELLS,
-        }
-        for wells in well_counts
-    ]
+    rows = []
+    for wells in well_counts:
+        width = design.relative_turnover_width(wells, confidence)
+        ratio = design.turnover_ratio(wells, confidence)
+        rows.append(
+            {
+                "wells": wells,
+                # Reported side by side and never interchangeably. The ratio is
+                # what "known to within a factor of" means; the width is the
+                # interval's span over the estimate. At three wells they are 146
+                # and 39, and an earlier version printed the second under the
+                # first one's name.
+                "turnover_ratio": ratio if ratio < 1e6 else None,
+                "relative_turnover_width": width if width < 1e6 else None,
+                "mechanism_estimable": wells >= design.MINIMUM_USEFUL_WELLS,
+            }
+        )
+    return rows
 
 
 def follow_up(

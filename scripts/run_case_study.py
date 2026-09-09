@@ -35,11 +35,13 @@ def main() -> None:
     print(f"\n  {report['supported']} supported, {report['unsupported']} not established\n")
 
     print("WHAT ANY EXPERIMENT OF THIS SHAPE COULD CONSTRAIN")
-    print("  (how tightly the birth/death split could be pinned, per well count)")
+    print("  (needs none of the paper's numbers: the width depends on the well count alone)")
+    print(f"    {'wells':>5s}  {'split known to within':>21s}  {'relative interval width':>23s}")
     for row in report["resolving_power"]:
-        width = row["relative_turnover_width"]
-        shown = "unbounded" if width is None else f"factor {width:.1f}"
-        print(f"    {row['wells']:3d} wells -> {shown}")
+        ratio, width = row["turnover_ratio"], row["relative_turnover_width"]
+        left = "unbounded" if ratio is None else f"x{ratio:,.1f}"
+        right = "unbounded" if width is None else f"{width:,.2f}"
+        print(f"    {row['wells']:5d}  {left:>21s}  {right:>23s}")
 
     follow = report["follow_up"]
     mts = follow["as_run_with_mts"]["current"]
