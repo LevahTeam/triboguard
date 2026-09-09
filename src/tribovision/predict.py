@@ -10,6 +10,7 @@ maps predictions back to the native image grid before measuring anything.
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
 from collections.abc import Iterable, Sequence
 from pathlib import Path
@@ -122,6 +123,22 @@ def overlay_image(
     return Image.fromarray(np.clip(canvas, 0, 255).astype(np.uint8))
 
 
+def artifact_stem(path: Path) -> str:
+    """A per-image output name that cannot collide with another input.
+
+    Two inputs named ``field1.tif`` in different directories previously both
+    wrote ``field1_mask.png``, so the second silently overwrote the first and the
+    morphology rows -- keyed on the bare file name -- could not say which image
+    they came from. A short digest of the resolved path makes the name unique
+    while keeping the original stem readable in a directory listing.
+
+    The digest is of the absolute path, so it is stable across runs and does not
+    depend on which other images happened to be in the same batch.
+    """
+    digest = hashlib.sha256(str(path.resolve()).encode("utf-8")).hexdigest()[:8]
+    return f"{path.stem}_{digest}"
+
+
 def collect_images(inputs: Sequence[Path]) -> list[Path]:
     found: list[Path] = []
     for item in inputs:
@@ -183,16 +200,18 @@ def run_prediction(
             np.asarray(image, dtype=np.float32),
             calibration=calibration,
             method=instance_method,
-            extra={"source_image": path.name},
+            extra={"source_image": path.name, "source_path": str(path)},
         )
         feature_rows.extend(rows)
-        stem = path.stem
+        stem = artifact_stem(path)
         Image.fromarray(mask.astype(np.uint8) * 255).save(output_dir / f"{stem}_mask.png")
         if save_overlays:
             overlay_image(image, mask).save(output_dir / f"{stem}_overlay.png")
         per_image.append(
             {
                 "source_image": path.name,
+                "source_path": str(path),
+                "artifact_stem": stem,
                 "width": image.width,
                 "height": image.height,
                 "foreground_fraction": float(mask.mean()),

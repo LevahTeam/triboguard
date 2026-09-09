@@ -158,6 +158,11 @@ class InstanceConfig:
     #: Which manifest directory to train from, so a mixed-cell-line set can sit
     #: alongside the single-line one instead of replacing it.
     manifests_dirname: str = "manifests"
+    #: How splits are checked for leakage before training starts. "well" is the
+    #: level the binary trainer has always used; LiveCell stores several crops of
+    #: one field under different names, so grouping by file name would pass a
+    #: leaking split.
+    group_by: str = "well"
     #: Which validation quantity selects the checkpoint. ``boundary_recall`` is
     #: the original rule and stays the default so every earlier run reproduces.
     #: ``balanced`` adds interior recall to it, because decoding an instance
@@ -243,6 +248,47 @@ def _epoch(
     }
 
 
+def _validate_instance_config(config: InstanceConfig) -> None:
+    """Reject an unrunnable configuration before any data is touched.
+
+    The binary trainer validates its config; this one checked only the selection
+    metric, so a negative learning rate or a zero batch size surfaced as an
+    opaque failure part-way through setup.
+    """
+    if config.selection_metric not in SELECTION_METRICS:
+        raise ValueError(
+            f"selection_metric must be one of {SELECTION_METRICS}, got {config.selection_metric!r}."
+        )
+    positive = {
+        "epochs": config.epochs,
+        "batch_size": config.batch_size,
+        "image_size": config.image_size,
+        "base_channels": config.base_channels,
+        "depth": config.depth,
+    }
+    for name, value in positive.items():
+        if value < 1:
+            raise ValueError(f"{name} must be at least 1, got {value}.")
+    if config.learning_rate <= 0:
+        raise ValueError(f"learning_rate must be positive, got {config.learning_rate}.")
+    if config.weight_decay < 0:
+        raise ValueError(f"weight_decay must be non-negative, got {config.weight_decay}.")
+    if config.boundary_weight <= 0:
+        raise ValueError(f"boundary_weight must be positive, got {config.boundary_weight}.")
+    if config.patience < 0:
+        raise ValueError(f"patience must be non-negative, got {config.patience}.")
+    if config.train_limit is not None and config.train_limit < 1:
+        raise ValueError(f"train_limit must be at least 1, got {config.train_limit}.")
+    # The U-Net halves the image once per level and needs a bottleneck larger
+    # than one pixel, so the floor is 2**(depth+1) rather than 2**depth.
+    floor = 2 ** (config.depth + 1)
+    if config.image_size < floor:
+        raise ValueError(
+            f"image_size {config.image_size} is below {floor}, the smallest a depth-"
+            f"{config.depth} network can process."
+        )
+
+
 def train_instance_model(config: InstanceConfig, *, progress: bool = True) -> dict[str, Any]:
     """Train the three-class model. Same network, different question."""
     from tribovision.training import resolve_device, seed_everything
@@ -250,10 +296,7 @@ def train_instance_model(config: InstanceConfig, *, progress: bool = True) -> di
     # Checked before anything expensive happens. A misspelled rule that only
     # surfaced at the end of the first epoch would waste the dataset build and
     # the model construction to report a typo.
-    if config.selection_metric not in SELECTION_METRICS:
-        raise ValueError(
-            f"selection_metric must be one of {SELECTION_METRICS}, got {config.selection_metric!r}."
-        )
+    _validate_instance_config(config)
     seed_everything(config.seed)
     device = resolve_device(config.device)
     manifests = Path(config.data_dir).resolve() / config.manifests_dirname
@@ -261,11 +304,22 @@ def train_instance_model(config: InstanceConfig, *, progress: bool = True) -> di
         split: ThreeClassDataset(manifests / f"{split}.jsonl", image_size=config.image_size)
         for split in ("train", "val", "test")
     }
+    # The binary trainer has refused to start on leaking splits since the audit
+    # that found the leak; this one never checked, so every three-class result so
+    # far rested on manifests being clean rather than on being told they were.
+    # Same guard, same grouping level, and a hard failure rather than a warning.
+    from tribovision.manifest import ManifestError, require_no_group_leakage
+
+    try:
+        require_no_group_leakage(
+            {split: dataset.records for split, dataset in datasets.items()},
+            group_by=config.group_by,
+        )
+    except ManifestError as exc:
+        raise ValueError(f"refusing to train on leaking splits: {exc}") from exc
     train_dataset: Any = datasets["train"]
     if config.train_limit is not None:
         available = len(datasets["train"])
-        if config.train_limit < 1:
-            raise ValueError(f"train_limit must be at least 1, got {config.train_limit}.")
         if config.train_limit < available:
             # A fixed permutation, so a smaller run is a subset of a larger one and
             # the curve is not confounded by which images each point happened to see.

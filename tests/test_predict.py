@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import json
+import shutil
 from pathlib import Path
 
 import numpy as np
@@ -13,6 +14,7 @@ from PIL import Image
 
 from tribovision.predict import (
     PredictionError,
+    artifact_stem,
     collect_images,
     load_checkpoint,
     overlay_image,
@@ -73,7 +75,10 @@ def test_full_prediction_run_writes_masks_overlays_and_morphology(
     output = tmp_path / "predictions"
     report = run_prediction(trained_checkpoint, [new_image], output, device="cpu")
 
-    stem = new_image.stem
+    # The artifact name carries a digest of the source path, so two inputs with
+    # the same file name in different directories cannot overwrite each other.
+    stem = artifact_stem(new_image)
+    assert stem.startswith(new_image.stem)
     assert (output / f"{stem}_mask.png").is_file()
     assert (output / f"{stem}_overlay.png").is_file()
     assert (output / "prediction_report.json").is_file()
@@ -294,3 +299,50 @@ def test_probabilities_and_mask_agree_on_a_uniform_prediction(new_image: Path) -
     )
     assert mask.all()
     assert probabilities.min() > 0.9
+
+
+def test_two_images_with_the_same_name_do_not_overwrite_each_other(
+    trained_checkpoint: Path, new_image: Path, tmp_path: Path
+) -> None:
+    """The collision that silently lost a result.
+
+    Previously both inputs wrote "<stem>_mask.png", so the second overwrote the
+    first and the morphology rows -- keyed on the bare file name -- could not say
+    which image they came from. A batch spanning two plates with the same field
+    naming would have lost half its outputs without an error.
+    """
+    first_dir, second_dir = tmp_path / "plate1", tmp_path / "plate2"
+    for directory in (first_dir, second_dir):
+        directory.mkdir()
+        shutil.copy(new_image, directory / "field1.tif")
+
+    output = tmp_path / "predictions"
+    report = run_prediction(
+        trained_checkpoint,
+        [first_dir / "field1.tif", second_dir / "field1.tif"],
+        output,
+        device="cpu",
+    )
+
+    masks = sorted(path.name for path in output.glob("*_mask.png"))
+    assert len(masks) == 2, f"one image overwrote the other: {masks}"
+    assert len({row["artifact_stem"] for row in report["images"]}) == 2
+    # Both keep the readable stem, and both record where they came from.
+    assert all(name.startswith("field1_") for name in masks)
+    assert len({row["source_path"] for row in report["images"]}) == 2
+
+
+def test_the_artifact_name_is_stable_across_runs(tmp_path: Path) -> None:
+    """A name that depended on the batch would break reproducibility."""
+    path = tmp_path / "a" / "field1.tif"
+    path.parent.mkdir()
+    path.write_bytes(b"")
+    assert artifact_stem(path) == artifact_stem(path)
+
+
+def test_the_artifact_name_differs_for_the_same_name_elsewhere(tmp_path: Path) -> None:
+    (tmp_path / "a").mkdir()
+    (tmp_path / "b").mkdir()
+    assert artifact_stem(tmp_path / "a" / "field1.tif") != artifact_stem(
+        tmp_path / "b" / "field1.tif"
+    )

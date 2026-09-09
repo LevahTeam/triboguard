@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import numpy as np
@@ -381,4 +382,81 @@ class TestCheckpointSelection:
             data_dir=tmp_path, output_dir=tmp_path, selection_metric="boundry_recall"
         )
         with pytest.raises(ValueError, match="selection_metric"):
+            train_instance_model(config, progress=False)
+
+
+class TestTheGuardsTheBinaryTrainerAlwaysHad:
+    """The three-class trainer had neither, and every result so far predates them.
+
+    The binary trainer refuses to start on leaking splits and validates its
+    configuration. This one checked only the selection metric and never looked at
+    the splits at all, so every three-class number in this project rested on the
+    manifests happening to be clean rather than on being told they were. They
+    were, which is luck rather than method.
+    """
+
+    def test_a_leaking_split_is_refused(self, tmp_path: Path, tiny_training_data: Path) -> None:
+        """The same well in train and test must stop the run, not warn."""
+        # Relabelled rather than copied: each record declares its own split, and
+        # an earlier guard already rejects a record sitting in the wrong file.
+        # The leak that matters is a record correctly labelled "test" whose well
+        # also appears in training, which only the group check can see.
+        manifests = tiny_training_data / "manifests"
+        leaked = []
+        for line in (manifests / "train.jsonl").read_text(encoding="utf-8").splitlines():
+            record = json.loads(line)
+            record["split"] = "test"
+            record["official_split"] = "test"
+            leaked.append(json.dumps(record, sort_keys=True))
+        (manifests / "test.jsonl").write_text("\n".join(leaked) + "\n", encoding="utf-8")
+        config = InstanceConfig(
+            data_dir=tiny_training_data,
+            output_dir=tmp_path / "out",
+            epochs=1,
+            image_size=32,
+            base_channels=4,
+            depth=2,
+            device="cpu",
+        )
+        with pytest.raises(ValueError, match="leaking splits"):
+            train_instance_model(config, progress=False)
+
+    @pytest.mark.parametrize(
+        "field,value,message",
+        [
+            ("epochs", 0, "epochs must be at least 1"),
+            ("batch_size", 0, "batch_size must be at least 1"),
+            ("depth", 0, "depth must be at least 1"),
+            ("learning_rate", 0.0, "learning_rate must be positive"),
+            ("learning_rate", -1e-3, "learning_rate must be positive"),
+            ("weight_decay", -1.0, "weight_decay must be non-negative"),
+            ("boundary_weight", 0.0, "boundary_weight must be positive"),
+            ("patience", -1, "patience must be non-negative"),
+            ("train_limit", 0, "train_limit must be at least 1"),
+            ("selection_metric", "f1", "selection_metric must be one of"),
+        ],
+    )
+    def test_an_unrunnable_configuration_is_refused(
+        self, tmp_path: Path, field: str, value: object, message: str
+    ) -> None:
+        config = InstanceConfig(
+            data_dir=tmp_path,
+            output_dir=tmp_path,
+            **{field: value},  # type: ignore[arg-type]
+        )
+        with pytest.raises(ValueError, match=message):
+            train_instance_model(config, progress=False)
+
+    def test_an_image_too_small_for_the_network_is_refused(self, tmp_path: Path) -> None:
+        """At exactly 2**depth the bottleneck is 1x1 and GroupNorm fails opaquely."""
+        config = InstanceConfig(
+            data_dir=tmp_path, output_dir=tmp_path, depth=3, image_size=8, device="cpu"
+        )
+        with pytest.raises(ValueError, match="smallest a depth-3 network"):
+            train_instance_model(config, progress=False)
+
+    def test_validation_happens_before_any_data_is_read(self, tmp_path: Path) -> None:
+        """A typo must cost a second, not a dataset build against a missing path."""
+        config = InstanceConfig(data_dir=tmp_path / "does-not-exist", output_dir=tmp_path, epochs=0)
+        with pytest.raises(ValueError, match="epochs must be at least 1"):
             train_instance_model(config, progress=False)
