@@ -1,0 +1,517 @@
+<title>TriboGuard</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<style>
+  :root {
+    --ground: #f6f5fa;
+    --panel: #ffffff;
+    --sunk: #edebf3;
+    --ink: #1b1825;
+    --ink-soft: #5d5870;
+    --ink-faint: #8b85a0;
+    --rule: #ddd9e6;
+    --accent: #6d4aa8;
+    --accent-soft: #ece5f7;
+    --good: #35735a;
+    --good-soft: #e0efe8;
+    --warn: #9d6f16;
+    --warn-soft: #f6ecd6;
+    --bad: #a63f37;
+    --bad-soft: #f7e3e1;
+    --sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", monospace;
+    --serif: "Newsreader", ui-serif, Georgia, serif;
+  }
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --ground: #131118;
+      --panel: #1c1923;
+      --sunk: #24202d;
+      --ink: #ebe8f2;
+      --ink-soft: #a49dba;
+      --ink-faint: #756e8a;
+      --rule: #2f2a3b;
+      --accent: #a98ae0;
+      --accent-soft: #2a2138;
+      --good: #6fbf9b;
+      --good-soft: #1b2c25;
+      --warn: #d8a94a;
+      --warn-soft: #2e2617;
+      --bad: #e08279;
+      --bad-soft: #2f1d1c;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #131118;
+    --panel: #1c1923;
+    --sunk: #24202d;
+    --ink: #ebe8f2;
+    --ink-soft: #a49dba;
+    --ink-faint: #756e8a;
+    --rule: #2f2a3b;
+    --accent: #a98ae0;
+    --accent-soft: #2a2138;
+    --good: #6fbf9b;
+    --good-soft: #1b2c25;
+    --warn: #d8a94a;
+    --warn-soft: #2e2617;
+    --bad: #e08279;
+    --bad-soft: #2f1d1c;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  header { border-bottom: 1px solid var(--rule); padding-bottom: 22px; margin-bottom: 28px; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 6px;
+  }
+  h1 { font-family: var(--serif); font-weight: 500; font-size: 38px; margin: 0 0 8px; letter-spacing: -.01em; }
+  .lede { margin: 0; color: var(--ink-soft); max-width: 62ch; }
+
+  h2 {
+    font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink-faint); margin: 0 0 14px;
+  }
+  section { margin-top: 34px; }
+
+  .console { display: grid; grid-template-columns: 300px 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 820px) { .console { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--panel); border: 1px solid var(--rule); border-radius: 4px; padding: 18px; }
+
+  .field { margin-bottom: 18px; }
+  .field:last-child { margin-bottom: 0; }
+  label {
+    display: block; font-family: var(--mono); font-size: 11px; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--ink-soft); margin-bottom: 7px;
+  }
+  .val { font-family: var(--mono); color: var(--ink); font-weight: 600; }
+  input[type="range"] { width: 100%; accent-color: var(--accent); }
+  .seg { display: flex; border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; }
+  .seg button {
+    flex: 1; border: 0; background: transparent; color: var(--ink-soft); cursor: pointer;
+    font-family: var(--sans); font-size: 13px; padding: 8px 6px;
+  }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  .seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .hint { font-size: 12px; color: var(--ink-faint); margin: 6px 0 0; }
+
+  .verdict { padding: 22px; }
+  .verdict-line { font-family: var(--serif); font-size: 25px; line-height: 1.32; margin: 0 0 16px; text-wrap: balance; }
+  .pill {
+    display: inline-block; font-family: var(--mono); font-size: 11px; letter-spacing: .08em;
+    text-transform: uppercase; padding: 3px 9px; border-radius: 2px; margin-bottom: 12px;
+  }
+  .pill.no { background: var(--bad-soft); color: var(--bad); }
+  .pill.yes { background: var(--good-soft); color: var(--good); }
+  .pill.maybe { background: var(--warn-soft); color: var(--warn); }
+
+  .readout { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; }
+  @media (max-width: 560px) { .readout { grid-template-columns: 1fr 1fr; } }
+  .readout div { background: var(--panel); padding: 13px 14px; }
+  .readout dt { font-family: var(--mono); font-size: 10px; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 4px; }
+  .readout dd { margin: 0; font-family: var(--mono); font-size: 21px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  .plate { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; max-width: 420px; }
+  .plate i {
+    aspect-ratio: 1; border-radius: 50%; background: var(--sunk);
+    border: 1px solid var(--rule); display: block;
+  }
+  .plate i.used { background: var(--accent); border-color: var(--accent); }
+  .plate i.over { background: var(--bad); border-color: var(--bad); }
+  .platewrap { display: flex; gap: 22px; flex-wrap: wrap; align-items: flex-start; }
+  .platenote { flex: 1; min-width: 220px; font-size: 13px; color: var(--ink-soft); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-family: var(--mono); font-size: 10px; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; padding: 0 10px 8px 0; }
+  td { padding: 9px 10px 9px 0; border-top: 1px solid var(--rule); vertical-align: top; }
+  td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; padding-right: 0; }
+  .tag { font-family: var(--mono); font-size: 10px; letter-spacing: .07em; text-transform: uppercase; padding: 2px 7px; border-radius: 2px; white-space: nowrap; }
+  .tag.yes { background: var(--good-soft); color: var(--good); }
+  .tag.no { background: var(--bad-soft); color: var(--bad); }
+  .why { color: var(--ink-soft); font-size: 13px; margin-top: 4px; }
+  .scroller { overflow-x: auto; }
+
+  textarea {
+    width: 100%; min-height: 84px; font-family: var(--mono); font-size: 12.5px;
+    background: var(--sunk); color: var(--ink); border: 1px solid var(--rule);
+    border-radius: 3px; padding: 10px; resize: vertical; line-height: 1.5;
+  }
+  textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 640px) { .grid2 { grid-template-columns: 1fr; } }
+  button.go {
+    background: var(--accent); color: #fff; border: 0; border-radius: 3px;
+    font-family: var(--sans); font-size: 14px; font-weight: 500; padding: 9px 18px; cursor: pointer;
+  }
+  button.go:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  footer { margin-top: 46px; padding-top: 18px; border-top: 1px solid var(--rule); font-size: 12.5px; color: var(--ink-faint); }
+  code { font-family: var(--mono); font-size: .92em; background: var(--sunk); padding: 1px 5px; border-radius: 2px; }
+  a { color: var(--accent); }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Experiment sufficiency</p>
+    <h1>TriboGuard</h1>
+    <p class="lede">
+      A treatment that halves a cell population may have killed half the cells or stopped half of
+      them dividing. Those need different follow-up experiments. This works out whether your design
+      can tell them apart &mdash; and what the answer would cost.
+    </p>
+  </header>
+
+  <section>
+    <h2>Your design</h2>
+    <div class="console">
+      <div class="panel">
+        <div class="field">
+          <label for="wells">Wells per condition &mdash; <span class="val" id="wellsVal">3</span></label>
+          <input type="range" id="wells" min="1" max="60" value="3">
+          <p class="hint">The only control that moves the mechanism.</p>
+        </div>
+        <div class="field">
+          <label for="times">Timepoints &mdash; <span class="val" id="timesVal">3</span></label>
+          <input type="range" id="times" min="2" max="12" value="3">
+          <p class="hint">Sharpens the growth curve. Buys nothing for the mechanism.</p>
+        </div>
+        <div class="field">
+          <label>Assay</label>
+          <div class="seg" role="group" aria-label="Assay">
+            <button id="mts" aria-pressed="true">MTS &middot; endpoint</button>
+            <button id="img" aria-pressed="false">Imaging &middot; live</button>
+          </div>
+          <p class="hint" id="assayHint">MTS lyses the well it reads, so every timepoint needs its own wells.</p>
+        </div>
+        <div class="field">
+          <label>Confidence</label>
+          <div class="seg" role="group" aria-label="Confidence">
+            <button id="c95" aria-pressed="true">95%</button>
+            <button id="c90" aria-pressed="false">90%</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel verdict">
+        <span class="pill no" id="pill">Cannot separate</span>
+        <p class="verdict-line" id="verdict">&nbsp;</p>
+        <dl class="readout">
+          <div><dt>Birth/death known to</dt><dd id="factor">&mdash;</dd></div>
+          <div><dt>Wells for a factor of 2</dt><dd id="need">&mdash;</dd></div>
+          <div><dt>Wells consumed</dt><dd id="consumed">&mdash;</dd></div>
+        </dl>
+        <p class="hint" id="costline"></p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>What the plate gives up</h2>
+    <div class="platewrap">
+      <div class="plate" id="plate" aria-hidden="true"></div>
+      <p class="platenote" id="platenote"></p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Why timepoints don't help</h2>
+    <div class="panel scroller">
+      <svg id="chart" viewBox="0 0 640 240" width="100%" height="240" role="img"
+           aria-label="Uncertainty in the birth/death split against well count"></svg>
+    </div>
+  </section>
+
+  <section>
+    <h2>Case study &mdash; Tribonema extract on RAW264.7, 2022</h2>
+    <div class="panel scroller">
+      <table>
+        <thead>
+          <tr><th style="width:46%">Conclusion drawn in the report</th><th style="width:16%">Verdict</th><th>Why</th></tr>
+        </thead>
+        <tbody id="claims"></tbody>
+      </table>
+    </div>
+    <p class="hint">
+      Two of seven conclusions survive. The reported effect is one of them &mdash; this is a
+      statement about which further conclusions the measurements can carry, not about whether the
+      extract works.
+    </p>
+  </section>
+
+  <section>
+    <h2>Analyse your own counts</h2>
+    <div class="panel">
+      <p class="hint" style="margin-top:0">
+        One row per well, one number per timepoint. Cell counts, not absorbance &mdash; a metabolic
+        reading cannot count cells.
+      </p>
+      <div class="grid2">
+        <div>
+          <label for="ctrl">Control wells</label>
+          <textarea id="ctrl" spellcheck="false"></textarea>
+        </div>
+        <div>
+          <label for="trt">Treated wells</label>
+          <textarea id="trt" spellcheck="false"></textarea>
+        </div>
+      </div>
+      <p style="margin:14px 0 0"><button class="go" id="run">Estimate rates</button></p>
+      <div id="out" style="margin-top:16px"></div>
+    </div>
+  </section>
+
+  <footer>
+    The mean of a birth&ndash;death process depends on birth minus death, so killing and stalling
+    can produce identical average curves. Only the variance between wells depends on birth plus
+    death. Intervals here come from the chi-squared law of a sample variance on
+    <code>wells &minus; 1</code> degrees of freedom &mdash; the same arithmetic as the Python
+    package, with exact quantiles tabulated rather than approximated.
+  </footer>
+</div>
+
+<script>
+const C95_LO=[0.000982069,0.0506356,0.215795,0.484419,0.831212,1.23734,1.68987,2.17973,2.70039,3.24697,3.81575,4.40379,5.00875,5.62873,6.26214,6.90766,7.56419,8.23075,8.90652,9.59078,10.2829,10.9823,11.6886,12.4012,13.1197,13.8439,14.5734,15.3079,16.0471,16.7908,17.5387,18.2908,19.0467,19.8063,20.5694,21.3359,22.1056,22.8785,23.6543,24.433,25.2145,25.9987,26.7854,27.5746,28.3662,29.1601,29.9562,30.7545,31.5549,32.3574,33.1618,33.9681,34.7763,35.5863,36.3981,37.2116,38.0267,38.8435,39.6619,40.4817,41.3031,42.126,42.9503,43.776,44.603,45.4314,46.261,47.092,47.9242,48.7576,49.5922,50.4279,51.2648,52.1028,52.9419,53.7821,54.6234,55.4656,56.3089,57.1532,57.9984,58.8446,59.6918,60.5398,61.3888,62.2386,63.0894,63.9409,64.7934,65.6466,66.5007,67.3556,68.2112,69.0677,69.9249,70.7828,71.6415,72.5009,73.3611,74.2219,75.0835,75.9457,76.8086,77.6722,78.5364,79.4013,80.2668,81.1329,81.9997,82.8671,83.735,84.6036,85.4728,86.3425,87.2128,88.0837,88.9551,89.8271,90.6996,91.5726,92.4462,93.3203,94.195,95.0701,95.9457,96.8219,97.6985,98.5756,99.4532,100.331,101.21,102.089,102.968,103.848,104.729,105.609,106.491,107.372,108.254,109.137,110.02,110.903,111.787,112.671,113.556,114.441,115.326,116.212,117.098,117.985,118.871,119.759,120.646,121.534,122.423,123.312,124.201,125.09,125.98,126.87,127.761,128.651,129.543,130.434,131.326,132.218,133.111,134.003,134.897,135.79,136.684,137.578,138.472,139.367,140.262,141.157,142.053,142.949,143.845,144.741,145.638,146.535,147.432,148.33,149.228,150.126,151.024,151.923,152.822,153.721,154.621,155.521,156.421,157.321,158.221,159.122,160.023,160.925,161.826,162.728,163.63,164.532,165.435,166.338,167.241,168.144,169.047,169.951,170.855,171.759,172.664,173.568,174.473,175.378,176.283,177.189,178.095,179.001,179.907,180.813,181.72,182.627,183.534,184.441,185.348,186.256,187.164,188.072,188.98,189.889,190.797,191.706,192.615,193.524,194.434,195.343,196.253,197.163,198.073,198.984,199.894,200.805,201.716,202.627,203.539,204.45,205.362,206.274,207.186,208.098,209.01,209.923,210.835,211.748,212.661,213.575,214.488,215.402,216.315,217.229,218.143,219.058,219.972,220.887,221.801,222.716,223.631,224.547,225.462,226.377,227.293,228.209,229.125,230.041,230.957,231.874,232.79,233.707,234.624,235.541,236.458,237.376,238.293,239.211,240.129,241.047,241.965,242.883,243.801,244.72,245.638,246.557,247.476,248.395,249.314,250.234,251.153,252.073,252.992,253.912,254.832,255.752,256.673,257.593,258.514,259.434,260.355,261.276,262.197,263.118,264.04,264.961,265.883,266.804,267.726,268.648,269.57,270.492,271.415,272.337,273.26,274.182,275.105,276.028,276.951,277.874,278.797,279.721,280.644,281.568,282.492,283.415,284.339,285.263,286.188,287.112,288.036,288.961,289.885,290.81,291.735,292.66,293.585,294.51,295.436,296.361,297.287,298.212,299.138,300.064,300.99,301.916,302.842,303.768,304.694,305.621,306.547,307.474,308.401,309.328,310.255,311.182,312.109,313.036,313.964,314.891,315.819,316.746,317.674,318.602,319.53,320.458,321.386,322.314,323.243,324.171,325.1,326.028,326.957,327.886,328.815,329.744,330.673,331.602,332.532,333.461,334.39,335.32,336.25,337.179,338.109,339.039,339.969,340.899,341.829,342.76,343.69,344.621,345.551,346.482];
+const C95_HI=[5.02389,7.37776,9.3484,11.1433,12.8325,14.4494,16.0128,17.5345,19.0228,20.4832,21.92,23.3367,24.7356,26.1189,27.4884,28.8454,30.191,31.5264,32.8523,34.1696,35.4789,36.7807,38.0756,39.3641,40.6465,41.9232,43.1945,44.4608,45.7223,46.9792,48.2319,49.4804,50.7251,51.966,53.2033,54.4373,55.668,56.8955,58.1201,59.3417,60.5606,61.7768,62.9904,64.2015,65.4102,66.6165,67.8206,69.0226,70.2224,71.4202,72.616,73.8099,75.0019,76.192,77.3805,78.5672,79.7522,80.9356,82.1174,83.2977,84.4764,85.6537,86.8296,88.0041,89.1771,90.3489,91.5194,92.6885,93.8565,95.0232,96.1887,97.3531,98.5163,99.6783,100.839,101.999,103.158,104.316,105.473,106.629,107.783,108.937,110.09,111.242,112.393,113.544,114.693,115.841,116.989,118.136,119.282,120.427,121.571,122.715,123.858,125,126.141,127.282,128.422,129.561,130.7,131.838,132.975,134.111,135.247,136.382,137.517,138.651,139.784,140.917,142.049,143.18,144.311,145.441,146.571,147.7,148.829,149.957,151.084,152.211,153.338,154.464,155.589,156.714,157.839,158.962,160.086,161.209,162.331,163.453,164.575,165.696,166.816,167.936,169.056,170.175,171.294,172.412,173.53,174.648,175.765,176.882,177.998,179.114,180.229,181.344,182.459,183.573,184.687,185.8,186.914,188.026,189.139,190.251,191.362,192.474,193.584,194.695,195.805,196.915,198.025,199.134,200.243,201.351,202.459,203.567,204.675,205.782,206.889,207.995,209.102,210.208,211.313,212.419,213.524,214.628,215.733,216.837,217.941,219.044,220.148,221.251,222.353,223.456,224.558,225.66,226.761,227.863,228.964,230.064,231.165,232.265,233.365,234.465,235.564,236.664,237.763,238.861,239.96,241.058,242.156,243.254,244.351,245.448,246.545,247.642,248.739,249.835,250.931,252.027,253.122,254.218,255.313,256.408,257.503,258.597,259.691,260.785,261.879,262.973,264.066,265.159,266.252,267.345,268.438,269.53,270.622,271.714,272.806,273.898,274.989,276.08,277.171,278.262,279.352,280.443,281.533,282.623,283.713,284.802,285.892,286.981,288.07,289.159,290.248,291.336,292.425,293.513,294.601,295.689,296.776,297.864,298.951,300.038,301.125,302.212,303.298,304.385,305.471,306.557,307.643,308.729,309.814,310.9,311.985,313.07,314.155,315.24,316.325,317.409,318.494,319.578,320.662,321.746,322.829,323.913,324.996,326.079,327.163,328.246,329.328,330.411,331.493,332.576,333.658,334.74,335.822,336.904,337.986,339.067,340.148,341.23,342.311,343.392,344.472,345.553,346.634,347.714,348.794,349.874,350.954,352.034,353.114,354.194,355.273,356.352,357.432,358.511,359.59,360.669,361.747,362.826,363.904,364.983,366.061,367.139,368.217,369.295,370.372,371.45,372.527,373.605,374.682,375.759,376.836,377.913,378.99,380.066,381.143,382.219,383.295,384.372,385.448,386.524,387.599,388.675,389.751,390.826,391.902,392.977,394.052,395.127,396.202,397.277,398.351,399.426,400.5,401.575,402.649,403.723,404.797,405.871,406.945,408.019,409.093,410.166,411.24,412.313,413.386,414.459,415.532,416.605,417.678,418.751,419.823,420.896,421.968,423.041,424.113,425.185,426.257,427.329,428.401,429.473,430.544,431.616,432.687,433.759,434.83,435.901,436.972,438.043,439.114,440.185,441.256,442.326,443.397,444.467,445.538,446.608,447.678,448.748,449.818,450.888,451.958,453.027,454.097,455.167,456.236,457.305];
+const C90_LO=[0.00393214,0.102587,0.351846,0.710723,1.14548,1.63538,2.16735,2.73264,3.32511,3.9403,4.57481,5.22603,5.89186,6.57063,7.26094,7.96165,8.67176,9.39046,10.117,10.8508,11.5913,12.338,13.0905,13.8484,14.6114,15.3792,16.1514,16.9279,17.7084,18.4927,19.2806,20.0719,20.8665,21.6643,22.465,23.2686,24.0749,24.8839,25.6954,26.5093,27.3256,28.144,28.9647,29.7875,30.6123,31.439,32.2676,33.0981,33.9303,34.7643,35.5999,36.4371,37.2759,38.1162,38.958,39.8013,40.6459,41.492,42.3393,43.188,44.0379,44.889,45.7414,46.5949,47.4496,48.3054,49.1623,50.0202,50.8792,51.7393,52.6003,53.4623,54.3253,55.1892,56.0541,56.9198,57.7864,58.6539,59.5223,60.3915,61.2615,62.1323,63.0039,63.8763,64.7494,65.6233,66.4979,67.3732,68.2493,69.126,70.0035,70.8816,71.7603,72.6398,73.5198,74.4005,75.2819,76.1638,77.0463,77.9295,78.8132,79.6975,80.5823,81.4678,82.3537,83.2403,84.1273,85.0149,85.903,86.7916,87.6808,88.5704,89.4605,90.3511,91.2422,92.1338,93.0258,93.9183,94.8112,95.7046,96.5985,97.4928,98.3875,99.2826,100.178,101.074,101.971,102.867,103.765,104.662,105.56,106.459,107.357,108.257,109.156,110.056,110.956,111.857,112.758,113.659,114.561,115.463,116.366,117.268,118.171,119.075,119.979,120.883,121.787,122.692,123.597,124.502,125.408,126.314,127.22,128.127,129.034,129.941,130.848,131.756,132.664,133.572,134.481,135.39,136.299,137.209,138.118,139.028,139.939,140.849,141.76,142.671,143.582,144.494,145.406,146.318,147.23,148.143,149.056,149.969,150.882,151.796,152.709,153.623,154.538,155.452,156.367,157.282,158.197,159.113,160.028,160.944,161.86,162.776,163.693,164.61,165.527,166.444,167.361,168.279,169.196,170.114,171.032,171.951,172.869,173.788,174.707,175.626,176.546,177.465,178.385,179.305,180.225,181.145,182.066,182.987,183.907,184.828,185.75,186.671,187.593,188.514,189.436,190.359,191.281,192.203,193.126,194.049,194.972,195.895,196.818,197.742,198.665,199.589,200.513,201.437,202.362,203.286,204.211,205.135,206.06,206.985,207.911,208.836,209.762,210.687,211.613,212.539,213.465,214.392,215.318,216.245,217.171,218.098,219.025,219.952,220.88,221.807,222.735,223.663,224.59,225.518,226.447,227.375,228.303,229.232,230.161,231.089,232.018,232.947,233.877,234.806,235.735,236.665,237.595,238.525,239.455,240.385,241.315,242.245,243.176,244.107,245.037,245.968,246.899,247.83,248.761,249.693,250.624,251.556,252.488,253.419,254.351,255.283,256.216,257.148,258.08,259.013,259.945,260.878,261.811,262.744,263.677,264.61,265.544,266.477,267.41,268.344,269.278,270.212,271.146,272.08,273.014,273.948,274.882,275.817,276.751,277.686,278.621,279.556,280.491,281.426,282.361,283.296,284.232,285.167,286.103,287.038,287.974,288.91,289.846,290.782,291.718,292.655,293.591,294.527,295.464,296.401,297.337,298.274,299.211,300.148,301.085,302.022,302.96,303.897,304.835,305.772,306.71,307.648,308.585,309.523,310.461,311.399,312.338,313.276,314.214,315.153,316.091,317.03,317.969,318.907,319.846,320.785,321.724,322.663,323.603,324.542,325.481,326.421,327.36,328.3,329.24,330.179,331.119,332.059,332.999,333.939,334.879,335.82,336.76,337.7,338.641,339.581,340.522,341.463,342.404,343.345,344.286,345.227,346.168,347.109,348.05,348.991,349.933,350.874,351.816,352.757,353.699,354.641];
+const C90_HI=[3.84146,5.99146,7.81473,9.48773,11.0705,12.5916,14.0671,15.5073,16.919,18.307,19.6751,21.0261,22.362,23.6848,24.9958,26.2962,27.5871,28.8693,30.1435,31.4104,32.6706,33.9244,35.1725,36.415,37.6525,38.8851,40.1133,41.3371,42.557,43.773,44.9853,46.1943,47.3999,48.6024,49.8018,50.9985,52.1923,53.3835,54.5722,55.7585,56.9424,58.124,59.3035,60.4809,61.6562,62.8296,64.0011,65.1708,66.3386,67.5048,68.6693,69.8322,70.9935,72.1532,73.3115,74.4683,75.6237,76.7778,77.9305,79.0819,80.2321,81.381,82.5287,83.6753,84.8206,85.9649,87.1081,88.2502,89.3912,90.5312,91.6702,92.8083,93.9453,95.0815,96.2167,97.351,98.4844,99.6169,100.749,101.879,103.01,104.139,105.267,106.395,107.522,108.648,109.773,110.898,112.022,113.145,114.268,115.39,116.511,117.632,118.752,119.871,120.99,122.108,123.225,124.342,125.458,126.574,127.689,128.804,129.918,131.031,132.144,133.257,134.369,135.48,136.591,137.701,138.811,139.921,141.03,142.138,143.246,144.354,145.461,146.567,147.674,148.779,149.885,150.989,152.094,153.198,154.302,155.405,156.508,157.61,158.712,159.814,160.915,162.016,163.116,164.216,165.316,166.415,167.514,168.613,169.711,170.809,171.907,173.004,174.101,175.198,176.294,177.39,178.485,179.581,180.676,181.77,182.865,183.959,185.052,186.146,187.239,188.332,189.424,190.516,191.608,192.7,193.791,194.883,195.973,197.064,198.154,199.244,200.334,201.423,202.513,203.602,204.69,205.779,206.867,207.955,209.042,210.13,211.217,212.304,213.391,214.477,215.563,216.649,217.735,218.82,219.906,220.991,222.076,223.16,224.245,225.329,226.413,227.496,228.58,229.663,230.746,231.829,232.912,233.994,235.077,236.159,237.24,238.322,239.403,240.485,241.566,242.647,243.727,244.808,245.888,246.968,248.048,249.128,250.207,251.286,252.365,253.444,254.523,255.602,256.68,257.758,258.837,259.914,260.992,262.07,263.147,264.224,265.301,266.378,267.455,268.531,269.608,270.684,271.76,272.836,273.911,274.987,276.062,277.138,278.213,279.288,280.362,281.437,282.511,283.586,284.66,285.734,286.808,287.882,288.955,290.028,291.102,292.175,293.248,294.321,295.393,296.466,297.538,298.611,299.683,300.755,301.827,302.898,303.97,305.041,306.113,307.184,308.255,309.326,310.397,311.467,312.538,313.608,314.678,315.749,316.819,317.888,318.958,320.028,321.097,322.167,323.236,324.305,325.374,326.443,327.512,328.58,329.649,330.717,331.786,332.854,333.922,334.99,336.058,337.125,338.193,339.26,340.328,341.395,342.462,343.529,344.596,345.663,346.73,347.796,348.863,349.929,350.995,352.062,353.128,354.194,355.26,356.325,357.391,358.456,359.522,360.587,361.652,362.718,363.783,364.847,365.912,366.977,368.042,369.106,370.171,371.235,372.299,373.363,374.427,375.491,376.555,377.619,378.682,379.746,380.809,381.873,382.936,383.999,385.062,386.125,387.188,388.251,389.314,390.376,391.439,392.501,393.564,394.626,395.688,396.75,397.812,398.874,399.936,400.997,402.059,403.121,404.182,405.244,406.305,407.366,408.427,409.488,410.549,411.61,412.671,413.732,414.792,415.853,416.913,417.974,419.034,420.094,421.154,422.214,423.274,424.334,425.394,426.454,427.513,428.573,429.632,430.692,431.751,432.811,433.87,434.929,435.988,437.047,438.106,439.165,440.223,441.282,442.341,443.399,444.458,445.516,446.574,447.632];
+const TABLES = { 95: [C95_LO, C95_HI], 90: [C90_LO, C90_HI] };
+
+let wells = 3, times = 3, destructive = true, conf = 95;
+const PER_WELL = 0.80, PER_READ_MTS = 0.35, PER_READ_IMG = 0.20;
+
+const $ = (id) => document.getElementById(id);
+
+function relWidth(w, c) {
+  if (w < 2) return Infinity;
+  const df = w - 1, [lo, hi] = TABLES[c];
+  if (df > lo.length) return 0;
+  return df / lo[df - 1] - df / hi[df - 1];
+}
+function wellsFor(target, c) {
+  for (let w = 2; w <= 400; w++) if (relWidth(w, c) <= target) return w;
+  return null;
+}
+function consumed() { return destructive ? wells * times : wells; }
+function cost() {
+  const read = destructive ? PER_READ_MTS : PER_READ_IMG;
+  return consumed() * PER_WELL + wells * times * read;
+}
+
+function render() {
+  $("wellsVal").textContent = wells;
+  $("timesVal").textContent = times;
+
+  const width = relWidth(wells, conf);
+  const need = wellsFor(1.0, conf);
+  const used = consumed();
+
+  $("factor").textContent = width === Infinity ? "nothing" : "×" + width.toFixed(width < 10 ? 1 : 0);
+  $("need").textContent = need === null ? "—" : need;
+  $("consumed").textContent = used;
+
+  const pill = $("pill"), verdict = $("verdict");
+  if (wells < 2) {
+    pill.className = "pill no"; pill.textContent = "Cannot separate";
+    verdict.textContent = "With one well per condition there is no spread between wells, so killing and growth inhibition are indistinguishable at any number of timepoints.";
+  } else if (width > 5) {
+    pill.className = "pill no"; pill.textContent = "Cannot separate";
+    verdict.textContent = "The birth and death rates are pinned only to within a factor of "
+      + width.toFixed(width < 10 ? 1 : 0)
+      + ". A single-mechanism conclusion is not supported by this design.";
+  } else if (width > 1.5) {
+    pill.className = "pill maybe"; pill.textContent = "Borderline";
+    verdict.textContent = "The split is constrained to within a factor of " + width.toFixed(1)
+      + " — enough to rule out extremes, not enough to name one mechanism with confidence.";
+  } else {
+    pill.className = "pill yes"; pill.textContent = "Can separate";
+    verdict.textContent = "The split is constrained to within a factor of " + width.toFixed(2)
+      + ". This design can distinguish cell killing from growth inhibition.";
+  }
+
+  const other = destructive
+    ? wells * PER_WELL + wells * times * PER_READ_IMG
+    : wells * times * PER_WELL + wells * times * PER_READ_MTS;
+  $("costline").textContent = "Cost " + cost().toFixed(2)
+    + " in wells and reads. The same information under "
+    + (destructive ? "live imaging" : "an endpoint assay like MTS") + " costs " + other.toFixed(2) + ".";
+
+  const plate = $("plate");
+  plate.innerHTML = "";
+  for (let i = 0; i < 96; i++) {
+    const w = document.createElement("i");
+    if (i < used) w.className = used > 96 ? "over" : "used";
+    plate.appendChild(w);
+  }
+  $("platenote").innerHTML = destructive
+    ? "<strong>" + used + " of 96 wells</strong> for one condition, because an endpoint assay cannot read a well twice. "
+      + "A dose series and its controls multiply this again."
+      + (used > 96 ? " <strong>This design no longer fits one plate.</strong>" : "")
+    : "<strong>" + used + " of 96 wells</strong> for one condition. Live imaging reads the same wells at every "
+      + "timepoint, so timepoints are free in plate space.";
+
+  drawChart();
+}
+
+function drawChart() {
+  const svg = $("chart");
+  const W = 640, H = 240, L = 56, R = 16, T = 18, B = 34;
+  const xs = [2,3,4,6,8,12,16,24,32,48,64];
+  const pts = xs.map((w) => [w, Math.min(relWidth(w, conf), 40)]);
+  const x = (w) => L + (Math.log(w) - Math.log(2)) / (Math.log(64) - Math.log(2)) * (W - L - R);
+  const y = (v) => T + (1 - Math.log(Math.max(v, 0.3) / 0.3) / Math.log(40 / 0.3)) * (H - T - B);
+  const line = pts.map((p, i) => (i ? "L" : "M") + x(p[0]).toFixed(1) + " " + y(p[1]).toFixed(1)).join(" ");
+
+  let g = "";
+  for (const v of [0.5, 1, 2, 5, 10, 40]) {
+    g += `<line x1="${L}" y1="${y(v).toFixed(1)}" x2="${W-R}" y2="${y(v).toFixed(1)}" stroke="var(--rule)" stroke-width="1"/>`;
+    g += `<text x="${L-8}" y="${(y(v)+4).toFixed(1)}" text-anchor="end" fill="var(--ink-faint)" font-family="var(--mono)" font-size="10">×${v}</text>`;
+  }
+  for (const w of [2, 4, 8, 16, 32, 64]) {
+    g += `<text x="${x(w).toFixed(1)}" y="${H-14}" text-anchor="middle" fill="var(--ink-faint)" font-family="var(--mono)" font-size="10">${w}</text>`;
+  }
+  g += `<text x="${((L+W-R)/2).toFixed(0)}" y="${H-1}" text-anchor="middle" fill="var(--ink-faint)" font-family="var(--sans)" font-size="11">wells per condition</text>`;
+  g += `<path d="${line}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>`;
+
+  const here = Math.min(relWidth(Math.max(wells, 2), conf), 40);
+  const hx = x(Math.max(wells, 2)), hy = y(here);
+  g += `<line x1="${hx.toFixed(1)}" y1="${T}" x2="${hx.toFixed(1)}" y2="${H-B}" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 3" opacity="0.55"/>`;
+  g += `<circle cx="${hx.toFixed(1)}" cy="${hy.toFixed(1)}" r="5" fill="var(--accent)"/>`;
+  const label = wells < 2 ? "1 well — nothing" : wells + " wells";
+  const anchor = hx > W - 130 ? "end" : "start";
+  const dx = anchor === "end" ? -10 : 10;
+  g += `<text x="${(hx+dx).toFixed(1)}" y="${(hy-11).toFixed(1)}" text-anchor="${anchor}" fill="var(--ink)" font-family="var(--mono)" font-size="11" font-weight="600">${label}</text>`;
+  svg.innerHTML = g;
+}
+
+const CLAIMS = [
+  ["Tribonema extract affected the cells", true, "MTS drop against a matched untreated control."],
+  ["The effect is comparable in size to doxorubicin", true, "Both measured on the same readout, same plate."],
+  ["About 40% of the cells died", false, "MTS reports mitochondrial dehydrogenase activity, not cell number. A 40% fall is equally consistent with 40% of cells dying and with every cell surviving at 60% of its former rate."],
+  ["The surviving 60% were resistant", false, "Needs cell counts, and a washout or re-treatment that was never run. A fraction is only resistant if it survives re-exposure."],
+  ["The effect was killing rather than growth inhibition", false, "Needs cell counts and the spread between wells. The report states no replicate count anywhere."],
+  ["It caused a specific death mechanism", false, "Apoptosis and necrosis differ by membrane integrity and caspase activity. Formalin fixation destroys the membrane evidence before staining."],
+  ["It is selective for cancer cells over normal cells", false, "The comparator is peritoneal lymphocytes — a different lineage, in primary culture. The contrast confounds cancer-versus-normal with macrophage-versus-lymphocyte."]
+];
+
+function claims() {
+  $("claims").innerHTML = CLAIMS.map(([text, ok, why]) =>
+    `<tr><td>${text}</td><td><span class="tag ${ok ? "yes" : "no"}">${ok ? "supported" : "not established"}</span></td>`
+    + `<td><span class="why">${why}</span></td></tr>`).join("");
+}
+
+function parseWells(text) {
+  return text.trim().split(/\n+/).map((row) => row.trim().split(/[\s,]+/).map(Number))
+    .filter((row) => row.length > 1 && row.every((v) => Number.isFinite(v) && v >= 0));
+}
+function mean(a) { return a.reduce((s, v) => s + v, 0) / a.length; }
+
+function fit(rows, hours) {
+  const n = rows.length, T = hours.length;
+  const means = hours.map((_, j) => mean(rows.map((r) => r[j])));
+  const use = means.map((m, j) => [m, hours[j]]).filter(([m]) => m > 0);
+  if (use.length < 2) return null;
+  const ys = use.map(([m]) => Math.log(m)), ts = use.map(([, t]) => t);
+  const tbar = mean(ts), ybar = mean(ys);
+  let sxy = 0, sxx = 0;
+  for (let i = 0; i < ts.length; i++) { sxy += (ts[i] - tbar) * (ys[i] - ybar); sxx += (ts[i] - tbar) ** 2; }
+  const net = sxx > 0 ? sxy / sxx : 0;
+  const n0 = Math.exp(ybar - net * tbar);
+  if (n < 2) return { net, n0, turnover: Math.abs(net), floored: true, wells: n };
+  const vars = hours.map((_, j) => {
+    const col = rows.map((r) => r[j]), m = mean(col);
+    return col.reduce((s, v) => s + (v - m) ** 2, 0) / (n - 1);
+  });
+  // Variance at unit turnover, from the same closed form the package uses.
+  const unit = hours.map((t) => {
+    if (Math.abs(net) < 1e-12) return n0 * t;
+    const g = Math.exp(net * t);
+    return n0 * (1 / net) * g * (g - 1);
+  });
+  let num = 0, den = 0;
+  for (let j = 0; j < T; j++) { num += vars[j] * unit[j]; den += unit[j] * unit[j]; }
+  let turnover = den > 0 ? num / den : Math.abs(net);
+  const floored = turnover < Math.abs(net);
+  if (floored) turnover = Math.abs(net);
+  return { net, n0, turnover, floored, wells: n };
+}
+
+function analyse() {
+  const c = parseWells($("ctrl").value), t = parseWells($("trt").value);
+  const out = $("out");
+  if (!c.length || !t.length) {
+    out.innerHTML = `<p class="hint" style="color:var(--bad)">Both boxes need at least one row of two or more counts.</p>`;
+    return;
+  }
+  const T = Math.min(...c.map((r) => r.length), ...t.map((r) => r.length));
+  if (T < 2) { out.innerHTML = `<p class="hint" style="color:var(--bad)">At least two timepoints are needed to estimate a rate.</p>`; return; }
+  const hours = Array.from({ length: T }, (_, i) => i * (48 / (T - 1)));
+  const cf = fit(c.map((r) => r.slice(0, T)), hours), tf = fit(t.map((r) => r.slice(0, T)), hours);
+  if (!cf || !tf) { out.innerHTML = `<p class="hint" style="color:var(--bad)">Too few surviving cells to estimate a rate.</p>`; return; }
+
+  const w = Math.min(cf.wells, tf.wells);
+  const width = relWidth(w, conf);
+  const rows = [["Control", cf], ["Treated", tf]].map(([name, f]) => {
+    const b = Math.max((f.turnover + f.net) / 2, 0), d = Math.max((f.turnover - f.net) / 2, 0);
+    return `<tr><td>${name}</td><td class="num">${f.net.toFixed(4)}</td><td class="num">${f.turnover.toFixed(4)}</td>`
+      + `<td class="num">${b.toFixed(4)}</td><td class="num">${d.toFixed(4)}</td></tr>`;
+  }).join("");
+
+  const decisive = width <= 1.5 && w >= 2;
+  out.innerHTML = `<div class="scroller"><table><thead><tr><th>Condition</th>
+      <th style="text-align:right">Net (birth&minus;death)</th><th style="text-align:right">Turnover (birth+death)</th>
+      <th style="text-align:right">Birth /h</th><th style="text-align:right">Death /h</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+    <p class="hint" style="margin-top:12px">
+      Timepoints assumed evenly spaced across 48&nbsp;h. Net is well determined; turnover carries all
+      the uncertainty, at <strong>&times;${width === Infinity ? "∞" : width.toFixed(width < 10 ? 1 : 0)}</strong>
+      on ${w} well${w === 1 ? "" : "s"}.
+    </p>
+    <p class="verdict-line" style="font-size:19px;margin:10px 0 0">${
+      w < 2
+        ? "One well per condition: birth and death are not separable, and the split above is a convention rather than a finding."
+        : decisive
+          ? "The turnover is pinned tightly enough to name a mechanism from these counts."
+          : "The turnover is too loose to name a mechanism. These counts show <em>that</em> something changed, not <em>which</em> rate changed."
+    }</p>
+    ${cf.floored || tf.floored ? `<p class="hint" style="color:var(--warn)">Wells agreed more closely than the model allows, so turnover was clamped. Usually means too few wells.</p>` : ""}`;
+}
+
+function sample() {
+  // A worked example: a control that grows, and a treated arm that stalls.
+  const rng = (s) => () => (s = (s * 1103515245 + 12345) % 2147483648) / 2147483648;
+  const r1 = rng(7), r2 = rng(19);
+  const make = (net, turn, rand) => Array.from({ length: 4 }, () =>
+    [0, 16, 32, 48].map((t) => {
+      const m = 2000 * Math.exp(net * t);
+      const sd = Math.sqrt(Math.max(2000 * (turn / (net || 1e-9)) * Math.exp(net * t) * (Math.exp(net * t) - 1), 1));
+      return Math.max(0, Math.round(m + sd * (rand() - 0.5) * 2));
+    }).join("  "));
+  $("ctrl").value = make(0.050, 0.060, r1).join("\n");
+  $("trt").value = make(0.030, 0.040, r2).join("\n");
+}
+
+$("wells").addEventListener("input", (e) => { wells = +e.target.value; render(); });
+$("times").addEventListener("input", (e) => { times = +e.target.value; render(); });
+$("mts").addEventListener("click", () => { destructive = true; $("mts").setAttribute("aria-pressed", "true"); $("img").setAttribute("aria-pressed", "false"); $("assayHint").textContent = "MTS lyses the well it reads, so every timepoint needs its own wells."; render(); });
+$("img").addEventListener("click", () => { destructive = false; $("img").setAttribute("aria-pressed", "true"); $("mts").setAttribute("aria-pressed", "false"); $("assayHint").textContent = "Imaging leaves the well alive, so the same wells carry every timepoint."; render(); });
+$("c95").addEventListener("click", () => { conf = 95; $("c95").setAttribute("aria-pressed", "true"); $("c90").setAttribute("aria-pressed", "false"); render(); });
+$("c90").addEventListener("click", () => { conf = 90; $("c90").setAttribute("aria-pressed", "true"); $("c95").setAttribute("aria-pressed", "false"); render(); });
+$("run").addEventListener("click", analyse);
+
+claims();
+sample();
+render();
+analyse();
+</script>
