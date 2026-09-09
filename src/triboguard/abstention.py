@@ -329,6 +329,7 @@ def evaluate(
         elif names[0] != record.truth:
             confidently_wrong += 1
     total = len(held)
+    decisive = total - abstained
     return {
         "experiments": total,
         "coverage": covered / total,
@@ -336,10 +337,16 @@ def evaluate(
         "mean_set_size": float(np.mean(sizes)),
         "abstention_rate": abstained / total,
         "confidently_wrong_rate": confidently_wrong / total,
+        # The rate a researcher actually faces. They do not act on the
+        # experiments where the system abstained; they act on the ones where it
+        # named a mechanism, and this is how often it was wrong when it did.
+        "decisive_rate": decisive / total,
+        "decisive_error_rate": (confidently_wrong / decisive) if decisive else None,
         "note": (
             "Coverage is free if every set contains everything, so read it "
-            "beside mean_set_size. confidently_wrong_rate counts single-mechanism "
-            "verdicts that were wrong -- the answers a reader would act on and "
-            "be misled by."
+            "beside mean_set_size. confidently_wrong_rate is a share of all "
+            "experiments; decisive_error_rate is the share of the *named* ones, "
+            "which is what a reader acting on a verdict is exposed to. Split "
+            "conformal guarantees the first kind of coverage and not the second."
         ),
     }
