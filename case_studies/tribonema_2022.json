@@ -1,0 +1,111 @@
+{
+  "source": {
+    "title": "Anti-tumor activity of Tribonema extract on mouse leukemia cells",
+    "authors": ["Kim Si-on", "Kim On-yu"],
+    "supervisor": "Prof. Kim Ho, Daejin University, Department of Life Science and Chemistry",
+    "date": "2022-12-04",
+    "note": "Facts below are transcribed from the report. Anything the report does not state is recorded in not_reported rather than guessed at."
+  },
+  "system": {
+    "cell_line": "RAW264.7",
+    "supplier": "Korean Cell Line Bank",
+    "described_in_paper_as": "mouse blood cancer cell",
+    "correction": "ATCC classifies RAW264.7 as a macrophage/monocyte line from a tumour induced by Abelson murine leukaemia virus. It is tumour-derived, but calling it a general blood-cancer model overstates what a result in it supports.",
+    "normal_comparator": "mouse peritoneal lymphocytes, isolated and supplied by the supervising staff"
+  },
+  "design": {
+    "assay": "MTS",
+    "assay_measures": "mitochondrial dehydrogenase activity, read as absorbance at 450 nm",
+    "destructive": true,
+    "plate": "96-well, 0.2 ml per well",
+    "times_hours": [3, 6, 24],
+    "morphology": {
+      "plate": "6-well with sterile coverslips",
+      "seeding_cells_per_well": 100000,
+      "exposure_hours": 24,
+      "fixation": "formalin, overnight at 4 C",
+      "stain": "methylene blue",
+      "imaging": "light microscope"
+    },
+    "comparators": {
+      "doxorubicin_micromolar": 5,
+      "taxol_nanomolar": 100
+    }
+  },
+  "reported_results": {
+    "cytotoxicity_at_24h_percent": 40,
+    "time_course_percent": [
+      {"hours": 3, "cytotoxicity_percent": 10},
+      {"hours": 6, "cytotoxicity_percent": 40}
+    ],
+    "doxorubicin_cytotoxicity_percent": 50,
+    "taxol_effect": "none detected",
+    "lymphocyte_effect": "no cytotoxicity; viability reported as more than doubled",
+    "morphology_observations": ["rounded", "widely swollen", "cytoplasmic vacuoles"],
+    "heat_stability": "activity retained after concentration in a 50 C water bath"
+  },
+  "provides": [
+    "metabolic_readout",
+    "matched_untreated_control",
+    "positive_control_drug",
+    "morphology_snapshot",
+    "dose_series",
+    "time_series"
+  ],
+  "not_reported": [
+    "number of wells per condition (no replicate count appears anywhere in the report)",
+    "biological versus technical replicate structure",
+    "raw per-well absorbance values",
+    "the statistical test used, and whether error bars are SD or SEM",
+    "extract concentration standardised by mass per volume",
+    "starting and final direct cell counts",
+    "per-cell survival outcomes",
+    "division events",
+    "death events",
+    "original full-resolution micrographs",
+    "image scale in micrometres per pixel",
+    "longitudinal tracking of the same cells",
+    "washout or recovery measurement",
+    "independent apoptosis or necrosis markers"
+  ],
+  "internal_inconsistencies": [
+    "The MTS methods section states cells were cultured for 48 hours after treatment, while the results sections for figures 1, 2, 3 and 5 all describe 24-hour treatment. The report does not reconcile the two, and this analysis does not choose one for it."
+  ],
+  "claims": [
+    {
+      "id": "affected",
+      "text": "Tribonema extract affected the cells",
+      "requires": ["metabolic_readout", "matched_untreated_control"]
+    },
+    {
+      "id": "forty_percent_died",
+      "text": "About 40% of the cells died",
+      "requires": ["cell_counts"]
+    },
+    {
+      "id": "sixty_percent_resistant",
+      "text": "The surviving 60% were resistant",
+      "requires": ["cell_counts", "recovery_test"]
+    },
+    {
+      "id": "cytotoxic_not_cytostatic",
+      "text": "The effect was cell killing rather than growth inhibition",
+      "requires": ["cell_counts", "replicate_variance"]
+    },
+    {
+      "id": "death_mechanism",
+      "text": "The extract caused a specific death mechanism (apoptosis or necrosis)",
+      "requires": ["death_markers"]
+    },
+    {
+      "id": "selective",
+      "text": "The extract is selective for cancer cells over normal cells",
+      "requires": ["matched_untreated_control", "matched_normal_population"]
+    },
+    {
+      "id": "comparable_to_doxorubicin",
+      "text": "The effect is comparable in size to doxorubicin",
+      "requires": ["metabolic_readout", "positive_control_drug"]
+    }
+  ]
+}
