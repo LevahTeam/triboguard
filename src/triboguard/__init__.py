@@ -8,6 +8,6 @@ data, refuses to name a mechanism when it is not, and works out the cheapest
 measurement that would settle it.
 """
 
-from triboguard import abstention, inference, kinetics
+from triboguard import abstention, design, inference, kinetics
 
-__all__ = ["abstention", "inference", "kinetics"]
+__all__ = ["abstention", "design", "inference", "kinetics"]
