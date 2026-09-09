@@ -24,9 +24,7 @@ from typing import Any
 
 import numpy as np
 
-sys.path.insert(0, "src")
-
-from tribovision import provenance  # noqa: E402
+from tribovision import provenance
 
 RUNS = {
     "mixed_42": "runs/diversity/mixed_42",

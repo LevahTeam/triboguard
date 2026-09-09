@@ -13,16 +13,13 @@ does not depend on any segmenter.
 from __future__ import annotations
 
 import json
-import sys
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
-sys.path.insert(0, "src")
-
-from tribovision import mechanics, provenance  # noqa: E402
-from tribovision.manifest import load_manifest  # noqa: E402
+from tribovision import mechanics, provenance
+from tribovision.manifest import load_manifest
 
 LINES = (("", "A172"), ("_mcf7", "MCF7"), ("_shsy5y", "SHSY5Y"), ("_skbr3", "SkBr3"))
 

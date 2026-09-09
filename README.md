@@ -4,7 +4,7 @@ TriboVision turns ordinary phase-contrast microscope images into quantitative,
 auditable measurements of cell morphology, and provides the statistical machinery
 to test whether those visible changes track an independent viability assay.
 
-It has three parts, and the distinction between them matters:
+It has four parts, and the distinction between them matters:
 
 1. **A working cell segmenter**, trained and evaluated on the public
    [LIVECell](https://sartorius-research.github.io/LIVECell/) dataset. This part
@@ -16,7 +16,17 @@ It has three parts, and the distinction between them matters:
    output to ask whether a vision model can recover a mechanical quantity rather
    than merely outline cells. Both results are in
    [docs/RESULTS.md](docs/RESULTS.md).
-3. **A Tribonema treatment-analysis pipeline** — manifest schema, segmentation,
+3. **TriboGuard** — a separate package answering a question the first two raise.
+   A viability assay reports one number per well, and that number cannot, even in
+   principle, distinguish cell killing from growth inhibition: the mean of a
+   birth–death process depends on birth *minus* death, so the two produce
+   identical average curves. The variance *between wells* depends on birth *plus*
+   death, which is where the mechanism lives and what averaging destroys.
+   TriboGuard estimates both rates, returns a calibrated *set* of mechanisms
+   rather than a single label when the evidence cannot separate them, and prices
+   the measurement that would settle it. See
+   [the technical report](demo/triboguard_report.html).
+4. **A Tribonema treatment-analysis pipeline** — manifest schema, segmentation,
    per-cell morphometry, dose-response fitting, and viability linkage. The code
    and its statistics are complete and tested against synthetic data with a known
    answer. **No Tribonema images have been collected yet**, so this repository
@@ -126,6 +136,25 @@ A point-by-point response to the full audit is in
 [docs/PRE_SPECIFICATION.md](docs/PRE_SPECIFICATION.md) separates what was decided
 before the data from what was decided after — including every claim that had to
 be withdrawn once it was tested properly.
+
+## TriboGuard, from the command line
+
+```bash
+# What can this design constrain, and what does it cost?
+triboguard design --wells 3 --times 3 6 12 24 --assay mts
+
+# Which conclusions can a published design actually carry?
+triboguard case-study case_studies/tribonema_2022.json
+
+# Where does the method stop being trustworthy?
+triboguard boundary --wells 3 12 48 --effects 0.25 0.70
+```
+
+At three wells per condition — the shape of most published dose–response work —
+the birth-to-death split is pinned only to within a factor of about 146. Narrowing
+that to a factor of two takes roughly 66 wells. And because MTS lyses the well it
+reads, a four-timepoint course under MTS consumes four times the plate of live
+imaging for identical information.
 
 ## Install
 

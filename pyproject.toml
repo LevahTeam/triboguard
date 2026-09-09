@@ -37,6 +37,7 @@ dev = [
 
 [project.scripts]
 tribovision = "tribovision.cli:main"
+triboguard = "triboguard.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

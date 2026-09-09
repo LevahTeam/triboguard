@@ -8,13 +8,10 @@ supplies a design and a set of conclusions to check that design against.
 from __future__ import annotations
 
 import json
-import sys
 import textwrap
 from pathlib import Path
 
-sys.path.insert(0, "src")
-
-from triboguard import case_study  # noqa: E402
+from triboguard import case_study
 
 PAPER = Path("case_studies/tribonema_2022.json")
 

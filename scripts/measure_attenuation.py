@@ -29,9 +29,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-sys.path.insert(0, "src")
-
-from tribovision import provenance  # noqa: E402
+from tribovision import provenance
 
 #: Limits of agreement span mean +/- 1.96 sd, so the full width is 3.92 sd.
 LOA_SPAN_IN_SD = 3.92

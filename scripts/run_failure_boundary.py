@@ -13,12 +13,9 @@ bug instead of the method.
 from __future__ import annotations
 
 import json
-import sys
 from pathlib import Path
 
-sys.path.insert(0, "src")
-
-from triboguard import boundary  # noqa: E402
+from triboguard import boundary
 
 # Well counts spanning what a student laboratory runs (3) to what a screening
 # facility runs (48). Effects run from "smaller than the classifier's own

@@ -13,7 +13,6 @@ applied unchanged, which is the only reason clearing it means anything.
 from __future__ import annotations
 
 import json
-import sys
 import warnings
 from pathlib import Path
 from typing import Any
@@ -22,11 +21,9 @@ import numpy as np
 import torch
 from PIL import Image
 
-sys.path.insert(0, "src")
-
-from tribovision import coco, external, mechanics, provenance  # noqa: E402
-from tribovision.instance_model import load_instance_checkpoint, predict_instances  # noqa: E402
-from tribovision.manifest import load_manifest  # noqa: E402
+from tribovision import coco, external, mechanics, provenance
+from tribovision.instance_model import load_instance_checkpoint, predict_instances
+from tribovision.manifest import load_manifest
 
 CHECKPOINT = Path("runs/scale_304/best_model.pt")
 #: Tuned on four A172 training images and deliberately not re-tuned per line;

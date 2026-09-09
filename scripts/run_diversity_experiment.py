@@ -11,14 +11,11 @@ there is no more data.
 from __future__ import annotations
 
 import json
-import sys
 from pathlib import Path
 from typing import Any
 
-sys.path.insert(0, "src")
-
-from tribovision import evaluation, provenance  # noqa: E402
-from tribovision.instance_model import (  # noqa: E402
+from tribovision import evaluation, provenance
+from tribovision.instance_model import (
     InstanceConfig,
     score_on_manifest,
     train_instance_model,

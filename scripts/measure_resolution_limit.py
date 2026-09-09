@@ -14,16 +14,13 @@ such in docs/PRE_SPECIFICATION.md.
 from __future__ import annotations
 
 import json
-import sys
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
-sys.path.insert(0, "src")
-
-from tribovision import mechanics, provenance  # noqa: E402
-from tribovision.manifest import load_manifest  # noqa: E402
+from tribovision import mechanics, provenance
+from tribovision.manifest import load_manifest
 
 #: The diameter passed to Cellpose everywhere, chosen on four A172 training
 #: images and never re-tuned. Whether that was fair to the other lines is
