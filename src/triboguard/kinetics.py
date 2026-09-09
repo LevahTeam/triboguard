@@ -48,6 +48,12 @@ MECHANISMS = (NO_EFFECT, CYTOSTATIC, CYTOTOXIC, MIXED)
 EFFECT_THRESHOLD = 0.15
 
 
+#: A schedule of measurement times. Everything here converts with
+#: ``np.asarray``, so an array is as acceptable as a list and callers should
+#: not have to round-trip through one.
+Times = Sequence[float] | np.ndarray
+
+
 class KineticsError(ValueError):
     """Raised when a rate or a schedule cannot describe a real experiment."""
 
@@ -81,7 +87,7 @@ class BirthDeath:
         return math.log(2.0) / self.net if self.net > 0 else None
 
 
-def mean_count(params: BirthDeath, initial: float, times: Sequence[float]) -> np.ndarray:
+def mean_count(params: BirthDeath, initial: float, times: Times) -> np.ndarray:
     """Expected population size. A function of ``net`` alone -- that is the problem."""
     t = np.asarray(times, dtype=float)
     if np.any(t < 0):
@@ -89,7 +95,7 @@ def mean_count(params: BirthDeath, initial: float, times: Sequence[float]) -> np
     return float(initial) * np.exp(params.net * t)
 
 
-def variance_count(params: BirthDeath, initial: float, times: Sequence[float]) -> np.ndarray:
+def variance_count(params: BirthDeath, initial: float, times: Times) -> np.ndarray:
     """Variance across independent wells. This is where the mechanism hides.
 
     The ``birth == death`` case is the limit of the general expression and has
@@ -109,7 +115,7 @@ def variance_count(params: BirthDeath, initial: float, times: Sequence[float]) -
 def simulate(
     params: BirthDeath,
     initial: int,
-    times: Sequence[float],
+    times: Times,
     *,
     replicates: int = 3,
     rng: np.random.Generator | None = None,
