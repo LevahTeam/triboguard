@@ -233,3 +233,23 @@ def test_a_nul_byte_in_a_path_is_a_manifest_error_not_a_raw_oserror(
     )
     with pytest.raises(ManifestError):
         load_manifest(path)
+
+
+def test_a_fractional_pixel_count_is_refused_rather_than_truncated() -> None:
+    """int(3.7) is 3, and it was accepted silently.
+
+    A manifest claiming a width of 3.7 pixels is wrong about its own image, and
+    quietly rounding it hides the mistake behind a plausible number. Note that
+    int("3.7") raises, so only a JSON float ever reached this path.
+    """
+    from tribovision.manifest import _require_int
+
+    with pytest.raises(ManifestError, match="whole number"):
+        _require_int({"width": 3.7}, "width")
+
+
+def test_a_float_that_is_a_whole_number_is_still_accepted() -> None:
+    """JSON has no integer type, so 704.0 is how a valid width often arrives."""
+    from tribovision.manifest import _require_int
+
+    assert _require_int({"width": 704.0}, "width") == 704

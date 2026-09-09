@@ -179,6 +179,11 @@ def _require_int(record: dict[str, Any], key: str, *, positive: bool = False) ->
         number = int(value)
     except (TypeError, ValueError) as exc:
         raise ManifestError(f"Manifest field {key!r} must be an integer, got {value!r}.") from exc
+    # int(3.7) is 3 and int("3.7") raises, so a JSON float slipped through and was
+    # silently truncated. A fractional pixel count means the manifest is wrong
+    # about the image, which is worth stopping for rather than rounding away.
+    if isinstance(value, float) and value != number:
+        raise ManifestError(f"Manifest field {key!r} must be a whole number, got {value!r}.")
     if positive and number <= 0:
         raise ManifestError(f"Manifest field {key!r} must be positive, got {number}.")
     return number

@@ -37,6 +37,18 @@ class Calibration:
 
     micrometers_per_pixel: float | None = None
 
+    def __post_init__(self) -> None:
+        # A scale of zero or less turns every area and length into a negative or
+        # vanishing physical quantity, and does it silently: the arithmetic below
+        # is happy to multiply by -0.5 and report cells with negative area.
+        if self.micrometers_per_pixel is None:
+            return
+        if not math.isfinite(self.micrometers_per_pixel) or self.micrometers_per_pixel <= 0:
+            raise ValueError(
+                "micrometers_per_pixel must be a positive finite number, got "
+                f"{self.micrometers_per_pixel!r}."
+            )
+
     def area(self, pixels: float) -> float | None:
         if self.micrometers_per_pixel is None:
             return None

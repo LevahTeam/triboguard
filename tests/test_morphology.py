@@ -150,3 +150,23 @@ def test_circularity_never_exceeds_one() -> None:
     assert math.isfinite(
         morphology.measure(morphology.connected_components(tiny))[0]["circularity"]
     )
+
+
+class TestCalibrationValidation:
+    """A scale is a physical length, and physical lengths are positive.
+
+    Calibration(-0.5) previously produced cells with negative area, silently,
+    because the arithmetic is happy to multiply by a negative number.
+    """
+
+    @pytest.mark.parametrize("bad", [0.0, -0.5, float("nan"), float("inf")])
+    def test_an_impossible_scale_is_refused(self, bad: float) -> None:
+        with pytest.raises(ValueError, match="positive finite"):
+            Calibration(micrometers_per_pixel=bad)
+
+    def test_no_scale_is_still_allowed(self) -> None:
+        """Most manifests do not record one, and that must stay legal."""
+        assert Calibration().area(100) is None
+
+    def test_a_real_scale_converts(self) -> None:
+        assert Calibration(micrometers_per_pixel=0.5).area(100) == pytest.approx(25.0)

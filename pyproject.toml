@@ -56,7 +56,7 @@ filterwarnings = [
 
 [tool.coverage.run]
 branch = true
-source = ["tribovision"]
+source = ["tribovision", "triboguard"]
 
 [tool.coverage.report]
 show_missing = true
