@@ -263,6 +263,41 @@ def sweep(
     }
 
 
+def null_behaviour(cells: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
+    """What the system does when the truth is "no effect" everywhere.
+
+    These cells are set aside by :func:`regime` because they cannot test whether
+    mechanisms are separable. They do test something else, and it was nearly
+    lost behind that label: whether the system invents a mechanism when there is
+    none. The rate rises with the well count -- zero at three wells, above ten
+    percent at forty-eight -- which reads alarming and is mostly not.
+
+    The effect at the smallest sweep step is a real change of about ten percent
+    in a rate, sitting below the fifteen percent the classifier needs before it
+    calls anything a mechanism. Ground truth therefore says "no effect" while a
+    well-powered experiment is precise enough to resolve the change and gets
+    scored wrong for succeeding. That is a hard threshold on a continuous
+    quantity behaving as hard thresholds do, and it is a limitation of the
+    scoring rather than of the inference.
+
+    It is still worth reporting, because every laboratory that reports
+    "cytotoxic" or "no effect" is applying some threshold, and the boundary
+    behaves the same way for them.
+    """
+    return [
+        {
+            "wells": cell["wells"],
+            "effect": cell["effect"],
+            "coverage": cell["coverage"],
+            "commits_on": cell["decisive_rate"],
+            "wrong_when_it_commits": cell["decisive_error_rate"],
+            "spurious_mechanism_rate": cell["decisive_rate"] * (cell["decisive_error_rate"] or 0.0),
+        }
+        for cell in cells
+        if cell["regime"] == NO_CONTRAST
+    ]
+
+
 def summarise(cells: Sequence[dict[str, Any]]) -> dict[str, Any]:
     """Counts per regime, and the safe boundary in wells."""
     counts = {name: 0 for name in REGIMES}
@@ -283,6 +318,9 @@ def summarise(cells: Sequence[dict[str, Any]]) -> dict[str, Any]:
         "max_confidently_wrong_rate": (
             max(cell["confidently_wrong_rate"] for cell in cells) if cells else None
         ),
+        # Reported beside the regimes because the no-contrast label would
+        # otherwise hide it entirely.
+        "null_behaviour": null_behaviour(cells),
         "max_decisive_error_rate": (
             max(
                 (cell["decisive_error_rate"] for cell in cells if cell["decisive_error_rate"]),

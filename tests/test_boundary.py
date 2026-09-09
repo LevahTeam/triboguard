@@ -242,3 +242,85 @@ class TestNoContrast:
         scenario = Scenario(wells=6, times=TIMES, effect=0.40)
         seen = {boundary._treatment(scenario, np.random.default_rng(seed))[1] for seed in range(30)}
         assert len(seen) > 1
+
+
+class TestNullBehaviour:
+    """The no-contrast label must not swallow the false-positive rate.
+
+    Cells whose truth is uniformly "no effect" cannot test separation, so
+    regime() sets them aside. They do test whether the system invents a
+    mechanism from nothing, and that number was invisible until it was reported
+    beside the regimes.
+    """
+
+    def test_null_cells_are_reported_separately(self) -> None:
+        cells = [
+            {
+                "regime": boundary.NO_CONTRAST,
+                "wells": 48,
+                "effect": 0.1,
+                "coverage": 0.89,
+                "decisive_rate": 0.16,
+                "decisive_error_rate": 0.69,
+            },
+            {
+                "regime": RELIABLE,
+                "wells": 48,
+                "effect": 0.7,
+                "coverage": 0.97,
+                "decisive_rate": 0.88,
+                "decisive_error_rate": 0.03,
+            },
+        ]
+        rows = boundary.null_behaviour(cells)
+        assert len(rows) == 1
+        assert rows[0]["wells"] == 48
+
+    def test_the_spurious_rate_is_the_product_of_the_two(self) -> None:
+        cells = [
+            {
+                "regime": boundary.NO_CONTRAST,
+                "wells": 48,
+                "effect": 0.1,
+                "coverage": 0.89,
+                "decisive_rate": 0.16,
+                "decisive_error_rate": 0.69,
+            }
+        ]
+        assert boundary.null_behaviour(cells)[0]["spurious_mechanism_rate"] == pytest.approx(0.1104)
+
+    def test_a_cell_that_never_commits_has_no_spurious_claims(self) -> None:
+        cells = [
+            {
+                "regime": boundary.NO_CONTRAST,
+                "wells": 3,
+                "effect": 0.1,
+                "coverage": 0.94,
+                "decisive_rate": 0.0,
+                "decisive_error_rate": None,
+            }
+        ]
+        assert boundary.null_behaviour(cells)[0]["spurious_mechanism_rate"] == 0.0
+
+    def test_the_summary_carries_it(self) -> None:
+        report = boundary.sweep(
+            wells=(3,),
+            effects=(0.05,),
+            calibration_experiments=12,
+            test_experiments=12,
+            resamples=30,
+        )
+        assert "null_behaviour" in report["summary"]
+        assert report["summary"]["null_behaviour"], "an all-null sweep must report null behaviour"
+
+    def test_the_smallest_swept_effect_really_is_a_sub_threshold_change(self) -> None:
+        """The reason the false-positive rate is mostly a scoring artifact.
+
+        A ten percent change in a rate is real, and the classifier's fifteen
+        percent rule calls it nothing. A precise experiment resolves it and is
+        marked wrong for doing so.
+        """
+        control = Scenario(wells=6, times=TIMES, effect=0.10).control
+        shift = 0.10 * control.birth
+        assert shift / control.birth < kinetics.EFFECT_THRESHOLD
+        assert shift > 0

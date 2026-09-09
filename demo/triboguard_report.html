@@ -166,7 +166,7 @@
   </p>
   <p class="byline">
     Method, results and corrections &middot; birth&ndash;death inference, conformal abstention,
-    cost-aware design &middot; 691 tests, all code and artifacts reproducible
+    cost-aware design &middot; 696 tests, all code and artifacts reproducible
   </p>
 
   <div class="col">
@@ -440,6 +440,41 @@
       </p>
     </div>
 
+    <h3>5.7 When there is nothing to find</h3>
+    <p>
+      Five cells in the map have only one true mechanism &mdash; "no effect" &mdash; so they cannot
+      test separation and the classifier sets them aside. They test something else, which that
+      label nearly hid: whether the system invents a mechanism from nothing.
+    </p>
+  </div>
+
+  <figure>
+    <div class="scroller">
+      <table>
+        <thead>
+          <tr><th>Wells</th><th class="num">Commits on</th><th class="num">Wrong when it commits</th><th class="num">Spurious mechanism claims</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>3</td><td class="num">0.00</td><td class="num">&mdash;</td><td class="num">0.0%</td></tr>
+          <tr><td>6</td><td class="num">0.00</td><td class="num">&mdash;</td><td class="num">0.0%</td></tr>
+          <tr><td>12</td><td class="num">0.01</td><td class="num">1.00</td><td class="num">1.2%</td></tr>
+          <tr><td>24</td><td class="num">0.06</td><td class="num">1.00</td><td class="num">6.2%</td></tr>
+          <tr class="hi"><td>48</td><td class="num">0.16</td><td class="num">0.69</td><td class="num">11.2%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figcaption>
+      The rate rises with the well count, which reads alarming and is mostly not. The smallest
+      swept effect is a real 10% change in a rate, sitting below the 15% the classifier needs
+      before it calls anything a mechanism. Ground truth says "no effect" while a well-powered
+      experiment is precise enough to resolve the change &mdash; and is scored wrong for
+      succeeding. That is a hard threshold on a continuous quantity behaving as hard thresholds
+      do. It is reported anyway, because every laboratory reporting "cytotoxic" or "no effect" is
+      applying some threshold, and the boundary behaves the same way for them.
+    </figcaption>
+  </figure>
+
+  <div class="col">
     <h2><span class="n">6</span> Case study</h2>
     <p>
       The system was applied, frozen, to the study that motivated it: a 2022 report on
@@ -583,7 +618,7 @@
     <h2><span class="n">9</span> Reproduction</h2>
     <pre>python scripts/run_failure_boundary.py    # the regime map
 python scripts/run_case_study.py         # the Tribonema assessment
-python -m pytest                         # 691 tests</pre>
+python -m pytest                         # 696 tests</pre>
     <p>
       Every figure in this report is produced by one of those commands and written to a JSON
       artifact recording the code revision and package versions that made it. The interactive

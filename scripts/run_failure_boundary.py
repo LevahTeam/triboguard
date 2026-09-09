@@ -60,7 +60,24 @@ def main() -> None:
             )
             row += f"{cell['regime']:>16s}"
         print(row)
-    print(f"\n  {json.dumps(report['summary'], indent=2)}")
+    nulls = report["summary"]["null_behaviour"]
+    if nulls:
+        print("\n  when there is nothing to find (truth is 'no effect' everywhere)")
+        print(
+            f"    {'wells':>5s}  {'commits on':>10s}  {'wrong then':>10s}  {'spurious claims':>15s}"
+        )
+        for row in sorted(nulls, key=lambda r: r["wells"]):
+            wrong = row["wrong_when_it_commits"]
+            shown = "n/a" if wrong is None else f"{wrong:.2f}"
+            print(
+                f"    {row['wells']:5d}  {row['commits_on']:10.2f}  {shown:>10s}  "
+                f"{row['spurious_mechanism_rate']:14.1%}"
+            )
+        print("    NOTE: the smallest effect is a real 10% rate change scored as 'no effect'")
+        print("    under a 15% rule, so a precise experiment is penalised for resolving it.")
+
+    summary = {k: v for k, v in report["summary"].items() if k != "null_behaviour"}
+    print(f"\n  {json.dumps(summary, indent=2)}")
     print(f"WROTE {out}")
 
 
