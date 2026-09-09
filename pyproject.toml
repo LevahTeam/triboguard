@@ -72,7 +72,7 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 
 [tool.mypy]
 python_version = "3.10"
-files = ["src/tribovision"]
+files = ["src/tribovision", "src/triboguard"]
 ignore_missing_imports = true
 warn_unused_ignores = true
 warn_redundant_casts = true
