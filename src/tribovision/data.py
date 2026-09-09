@@ -142,8 +142,16 @@ class LiveCellDataset(Dataset[Sample]):
             mask = coco.semantic_mask(self.annotations_for(index), record.width, record.height)
             try:
                 self.cache_dir.mkdir(parents=True, exist_ok=True)
-                temporary = cache_path.with_suffix(".npy.tmp")
-                np.save(temporary, np.packbits(mask.astype(np.uint8)))
+                # np.save appends ".npy" unless the name already ends in it, so
+                # a temporary called "x.npy.tmp" is written as "x.npy.tmp.npy"
+                # and the rename below then fails on a file that was never
+                # created. That raised OSError, which the handler swallowed, so
+                # the cache silently never worked while leaving one stray file
+                # per mask behind -- 948 of them here. Writing through an open
+                # handle bypasses the extension rule entirely.
+                temporary = cache_path.with_name(cache_path.name + ".tmp")
+                with temporary.open("wb") as handle:
+                    np.save(handle, np.packbits(mask.astype(np.uint8)))
                 temporary.replace(cache_path)
             except OSError:
                 # A read-only cache location must not break training.

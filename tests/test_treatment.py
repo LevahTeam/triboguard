@@ -672,3 +672,83 @@ def test_an_inadequate_plan_is_reported_as_inadequate(tmp_path: Path) -> None:
     assert met["two_or_more_wells_per_condition"] is False
     assert met["ic50_identifiable"] is False
     assert met["half_time_identifiable"] is False
+
+
+class TestStratification:
+    """A dose response only means something inside one cell line, treatment and time.
+
+    Before this, every well row went into one correlation regardless of what was
+    in the well, and a well imaged at three timepoints contributed three
+    correlated rows that the permutation treated as exchangeable. Both are ways
+    of manufacturing a p-value, and neither had been caught because no real
+    treatment images have ever been analysed.
+    """
+
+    def test_a_single_condition_still_gets_a_pooled_answer(self, tmp_path: Path) -> None:
+        """One stratum is not pooling, and must keep working exactly as before."""
+        manifest = build_synthetic_experiment(tmp_path, timepoints=(24.0,))
+        report = run_treatment_analysis(manifest, tmp_path / "out", permutations=60)
+        assert len(report["analysis_strata"]) == 1
+        assert "pooled" not in report["dose_response"]
+        assert report["dose_response"]["area_pixels_mean"]["wells"] > 0
+
+    def test_two_exposure_times_are_not_pooled(self, tmp_path: Path) -> None:
+        """Pooling exposure times confounds how much with how long."""
+        manifest = build_synthetic_experiment(tmp_path, timepoints=(6.0, 24.0))
+        report = run_treatment_analysis(manifest, tmp_path / "out", permutations=60)
+        assert len(report["analysis_strata"]) == 2
+        assert report["dose_response"]["pooled"] is False
+        assert "confounds" in report["dose_response"]["reason"]
+
+    def test_each_stratum_is_still_analysed(self, tmp_path: Path) -> None:
+        """Refusing to pool must not mean refusing to answer."""
+        manifest = build_synthetic_experiment(tmp_path, timepoints=(6.0, 24.0))
+        report = run_treatment_analysis(manifest, tmp_path / "out", permutations=60)
+        for label, entry in report["per_stratum"].items():
+            assert entry["dose_response"], label
+            assert entry["usable"], label
+
+    def test_two_treatments_are_not_pooled(self, tmp_path: Path) -> None:
+        """A microlitre of extract and a micromolar of doxorubicin are not one axis."""
+        manifest = _with_second_treatment(build_synthetic_experiment(tmp_path), "doxorubicin")
+        report = run_treatment_analysis(manifest, tmp_path / "out", permutations=60)
+        assert len(report["analysis_strata"]) == 2
+        assert report["dose_response"]["pooled"] is False
+
+    def test_a_well_appears_once_within_a_stratum(self, tmp_path: Path) -> None:
+        """The property that makes permuting wells legitimate at all."""
+        manifest = build_synthetic_experiment(tmp_path, timepoints=(6.0, 24.0), longitudinal=True)
+        report = run_treatment_analysis(manifest, tmp_path / "out", permutations=30)
+        for label, entry in report["per_stratum"].items():
+            wells = {
+                d["wells"]
+                for d in entry["dose_response"].values()
+                if isinstance(d.get("wells"), int)
+            }
+            assert len(wells) <= 1, f"{label} disagrees on its own well count"
+
+    def test_the_stratum_fields_are_reported(self, tmp_path: Path) -> None:
+        """A reader cannot judge a stratified result without knowing the strata."""
+        manifest = build_synthetic_experiment(tmp_path)
+        report = run_treatment_analysis(manifest, tmp_path / "out", permutations=30)
+        assert report["stratum_fields"] == ["cell_line", "treatment", "exposure_hours"]
+
+    def test_cell_line_reaches_the_well_rows(self, tmp_path: Path) -> None:
+        """It was dropped entirely, so two cell lines could silently merge."""
+        manifest = build_synthetic_experiment(tmp_path)
+        report = run_treatment_analysis(manifest, tmp_path / "out", permutations=30)
+        assert any("cell_line=" in label for label in report["analysis_strata"])
+
+
+def _with_second_treatment(manifest: Path, name: str) -> Path:
+    """Relabel half the rows so the manifest holds two treatments."""
+    with manifest.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    for row in rows[: len(rows) // 2]:
+        row["treatment"] = name
+    out = manifest.with_name("two_treatments.csv")
+    with out.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+    return out

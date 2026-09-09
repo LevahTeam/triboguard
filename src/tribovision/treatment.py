@@ -25,6 +25,7 @@ import json
 import math
 import warnings
 from collections import defaultdict
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -685,6 +686,78 @@ def stratified_spearman(
     }
 
 
+#: A dose response only means something inside one of these. Concentration is
+#: not comparable between an algal extract in microlitres and doxorubicin in
+#: micromolar, a dose effect is not comparable between cell lines, and pooling
+#: exposure times mixes "how much" with "how long".
+STRATUM_FIELDS = ("cell_line", "treatment", "exposure_hours")
+
+
+def stratum_label(row: dict[str, Any]) -> str:
+    """The analysis stratum a well belongs to, as a readable key."""
+    return " | ".join(f"{field}={row[field]}" for field in STRATUM_FIELDS)
+
+
+def _dose_response_for(
+    well_rows: list[dict[str, Any]], features: Sequence[str], *, permutations: int
+) -> dict[str, Any]:
+    """Dose response for one stratum, where a correlation is meaningful.
+
+    Every well here shares a cell line, a treatment and an exposure time, so the
+    only thing varying is concentration and each well appears exactly once.
+    That second property is what makes permuting wells legitimate: a well
+    imaged at three timepoints would otherwise contribute three correlated rows
+    that the permutation would treat as exchangeable, which is the
+    pseudoreplication this project has already had to correct once elsewhere.
+    """
+    present = [name for name in features if all(row.get(name) is not None for row in well_rows)]
+    # A feature with no variance across wells cannot show a dose response, and a
+    # correlation on a constant array is undefined rather than merely weak.
+    constant = [
+        name for name in present if float(np.std([float(row[name]) for row in well_rows])) < 1e-12
+    ]
+    usable = [name for name in present if name not in constant]
+    concentrations = np.array(
+        [float(row["concentration_ug_per_ml"]) for row in well_rows], dtype=float
+    )
+
+    dose_response: dict[str, Any] = {}
+    p_values: list[float] = []
+    day_labels = np.array([str(row["experiment_day"]) for row in well_rows])
+    for name in usable:
+        feature = np.array([float(row[name]) for row in well_rows], dtype=float)
+        correlation = stratified_spearman(
+            concentrations, feature, day_labels, permutations=permutations
+        )
+        per_day: dict[str, Any] = {}
+        for day in sorted({str(row["experiment_day"]) for row in well_rows}):
+            selection = np.array([str(row["experiment_day"]) == day for row in well_rows])
+            if selection.sum() >= 3:
+                per_day[day] = {
+                    **_safe_spearman(concentrations[selection], feature[selection]),
+                    "wells": int(selection.sum()),
+                }
+        dose_response[name] = {
+            **correlation,
+            "feature_kind": FEATURE_KINDS.get(name, "unclassified"),
+            "wells": len(well_rows),
+            "per_day": per_day,
+            "fit": fit_dose_response(concentrations, feature),
+        }
+        headline = correlation.get("p_value_day_stratified")
+        p_values.append(float("nan") if headline is None else float(headline))
+    for name, q_value in zip(usable, benjamini_hochberg(p_values), strict=True):
+        dose_response[name]["q_value_bh"] = None if np.isnan(q_value) else q_value
+        dose_response[name]["significant_at_q_0.05"] = bool(q_value < 0.05)
+    for name in constant:
+        dose_response[name] = {
+            "constant": True,
+            "feature_kind": FEATURE_KINDS.get(name, "unclassified"),
+            "note": "This feature took the same value in every well; no test was run.",
+        }
+    return {"dose_response": dose_response, "usable": usable, "constant": constant}
+
+
 def analyse_kinetics(
     well_rows: list[dict[str, Any]],
     feature: str,
@@ -837,6 +910,7 @@ def analyse(
                 "plate_id": record.plate_id,
                 "well_id": record.well_id,
                 "field": record.field,
+                "cell_line": record.cell_line,
                 "treatment": record.treatment,
                 "concentration_ug_per_ml": record.concentration_ug_per_ml,
                 "exposure_hours": record.exposure_hours,
@@ -857,6 +931,7 @@ def analyse(
                 row["experiment_day"],
                 row["plate_id"],
                 row["well_id"],
+                row["cell_line"],
                 row["treatment"],
                 row["concentration_ug_per_ml"],
                 row["exposure_hours"],
@@ -868,9 +943,10 @@ def analyse(
             "experiment_day": key[0],
             "plate_id": key[1],
             "well_id": key[2],
-            "treatment": key[3],
-            "concentration_ug_per_ml": key[4],
-            "exposure_hours": key[5],
+            "cell_line": key[3],
+            "treatment": key[4],
+            "concentration_ug_per_ml": key[5],
+            "exposure_hours": key[6],
             "fields": len(members),
         }
         for name in features:
@@ -884,50 +960,36 @@ def analyse(
         aggregated["viability_fraction"] = float(np.mean(viabilities)) if viabilities else None
         well_rows.append(aggregated)
 
-    present = [name for name in features if all(row.get(name) is not None for row in well_rows)]
-    # A feature with no variance across wells cannot show a dose response, and a
-    # correlation on a constant array is undefined rather than merely weak.
-    constant = [
-        name for name in present if float(np.std([float(row[name]) for row in well_rows])) < 1e-12
-    ]
-    usable = [name for name in present if name not in constant]
-    concentrations = np.array(
-        [float(row["concentration_ug_per_ml"]) for row in well_rows], dtype=float
-    )
+    strata: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for row in well_rows:
+        strata[stratum_label(row)].append(row)
 
-    dose_response: dict[str, Any] = {}
-    p_values: list[float] = []
-    day_labels = np.array([str(row["experiment_day"]) for row in well_rows])
-    for name in usable:
-        feature = np.array([float(row[name]) for row in well_rows], dtype=float)
-        correlation = stratified_spearman(
-            concentrations, feature, day_labels, permutations=permutations
-        )
-        per_day: dict[str, Any] = {}
-        for day in sorted({str(row["experiment_day"]) for row in well_rows}):
-            selection = np.array([str(row["experiment_day"]) == day for row in well_rows])
-            if selection.sum() >= 3:
-                per_day[day] = {
-                    **_safe_spearman(concentrations[selection], feature[selection]),
-                    "wells": int(selection.sum()),
-                }
-        dose_response[name] = {
-            **correlation,
-            "feature_kind": FEATURE_KINDS.get(name, "unclassified"),
-            "wells": len(well_rows),
-            "per_day": per_day,
-            "fit": fit_dose_response(concentrations, feature),
-        }
-        headline = correlation.get("p_value_day_stratified")
-        p_values.append(float("nan") if headline is None else float(headline))
-    for name, q_value in zip(usable, benjamini_hochberg(p_values), strict=True):
-        dose_response[name]["q_value_bh"] = None if np.isnan(q_value) else q_value
-        dose_response[name]["significant_at_q_0.05"] = bool(q_value < 0.05)
-    for name in constant:
-        dose_response[name] = {
-            "constant": True,
-            "feature_kind": FEATURE_KINDS.get(name, "unclassified"),
-            "note": "This feature took the same value in every well; no test was run.",
+    per_stratum = {
+        label: _dose_response_for(members, features, permutations=permutations)
+        for label, members in sorted(strata.items())
+    }
+    # The headline is the single stratum's result when there is only one. With
+    # several, there is no honest pooled answer: concentration is not comparable
+    # across treatments or cell lines, and pooling exposure times confounds dose
+    # with time. Refusing is the finding, and per_stratum carries the analysis.
+    if len(per_stratum) == 1:
+        only = next(iter(per_stratum.values()))
+        dose_response = only["dose_response"]
+        usable, constant = only["usable"], only["constant"]
+    else:
+        usable = sorted({name for entry in per_stratum.values() for name in entry["usable"]})
+        constant = sorted({name for entry in per_stratum.values() for name in entry["constant"]})
+        dose_response = {
+            "pooled": False,
+            "reason": (
+                f"This manifest contains {len(per_stratum)} analysis strata "
+                f"({', '.join(sorted(per_stratum))}). A dose response pooled across cell "
+                "lines, treatments or exposure times is not interpretable: concentration "
+                "means different things in each, and pooling exposure times confounds how "
+                "much with how long. Each stratum is analysed separately under "
+                "'per_stratum'."
+            ),
+            "strata": sorted(per_stratum),
         }
 
     viability_rows = [
@@ -993,8 +1055,13 @@ def analyse(
         "kinetics": kinetics,
         "wells": len(well_rows),
         "experiment_days": sorted({str(row["experiment_day"]) for row in well_rows}),
-        "concentrations_ug_per_ml": sorted({float(value) for value in concentrations}),
+        "concentrations_ug_per_ml": sorted(
+            {float(row["concentration_ug_per_ml"]) for row in well_rows}
+        ),
         "exposure_hours": sorted({float(row["exposure_hours"]) for row in well_rows}),
+        "analysis_strata": sorted(per_stratum),
+        "per_stratum": per_stratum,
+        "stratum_fields": list(STRATUM_FIELDS),
         "features_analysed": usable,
         "feature_kinds": {name: FEATURE_KINDS.get(name, "unclassified") for name in usable},
         "primary_feature": primary_feature,

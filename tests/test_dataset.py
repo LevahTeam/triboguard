@@ -44,13 +44,33 @@ def test_intensity_is_standardised_over_real_pixels_only(tiny_training_data: Pat
 
 
 def test_masks_are_cached_and_the_cache_is_reused(tiny_training_data: Path, tmp_path: Path) -> None:
+    """The reuse half needs proving, not assuming.
+
+    The previous version asserted a *.npy file existed and that a second read
+    matched the first. Both held while the cache was completely broken: the glob
+    matched the stray "x.npy.tmp.npy" left by a failed write, and the second read
+    matched because it recomputed the mask correctly from scratch. The cache had
+    never once been read. So the file is now named exactly, and the second read
+    is forced to come from disk by making a fresh mask impossible to compute.
+    """
     cache = tmp_path / "cache"
     dataset = load(tiny_training_data, cache_dir=cache)
     first = dataset.native_mask(0)
-    assert list(cache.glob("*.npy"))
+
+    written = sorted(path.name for path in cache.iterdir())
+    assert written, "nothing was cached at all"
+    assert all(name.endswith(".npy") for name in written), written
+    assert not any(".tmp" in name for name in written), f"stray temporaries left behind: {written}"
 
     fresh = load(tiny_training_data, cache_dir=cache)
+    # If this read touched the annotations it would raise, so a match proves the
+    # value came from the cache file rather than from a recomputation.
+    fresh.annotations_for = _refuse  # type: ignore[method-assign]
     assert np.array_equal(fresh.native_mask(0), first)
+
+
+def _refuse(index: int) -> list[dict[str, object]]:
+    raise AssertionError("the cache was not used; the mask was recomputed instead")
 
 
 def test_a_read_only_cache_location_does_not_break_loading(
