@@ -17,8 +17,11 @@ dist/
 data/
 runs/
 
-# The web front end is tracked in its own repository.
-web/
+# The web front end lives here now. It was a separate repository, which meant
+# the root's status and releases could not see the site drifting -- and it did
+# drift: the site shipped a different algorithm from the one the package used.
+# Its own web/.gitignore still governs node_modules and the build output, since
+# git honours nested ignore files.
 
 # Source PDFs are third-party documents whose redistribution rights have not been
 # confirmed. Keep them out of version control until that is settled.

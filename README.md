@@ -271,6 +271,28 @@ The manifest schema and the experimental design it requires are described in
 support a dose-response claim — no vehicle control, one concentration, or fewer
 than two independent wells per condition — are refused rather than analysed.
 
+## The website
+
+The site in `web/` runs TriboGuard's design analysis in the browser, using the
+same closed form as the Python package. It has no backend: every number follows
+from the chi-squared law of a sample variance, which depends on the well count
+alone.
+
+```bash
+cd web
+npm install
+npm run dev     # the site
+npm test        # 66 tests asserting it agrees with the Python package
+```
+
+The browser's chi-squared table and the parity fixtures are generated, not
+written, and CI fails if either drifts from the Python that produced it:
+
+```bash
+python scripts/generate_chi2_table.py
+python scripts/generate_parity_fixtures.py
+```
+
 ## Developer commands
 
 ```bash
