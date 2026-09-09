@@ -1,0 +1,600 @@
+<title>Counting What a Plate Cannot Tell You</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+<style>
+  :root {
+    --ground: #f7f7fa;
+    --panel: #ffffff;
+    --sunk: #eeedf3;
+    --ink: #191922;
+    --ink-soft: #55536a;
+    --ink-faint: #86839c;
+    --rule: #dedbe8;
+    --rule-firm: #c3bed4;
+    --accent: #6d4aa8;
+    --good: #35735a;
+    --good-soft: #e2efe9;
+    --warn: #96690f;
+    --warn-soft: #f6ecd6;
+    --bad: #a63f37;
+    --bad-soft: #f7e3e1;
+    --sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", monospace;
+    --serif: "Newsreader", ui-serif, Georgia, serif;
+  }
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --ground: #121218;
+      --panel: #1a1a22;
+      --sunk: #22222c;
+      --ink: #eceaf3;
+      --ink-soft: #a29fb6;
+      --ink-faint: #726f87;
+      --rule: #2d2b39;
+      --rule-firm: #443f56;
+      --accent: #ab8ce2;
+      --good: #6fbf9b;
+      --good-soft: #1b2c25;
+      --warn: #d8a94a;
+      --warn-soft: #2d2517;
+      --bad: #e08279;
+      --bad-soft: #2f1d1c;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #121218;
+    --panel: #1a1a22;
+    --sunk: #22222c;
+    --ink: #eceaf3;
+    --ink-soft: #a29fb6;
+    --ink-faint: #726f87;
+    --rule: #2d2b39;
+    --rule-firm: #443f56;
+    --accent: #ab8ce2;
+    --good: #6fbf9b;
+    --good-soft: #1b2c25;
+    --warn: #d8a94a;
+    --warn-soft: #2d2517;
+    --bad: #e08279;
+    --bad-soft: #2f1d1c;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: var(--serif); font-size: 17.5px; line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 1000px; margin: 0 auto; padding: 52px 28px 90px; }
+  .col { max-width: 66ch; }
+
+  .stamp {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 10px;
+  }
+  h1 {
+    font-family: var(--serif); font-weight: 600; font-size: 44px; line-height: 1.12;
+    margin: 0 0 14px; letter-spacing: -.015em; text-wrap: balance; max-width: 18ch;
+  }
+  .sub { font-size: 20px; color: var(--ink-soft); margin: 0 0 26px; max-width: 60ch; }
+  .byline {
+    font-family: var(--mono); font-size: 12px; color: var(--ink-faint);
+    border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+    padding: 12px 0; margin-bottom: 40px;
+  }
+
+  h2 {
+    font-family: var(--sans); font-weight: 600; font-size: 15px; letter-spacing: .02em;
+    margin: 52px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--rule-firm);
+    display: flex; gap: 12px; align-items: baseline;
+  }
+  h2 .n { font-family: var(--mono); font-size: 12px; color: var(--accent); font-weight: 500; }
+  h3 {
+    font-family: var(--sans); font-weight: 600; font-size: 13.5px; color: var(--ink-soft);
+    margin: 30px 0 10px; letter-spacing: .01em;
+  }
+  p { margin: 0 0 16px; }
+  strong { font-weight: 600; }
+  em { font-style: italic; }
+
+  .lead { font-size: 19px; }
+  .note {
+    background: var(--sunk); border-left: 2px solid var(--accent);
+    padding: 14px 18px; margin: 22px 0; font-size: 16px;
+  }
+  .note p:last-child { margin-bottom: 0; }
+
+  figure { margin: 26px 0; }
+  figcaption {
+    font-family: var(--sans); font-size: 12.5px; color: var(--ink-faint);
+    margin-top: 10px; line-height: 1.5; max-width: 72ch;
+  }
+  .scroller { overflow-x: auto; }
+
+  table { width: 100%; border-collapse: collapse; font-family: var(--sans); font-size: 13.5px; }
+  th {
+    text-align: left; font-family: var(--mono); font-size: 10px; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--ink-faint); font-weight: 600;
+    padding: 0 14px 8px 0; white-space: nowrap;
+  }
+  td { padding: 9px 14px 9px 0; border-top: 1px solid var(--rule); vertical-align: top; }
+  td:last-child, th:last-child { padding-right: 0; }
+  .num { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+  tr.hi td { background: var(--bad-soft); }
+
+  .chip {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .07em; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 2px; white-space: nowrap;
+  }
+  .chip.yes { background: var(--good-soft); color: var(--good); }
+  .chip.no { background: var(--bad-soft); color: var(--bad); }
+  .chip.warn { background: var(--warn-soft); color: var(--warn); }
+
+  .map { border-collapse: separate; border-spacing: 2px; font-family: var(--mono); font-size: 10.5px; }
+  .map td { border: 0; padding: 8px 6px; text-align: center; border-radius: 2px; color: var(--ink); }
+  .map th { padding: 0 6px 6px; text-align: center; }
+  .map th.row { text-align: right; padding-right: 10px; }
+  .r-reliable { background: var(--good-soft); color: var(--good); }
+  .r-abstains { background: var(--sunk); color: var(--ink-soft); }
+  .r-over { background: var(--bad-soft); color: var(--bad); }
+  .r-none { background: transparent; color: var(--ink-faint); }
+
+  code { font-family: var(--mono); font-size: .86em; background: var(--sunk); padding: 1px 5px; border-radius: 2px; }
+  pre {
+    font-family: var(--mono); font-size: 12.5px; line-height: 1.6; background: var(--sunk);
+    border: 1px solid var(--rule); border-radius: 3px; padding: 14px 16px; overflow-x: auto; margin: 18px 0;
+  }
+  .eq {
+    font-family: var(--mono); font-size: 14px; background: var(--sunk);
+    border-radius: 3px; padding: 14px 18px; margin: 18px 0; overflow-x: auto;
+  }
+  a { color: var(--accent); }
+  ol.spaced li, ul.spaced li { margin-bottom: 10px; }
+  footer {
+    margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--rule-firm);
+    font-family: var(--sans); font-size: 12.5px; color: var(--ink-faint);
+  }
+</style>
+
+<div class="page">
+  <p class="stamp">Technical report &middot; TriboGuard</p>
+  <h1>Counting What a Plate Cannot Tell You</h1>
+  <p class="sub">
+    A treatment that halves a cell population may have killed half the cells or stopped half of
+    them dividing. From averages alone, those are not merely hard to separate &mdash; they are
+    provably identical.
+  </p>
+  <p class="byline">
+    Method, results and corrections &middot; birth&ndash;death inference, conformal abstention,
+    cost-aware design &middot; 687 tests, all code and artifacts reproducible
+  </p>
+
+  <div class="col">
+    <h2><span class="n">1</span> Summary</h2>
+    <p class="lead">
+      Cell-viability assays report one number per well. This work shows that number cannot, even in
+      principle, distinguish cell killing from growth inhibition; identifies the quantity that can;
+      and builds a system that refuses to name a mechanism when the evidence does not support one.
+    </p>
+    <p>
+      The mean of a birth&ndash;death process depends on birth <em>minus</em> death. Two treatments
+      with the same net rate &mdash; one killing, one stalling &mdash; produce identical average
+      trajectories at every timepoint. The variance between replicate wells depends on birth
+      <em>plus</em> death, so the mechanism lives in the spread between wells, which a bulk assay
+      destroys by averaging.
+    </p>
+    <p>
+      Four consequences follow, each measured rather than argued. Extra timepoints buy almost
+      nothing. Three wells per condition &mdash; the shape of most published dose&ndash;response work
+      &mdash; pin the birth-to-death split only to within a factor of 146. An endpoint assay such as
+      MTS costs four times the plate of live imaging for identical information. And a conformal
+      guarantee calibrated on one experimental design collapses when applied to another.
+    </p>
+
+    <h2><span class="n">2</span> The problem</h2>
+    <p>
+      A viability assay measures a population property: total metabolic activity, total ATP, total
+      absorbance. A 40% fall in that signal is consistent with 40% of cells dying, with every cell
+      surviving at 60% of its former metabolic rate, and with any mixture of the two. The reading is
+      the same in all three cases.
+    </p>
+    <p>
+      This matters because the follow-up experiments diverge. A compound that kills is a candidate
+      cytotoxic agent; a compound that stalls division is a candidate cytostatic one, and the two
+      are developed, dosed and combined differently. A paper that reports the fall and names the
+      mechanism has made a claim its measurements do not carry.
+    </p>
+
+    <h2><span class="n">3</span> The identifiability result</h2>
+    <p>
+      Model a well as a linear birth&ndash;death process: each cell divides at rate <em>b</em> and
+      dies at rate <em>d</em>, per hour. Starting from <em>N</em><sub>0</sub> cells, the population
+      at time <em>t</em> has
+    </p>
+    <div class="eq">
+      mean(t)      = N₀ · exp((b − d)·t)<br>
+      variance(t)  = N₀ · (b + d)/(b − d) · exp((b − d)·t) · (exp((b − d)·t) − 1)
+    </div>
+    <p>
+      The mean depends on <strong>b − d</strong> and on nothing else. So for any treatment, another
+      treatment with a different mechanism and the same net rate produces a byte-identical mean
+      curve. No schedule of extra timepoints helps, because every timepoint measures the same
+      degenerate combination.
+    </p>
+  </div>
+
+  <figure>
+    <div class="scroller">
+      <table>
+        <thead>
+          <tr>
+            <th>Condition</th><th class="num">birth</th><th class="num">death</th>
+            <th class="num">net</th><th class="num">turnover</th><th class="num">mean at 48 h</th>
+            <th class="num">variance at 48 h</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Control</td><td class="num">0.055</td><td class="num">0.005</td><td class="num">0.050</td><td class="num">0.060</td><td class="num">&mdash;</td><td class="num">&mdash;</td></tr>
+          <tr><td>Killing (death raised)</td><td class="num">0.055</td><td class="num">0.025</td><td class="num">0.030</td><td class="num">0.080</td><td class="num">4220.7</td><td class="num">36 249</td></tr>
+          <tr><td>Stalling (birth slowed)</td><td class="num">0.035</td><td class="num">0.005</td><td class="num">0.030</td><td class="num">0.040</td><td class="num">4220.7</td><td class="num">18 125</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figcaption>
+      Two different mechanisms, identical mean trajectories. The means agree to 1&times;10<sup>&minus;12</sup>
+      at every timepoint tested; the variance across wells differs by exactly 2.00&times;, the ratio
+      of the turnovers. The variance is the only channel carrying the mechanism.
+    </figcaption>
+  </figure>
+
+  <div class="col">
+    <p>
+      A sample variance from <em>r</em> wells has <em>r</em> &minus; 1 degrees of freedom. Three
+      wells buy two. This is why replicates are not a statistical nicety in this problem: they are
+      the only channel through which the mechanism is visible at all.
+    </p>
+
+    <h2><span class="n">4</span> Method</h2>
+    <p>The system has four stages, each answering a question the previous one raises.</p>
+    <ol class="spaced">
+      <li>
+        <strong>Estimation.</strong> Net rate from the slope of log mean count against time;
+        turnover from a one-parameter regression of the between-well variance onto the model's
+        variance curve. Method-of-moments rather than maximum likelihood, so a wrong number traces
+        to a line rather than to an optimiser.
+      </li>
+      <li>
+        <strong>Calibrated abstention.</strong> Split conformal prediction over whole experiments,
+        returning a <em>set</em> of mechanisms that contains the truth at a stated rate. A set of
+        size one is a conclusion; larger sets are the system declining to choose.
+      </li>
+      <li>
+        <strong>Cost-aware design.</strong> Ranks extra wells against extra timepoints by
+        information per unit cost, and charges a destructive assay for the wells it destroys.
+      </li>
+      <li>
+        <strong>Failure boundary.</strong> Sweeps designs and effect sizes, sorting each into
+        reliable, abstaining, or overconfident.
+      </li>
+    </ol>
+    <p>
+      Simulation is exact rather than Gillespie: a linear birth&ndash;death process from <em>n</em>
+      ancestors is a sum of <em>n</em> independent single-ancestor processes with a closed-form law,
+      so a well of 10<sup>5</sup> cells costs one draw per ancestor per interval instead of one per
+      division event.
+    </p>
+
+    <h2><span class="n">5</span> Results</h2>
+
+    <h3>5.1 The estimator is unbiased, and the uncertainty is the hard part</h3>
+    <p>
+      Over 30 independent datasets at 200 wells, the estimator recovers a true turnover of 0.0600 at
+      0.0605. It is noisy, not wrong. All the difficulty is in reporting how noisy.
+    </p>
+
+    <h3>5.2 Wells buy the mechanism; timepoints do not</h3>
+  </div>
+
+  <figure>
+    <div class="scroller">
+      <table>
+        <thead>
+          <tr><th>Design</th><th class="num">wells</th><th class="num">timepoints</th><th class="num">interval width</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Sparse schedule, few wells</td><td class="num">3</td><td class="num">3</td><td class="num">1.999</td></tr>
+          <tr><td>Dense schedule, few wells</td><td class="num">3</td><td class="num">9</td><td class="num">1.979</td></tr>
+          <tr><td>Sparse schedule, more wells</td><td class="num">24</td><td class="num">3</td><td class="num">0.082</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figcaption>
+      Tripling the number of timepoints moves the turnover interval from 1.999 to 1.979. Multiplying
+      the wells by eight moves it to 0.082. This result is what makes a design tool necessary: if
+      measuring more often fixed the problem, the advice would be free.
+    </figcaption>
+  </figure>
+
+  <div class="col">
+    <h3>5.3 What a design can constrain</h3>
+    <p>
+      Because the interval comes from a chi-squared law, its width depends on the well count alone.
+      That makes the question &ldquo;how many wells do I need&rdquo; answerable in closed form, and
+      answerable for a study that never reported its replicate count.
+    </p>
+  </div>
+
+  <figure>
+    <div class="scroller">
+      <table>
+        <thead>
+          <tr><th>Wells per condition</th><th class="num">Split known to within</th><th class="num">Relative interval width</th></tr>
+        </thead>
+        <tbody>
+          <tr class="hi"><td>3 &mdash; typical published design</td><td class="num">&times;145.7</td><td class="num">39.23</td></tr>
+          <tr><td>12</td><td class="num">&times;5.7</td><td class="num">2.38</td></tr>
+          <tr><td>24</td><td class="num">&times;3.3</td><td class="num">1.36</td></tr>
+          <tr><td>48</td><td class="num">&times;2.3</td><td class="num">0.88</td></tr>
+          <tr><td>66</td><td class="num">&times;2.0</td><td class="num">0.71</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figcaption>
+      Two distinct quantities, reported separately because an earlier version of this work conflated
+      them (&sect;7). &ldquo;Known to within a factor of&rdquo; is the ratio of the interval's
+      endpoints; the relative width is its span divided by the estimate.
+    </figcaption>
+  </figure>
+
+  <div class="col">
+    <h3>5.4 The assay changes the price, not the information</h3>
+    <p>
+      MTS produces its colour change by lysing cells, so a well cannot be read twice and every
+      timepoint needs its own wells. For a three-well, four-timepoint design that is 12 wells
+      consumed against 3 for live imaging &mdash; a cost of 13.80 against 4.80 for identical
+      information.
+    </p>
+    <div class="note">
+      <p>
+        A convenient property falls out of the estimator: it reads a mean and a variance at each
+        timepoint and never follows one well through time. So a destructive assay costs money here
+        but not information, and switching to imaging is a pure saving rather than a trade.
+      </p>
+    </div>
+
+    <h3>5.5 Coverage holds only within a design</h3>
+    <p>
+      Conformal prediction guarantees coverage when calibration and test data are exchangeable. A
+      three-well experiment is not exchangeable with a thirty-well one, and calibrating on the
+      second while predicting on the first fails in the dangerous direction.
+    </p>
+  </div>
+
+  <figure>
+    <div class="scroller">
+      <table>
+        <thead>
+          <tr>
+            <th>Wells</th><th class="num">Coverage, pooled</th><th class="num">Confidently wrong, pooled</th>
+            <th class="num">Coverage, stratified</th><th class="num">Confidently wrong, stratified</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="hi"><td>3</td><td class="num">0.53</td><td class="num">0.45</td><td class="num">0.97</td><td class="num">0.00</td></tr>
+          <tr><td>20</td><td class="num">0.93</td><td class="num">0.07</td><td class="num">0.95</td><td class="num">0.05</td></tr>
+          <tr><td>60</td><td class="num">0.97</td><td class="num">0.03</td><td class="num">0.95</td><td class="num">0.05</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figcaption>
+      Target coverage 0.90. Pooled calibration reaches 0.53 at three wells with 45% of verdicts
+      confidently wrong. Stratifying by design restores the guarantee; at three wells the system
+      then abstains on 100% of experiments and is confidently wrong on none. Thresholds run from
+      0.895 at three wells to 0.585 at sixty.
+    </figcaption>
+  </figure>
+
+  <div class="col">
+    <h3>5.6 The failure boundary</h3>
+    <p>
+      Each cell below calibrates on its own design and is evaluated on 80 held-out experiments of
+      that design. A cell is <strong>overconfident</strong> when coverage breaks, or when the
+      answers the system committed to are wrong more often than the nominal level allows.
+    </p>
+  </div>
+
+  <figure>
+    <div class="scroller">
+      <table class="map">
+        <thead>
+          <tr><th></th><th colspan="5" style="font-family:var(--sans);text-transform:none;letter-spacing:0;font-size:12px;padding-bottom:10px">effect size</th></tr>
+          <tr><th class="row">wells</th><th>0.10</th><th>0.25</th><th>0.40</th><th>0.70</th><th>1.20</th></tr>
+        </thead>
+        <tbody>
+          <tr><th class="row">3</th><td class="r-none">no contrast</td><td class="r-abstains">abstains</td><td class="r-abstains">abstains</td><td class="r-over">overconfident</td><td class="r-over">overconfident</td></tr>
+          <tr><th class="row">6</th><td class="r-none">no contrast</td><td class="r-over">overconfident</td><td class="r-over">overconfident</td><td class="r-over">overconfident</td><td class="r-abstains">abstains</td></tr>
+          <tr><th class="row">12</th><td class="r-none">no contrast</td><td class="r-over">overconfident</td><td class="r-over">overconfident</td><td class="r-reliable">reliable</td><td class="r-abstains">abstains</td></tr>
+          <tr><th class="row">24</th><td class="r-none">no contrast</td><td class="r-over">overconfident</td><td class="r-abstains">abstains</td><td class="r-over">overconfident</td><td class="r-reliable">reliable</td></tr>
+          <tr><th class="row">48</th><td class="r-none">no contrast</td><td class="r-abstains">abstains</td><td class="r-reliable">reliable</td><td class="r-reliable">reliable</td><td class="r-reliable">reliable</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figcaption>
+      Six reliable, five abstaining, nine overconfident, five with no contrast to test. The
+      reliable corner is bottom-right: many wells, large effects. Overconfidence concentrates at
+      few wells with large effects &mdash; a strong effect makes the system willing to commit while
+      few wells leave it unable to tell which rate moved. The boundary is a gradient rather than a
+      line, and 80 experiments per cell do not resolve it cleanly.
+    </figcaption>
+  </figure>
+
+  <div class="col">
+    <div class="note">
+      <p>
+        <strong>Marginal coverage is not conditional coverage.</strong> At six wells and effect
+        0.25 the system holds 0.91 coverage overall &mdash; the guarantee is intact &mdash; while
+        <strong>75% of the verdicts it committed to are wrong</strong>. The wide sets carry the
+        average for the narrow ones. Split conformal promises the first kind of coverage and not the
+        second, and the gap is a real limitation of the method rather than a bug in this
+        implementation.
+      </p>
+    </div>
+
+    <h2><span class="n">6</span> Case study</h2>
+    <p>
+      The system was applied, frozen, to the study that motivated it: a 2022 report on
+      <em>Tribonema</em> aqueous extract against RAW264.7 cells, measured by MTS. The paper is the
+      case study, not the training data &mdash; it contains a few dozen numbers, far too few to fit
+      or calibrate anything, and they are the wrong kind. No rates are estimated from it.
+    </p>
+    <p>
+      What is assessed is whether the design could carry each conclusion drawn from it. Claims
+      declare what they require, the design declares what it provides, and support is set inclusion.
+    </p>
+  </div>
+
+  <figure>
+    <div class="scroller">
+      <table>
+        <thead><tr><th style="width:52%">Conclusion</th><th>Verdict</th><th>Blocking requirement</th></tr></thead>
+        <tbody>
+          <tr><td>The extract affected the cells</td><td><span class="chip yes">supported</span></td><td>&mdash;</td></tr>
+          <tr><td>Comparable in size to doxorubicin</td><td><span class="chip yes">supported</span></td><td>&mdash;</td></tr>
+          <tr><td>About 40% of the cells died</td><td><span class="chip no">not established</span></td><td>cell counts</td></tr>
+          <tr><td>The surviving 60% were resistant</td><td><span class="chip no">not established</span></td><td>cell counts, recovery test</td></tr>
+          <tr><td>Killing rather than growth inhibition</td><td><span class="chip no">not established</span></td><td>cell counts, replicate variance</td></tr>
+          <tr><td>A specific death mechanism</td><td><span class="chip no">not established</span></td><td>death markers</td></tr>
+          <tr><td>Selective for cancer over normal cells</td><td><span class="chip no">not established</span></td><td>matched normal population</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figcaption>
+      Two of seven conclusions are supported by the design. The reported effect is one of them.
+    </figcaption>
+  </figure>
+
+  <div class="col">
+    <p>
+      Two absences are findings in their own right. The report states <strong>no replicate count
+      anywhere</strong>, and its methods section describes 48-hour incubation where every results
+      section describes 24 hours. Neither is resolved here; choosing one would be inventing data.
+    </p>
+    <p>
+      At an assumed three wells &mdash; the most favourable reading &mdash; the birth-to-death split
+      would be pinned only to within a factor of about 146, and narrowing that to a factor of two
+      would take roughly 66 wells per condition.
+    </p>
+    <div class="note">
+      <p>
+        None of this is evidence against the extract having an effect. The reported effect stands.
+        It is a statement about which <em>further</em> conclusions the measurements can carry.
+      </p>
+    </div>
+
+    <h2><span class="n">7</span> What was wrong along the way</h2>
+    <p>
+      Seven errors were found and corrected during development, each by a measurement rather than by
+      review. They are listed because a system whose purpose is preventing overconfident claims
+      should show its own.
+    </p>
+  </div>
+
+  <figure>
+    <div class="scroller">
+      <table>
+        <thead><tr><th style="width:34%">Error</th><th>Consequence</th><th>What caught it</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Turnover interval by bootstrap</td>
+            <td>100% of three-well resamples collapsed onto the variance floor; the interval came out <em>narrower</em> at 3 wells (0.005) than at 24 (0.030) &mdash; maximum confidence at minimum evidence</td>
+            <td>Comparing interval widths across well counts</td>
+          </tr>
+          <tr>
+            <td>Guard rejecting a negative denominator</td>
+            <td>Refused to simulate pure killing, the case of most interest</td>
+            <td>Its own unit test</td>
+          </tr>
+          <tr>
+            <td>Calibration pooled across designs</td>
+            <td>0.53 coverage against a 0.90 target; 45% of verdicts confidently wrong</td>
+            <td>Evaluating per design instead of in aggregate</td>
+          </tr>
+          <tr>
+            <td>Closed form for minimum calibration size</td>
+            <td><code>0.9/(1&minus;0.9)</code> evaluates to 9.000000000000002, so the advertised minimum was one experiment too high at every round confidence</td>
+            <td>A parametrised test at 0.8 and 0.9</td>
+          </tr>
+          <tr>
+            <td>Fixed 5% cutoff for &ldquo;overconfident&rdquo;</td>
+            <td>At 90% target coverage 10% of answers are expected to be wrong, so the rule demanded better than the guarantee promises and flagged 10 of 25 cells including the easiest</td>
+            <td>Noticing the easiest cells were red</td>
+          </tr>
+          <tr>
+            <td>Degenerate effect grid</td>
+            <td>Two whole columns contained only one true mechanism, so they tested nothing about separation while still being scored</td>
+            <td>Counting distinct truths per cell</td>
+          </tr>
+          <tr>
+            <td>&ldquo;Factor&rdquo; used for relative width</td>
+            <td>Understated the gap nearly fourfold (39 quoted where the ratio is 146) and priced &ldquo;a factor of two&rdquo; at 39 wells when it is 66</td>
+            <td>Computing both quantities before writing them down</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <figcaption>
+      Three of these &mdash; the bootstrap collapse, the pooled calibration, and the fixed cutoff
+      &mdash; passed every test that checked only point estimates. Each was found by asking whether
+      the uncertainty behaved correctly, not whether the answer looked right.
+    </figcaption>
+  </figure>
+
+  <div class="col">
+    <h2><span class="n">8</span> Limitations</h2>
+    <ul class="spaced">
+      <li>
+        <strong>Simulated ground truth.</strong> Every result here is measured on simulated wells
+        from the model being fitted. That tests the inference, not the model's fidelity to real cell
+        culture, which has carrying capacity, cell-cycle structure and measurement error the model
+        omits.
+      </li>
+      <li>
+        <strong>The boundary is a gradient.</strong> Eighty experiments per cell leave neighbouring
+        cells disagreeing &mdash; 24 wells at effect 0.70 lands overconfident where 12 wells does
+        not. The map shows a trend, not a cutoff.
+      </li>
+      <li>
+        <strong>Conditional coverage is not guaranteed</strong>, and &sect;5.6 shows it failing.
+        The system can hold its stated coverage while the specific answers it commits to are
+        unreliable.
+      </li>
+      <li>
+        <strong>The case study is design-level.</strong> No rates were estimated from the
+        <em>Tribonema</em> data, because MTS does not measure cells. The conclusion is about what
+        the design can support, and nothing here validates or refutes the biology.
+      </li>
+      <li>
+        <strong>No external dataset yet.</strong> Validating against published longitudinal cell
+        counts with independent live/dead measurement is the obvious next step and has not been
+        done.
+      </li>
+    </ul>
+
+    <h2><span class="n">9</span> Reproduction</h2>
+    <pre>python scripts/run_failure_boundary.py    # the regime map
+python scripts/run_case_study.py         # the Tribonema assessment
+python -m pytest                         # 687 tests</pre>
+    <p>
+      Every figure in this report is produced by one of those commands and written to a JSON
+      artifact recording the code revision and package versions that made it. The interactive
+      version of the design analysis runs the same closed-form arithmetic in the browser, with
+      chi-squared quantiles tabulated rather than approximated.
+    </p>
+  </div>
+
+  <footer>
+    Report generated from the project's own artifacts. Numbers are quoted from
+    <code>runs/triboguard/failure_boundary.json</code> and
+    <code>runs/triboguard/tribonema_case_study.json</code> rather than transcribed.
+  </footer>
+</div>

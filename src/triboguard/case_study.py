@@ -222,17 +222,17 @@ def _statement(
 ) -> str:
     """The finding, written so it cannot be read as a verdict on the biology."""
     unsupported = [claim for claim in claims if not claim["supported"]]
-    width = design.relative_turnover_width(assumed_wells, confidence)
-    needed = design.wells_for_width(1.0, confidence)
+    ratio = design.turnover_ratio(assumed_wells, confidence)
+    needed = design.wells_for_ratio(2.0, confidence)
     return (
         f"{payload['design']['assay']} measures "
         f"{payload['design']['assay_measures']}, so the study's own readout cannot "
         "count cells. Of the "
         f"{len(claims)} conclusions examined, {len(claims) - len(unsupported)} are "
         f"supported by the design and {len(unsupported)} are not. At an assumed "
-        f"{assumed_wells} wells per condition the mechanism would be constrained only to "
-        f"within a factor of about {width:.0f}, and reaching a factor of two would "
-        f"take roughly {needed} wells per condition. None of this is evidence "
+        f"{assumed_wells} wells per condition the birth-to-death split would be pinned "
+        f"only to within a factor of about {ratio:.0f}, and narrowing that to a factor "
+        f"of two would take roughly {needed} wells per condition. None of this is evidence "
         "against the extract having an effect; the reported effect stands. It is a "
         "statement about which further conclusions the measurements can carry."
     )

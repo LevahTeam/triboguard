@@ -159,8 +159,11 @@ class TestTheStatement:
 
     def test_it_quantifies_the_gap_rather_than_gesturing_at_it(self) -> None:
         statement = case_study.report(PAPER)["statement"]
-        assert "factor of about 39" in statement
-        assert "39 wells per condition" in statement
+        # The ratio of the interval's endpoints, not its width relative to the
+        # estimate. An earlier version quoted the width here and called it a
+        # factor, which understated the gap by nearly fourfold.
+        assert "factor of about 146" in statement
+        assert "66 wells per condition" in statement
 
     def test_the_report_survives_a_round_trip_through_json(self) -> None:
         report = case_study.report(PAPER)

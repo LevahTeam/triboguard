@@ -208,7 +208,7 @@
         <span class="pill no" id="pill">Cannot separate</span>
         <p class="verdict-line" id="verdict">&nbsp;</p>
         <dl class="readout">
-          <div><dt>Birth/death known to</dt><dd id="factor">&mdash;</dd></div>
+          <div><dt>Split known to within</dt><dd id="factor">&mdash;</dd></div>
           <div><dt>Wells for a factor of 2</dt><dd id="need">&mdash;</dd></div>
           <div><dt>Wells consumed</dt><dd id="consumed">&mdash;</dd></div>
         </dl>
@@ -299,8 +299,14 @@ function relWidth(w, c) {
   if (df > lo.length) return 0;
   return df / lo[df - 1] - df / hi[df - 1];
 }
-function wellsFor(target, c) {
-  for (let w = 2; w <= 400; w++) if (relWidth(w, c) <= target) return w;
+function ratio(w, c) {
+  if (w < 2) return Infinity;
+  const df = w - 1, [lo, hi] = TABLES[c];
+  if (df > lo.length) return 1;
+  return hi[df - 1] / lo[df - 1];
+}
+function wellsForRatio(target, c) {
+  for (let w = 2; w <= 400; w++) if (ratio(w, c) <= target) return w;
   return null;
 }
 function consumed() { return destructive ? wells * times : wells; }
@@ -314,10 +320,11 @@ function render() {
   $("timesVal").textContent = times;
 
   const width = relWidth(wells, conf);
-  const need = wellsFor(1.0, conf);
+  const spread = ratio(wells, conf);
+  const need = wellsForRatio(2.0, conf);
   const used = consumed();
 
-  $("factor").textContent = width === Infinity ? "nothing" : "×" + width.toFixed(width < 10 ? 1 : 0);
+  $("factor").textContent = spread === Infinity ? "nothing" : "×" + spread.toFixed(spread < 10 ? 1 : 0);
   $("need").textContent = need === null ? "—" : need;
   $("consumed").textContent = used;
 
@@ -327,16 +334,16 @@ function render() {
     verdict.textContent = "With one well per condition there is no spread between wells, so killing and growth inhibition are indistinguishable at any number of timepoints.";
   } else if (width > 5) {
     pill.className = "pill no"; pill.textContent = "Cannot separate";
-    verdict.textContent = "The birth and death rates are pinned only to within a factor of "
-      + width.toFixed(width < 10 ? 1 : 0)
+    verdict.textContent = "The birth-to-death split is pinned only to within a factor of "
+      + spread.toFixed(spread < 10 ? 1 : 0)
       + ". A single-mechanism conclusion is not supported by this design.";
   } else if (width > 1.5) {
     pill.className = "pill maybe"; pill.textContent = "Borderline";
-    verdict.textContent = "The split is constrained to within a factor of " + width.toFixed(1)
+    verdict.textContent = "The split is pinned to within a factor of " + spread.toFixed(1)
       + " — enough to rule out extremes, not enough to name one mechanism with confidence.";
   } else {
     pill.className = "pill yes"; pill.textContent = "Can separate";
-    verdict.textContent = "The split is constrained to within a factor of " + width.toFixed(2)
+    verdict.textContent = "The split is pinned to within a factor of " + spread.toFixed(2)
       + ". This design can distinguish cell killing from growth inhibition.";
   }
 
@@ -475,8 +482,8 @@ function analyse() {
       <tbody>${rows}</tbody></table></div>
     <p class="hint" style="margin-top:12px">
       Timepoints assumed evenly spaced across 48&nbsp;h. Net is well determined; turnover carries all
-      the uncertainty, at <strong>&times;${width === Infinity ? "∞" : width.toFixed(width < 10 ? 1 : 0)}</strong>
-      on ${w} well${w === 1 ? "" : "s"}.
+      the uncertainty: on ${w} well${w === 1 ? "" : "s"} its plausible range spans a factor of
+      <strong>&times;${ratio(w, conf) === Infinity ? "∞" : ratio(w, conf).toFixed(ratio(w, conf) < 10 ? 1 : 0)}</strong>.
     </p>
     <p class="verdict-line" style="font-size:19px;margin:10px 0 0">${
       w < 2

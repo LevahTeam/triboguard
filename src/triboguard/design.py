@@ -126,6 +126,38 @@ def relative_turnover_width(wells: int, confidence: float = 0.95) -> float:
     return degrees / lower - degrees / upper
 
 
+def turnover_ratio(wells: int, confidence: float = 0.95) -> float:
+    """How many times wider the interval's top is than its bottom.
+
+    This is the quantity "known to within a factor of X" actually names, and it
+    is not the relative width above. The two were conflated in an earlier
+    version of this package: at three wells the relative width is 39 while the
+    endpoints differ by a factor of 146, and "reaching a factor of two" was
+    quoted as 39 wells when the width reaches 1.0 there and the ratio does not
+    fall to 2.0 until 66. Both numbers are real; only one of them answers the
+    sentence people say out loud.
+    """
+    if wells < MINIMUM_USEFUL_WELLS:
+        return float("inf")
+    if not 0 < confidence < 1:
+        raise DesignError(f"confidence must be in (0, 1), got {confidence}.")
+    from scipy import stats
+
+    degrees = wells - 1
+    tail = (1.0 - confidence) / 2.0
+    return float(stats.chi2.ppf(1.0 - tail, degrees) / stats.chi2.ppf(tail, degrees))
+
+
+def wells_for_ratio(target: float, confidence: float = 0.95) -> int | None:
+    """Fewest wells whose interval spans no more than ``target``-fold."""
+    if target <= 1.0:
+        raise DesignError(f"an interval cannot span less than 1x, got {target}.")
+    for wells in range(MINIMUM_USEFUL_WELLS, MAXIMUM_SEARCHED_WELLS + 1):
+        if turnover_ratio(wells, confidence) <= target:
+            return wells
+    return None
+
+
 def wells_for_width(target: float, confidence: float = 0.95) -> int | None:
     """Fewest wells reaching ``target`` relative width, or None if out of reach.
 

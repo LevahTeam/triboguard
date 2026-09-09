@@ -204,3 +204,48 @@ class TestRecommendation:
     def test_the_ceiling_on_the_search_is_stated_not_hidden(self) -> None:
         assert MAXIMUM_SEARCHED_WELLS > 0
         assert MINIMUM_USEFUL_WELLS == 2
+
+
+class TestRatioVersusWidth:
+    """Two different quantities that an earlier version conflated.
+
+    "Known to within a factor of X" names the ratio of the interval's endpoints.
+    The relative width is the interval's span divided by the estimate. At three
+    wells they are 146 and 39; the earlier code reported the width wherever the
+    prose said factor, understating the gap nearly fourfold, and quoted 39 wells
+    for "a factor of two" when the ratio does not reach 2.0 until 66.
+    """
+
+    def test_the_two_quantities_differ(self) -> None:
+        from triboguard.design import turnover_ratio
+
+        assert turnover_ratio(3) > 3 * relative_turnover_width(3)
+
+    def test_the_ratio_at_three_wells_is_about_146(self) -> None:
+        from triboguard.design import turnover_ratio
+
+        assert turnover_ratio(3) == pytest.approx(145.7, rel=0.01)
+
+    def test_a_factor_of_two_needs_far_more_wells_than_a_width_of_one(self) -> None:
+        from triboguard.design import wells_for_ratio
+
+        assert wells_for_ratio(2.0) == 66
+        assert wells_for_width(1.0) == 39
+
+    def test_the_ratio_falls_monotonically_towards_one(self) -> None:
+        from triboguard.design import turnover_ratio
+
+        ratios = [turnover_ratio(w) for w in (3, 6, 12, 48, 200)]
+        assert ratios == sorted(ratios, reverse=True)
+        assert ratios[-1] > 1.0
+
+    def test_one_well_has_no_ratio(self) -> None:
+        from triboguard.design import turnover_ratio
+
+        assert turnover_ratio(1) == float("inf")
+
+    def test_an_impossible_target_ratio_is_refused(self) -> None:
+        from triboguard.design import wells_for_ratio
+
+        with pytest.raises(DesignError, match="cannot span less than"):
+            wells_for_ratio(1.0)
