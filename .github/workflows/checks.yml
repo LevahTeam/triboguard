@@ -1,0 +1,96 @@
+# Every check the project already enforces locally, run where nobody can skip it.
+#
+# The audit that prompted this found four defects that passed the whole local
+# suite, so the point is not that CI would have caught them -- it would not --
+# but that the checks which *can* catch a regression should never depend on
+# somebody remembering to run them.
+name: checks
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  # A second push to the same branch makes the first run's answer irrelevant.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install the pinned environment
+        # --locked fails rather than silently resolving something new, so a stale
+        # lock file is a build error instead of an untested dependency set.
+        run: uv sync --locked --extra dev
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Format
+        run: uv run ruff format --check .
+
+      - name: Types
+        run: uv run mypy
+
+      - name: Tests
+        # No accelerator on a runner, so the device-matrix tests fall back to CPU
+        # and the multiprocessing test is the long pole at roughly 35 seconds.
+        run: uv run pytest -q
+
+      - name: The lock file matches pyproject
+        run: uv lock --check
+
+  artifacts:
+    # The generated documents are evidence, so a drift between them and the
+    # artifacts they are built from is a defect rather than a formatting nit.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --locked --extra dev
+
+      - name: RESULTS.md is regenerated, not hand-edited
+        run: |
+          uv run python scripts/collect_results.py runs > /tmp/RESULTS.md
+          diff -u docs/RESULTS.md /tmp/RESULTS.md
+
+      - name: The experiment plan is regenerated, not hand-edited
+        run: |
+          uv run python - <<'PY'
+          from pathlib import Path
+          from tribovision.treatment import plan_experiment
+          plan_experiment(Path("/tmp/planned_experiment.csv"))
+          PY
+          diff -u docs/planned_experiment.csv /tmp/planned_experiment.csv
+
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # The web front end is versioned separately, so its absence is normal and
+    # must not fail the build for everyone else.
+    if: ${{ hashFiles('web/package.json') != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+        working-directory: web
+      - run: npm run lint
+        working-directory: web
+      - run: npx tsc --noEmit
+        working-directory: web

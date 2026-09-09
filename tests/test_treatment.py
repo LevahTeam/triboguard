@@ -20,6 +20,7 @@ from PIL import Image
 from tribovision.treatment import (
     REQUIRED_COLUMNS,
     TreatmentDataError,
+    _dose_response_for,
     benjamini_hochberg,
     exponential_approach,
     fit_dose_response,
@@ -645,8 +646,10 @@ def test_a_planned_design_passes_the_design_check_once_filled_in(tmp_path: Path)
     images.mkdir()
     filled = []
     for index, row in enumerate(rows):
-        if row["control_type"] == "positive":
-            continue  # positive controls have no concentration and are not analysed
+        # Positive controls are kept. They used to be deleted here because the
+        # planner wrote them with no concentration and the loader then refused
+        # them, so the only test covering the planner quietly worked around the
+        # bug it should have caught.
         name = f"img{index}.png"
         Image.fromarray(np.full((32, 32), 128, dtype=np.uint8)).save(images / name)
         filled.append({**row, "image_path": f"images/{name}", "viability_fraction": "0.5"})
@@ -752,3 +755,59 @@ def _with_second_treatment(manifest: Path, name: str) -> Path:
         writer.writeheader()
         writer.writerows(rows)
     return out
+
+
+class TestPositiveControls:
+    """A positive control is a drug at a dose, and must survive the round trip.
+
+    The planner wrote these rows with a NaN concentration, which the manifest
+    loader then refused. The two halves of the pipeline disagreed, and the only
+    test covering it deleted the rows before loading them -- so the workflow the
+    planner describes had never once been run end to end.
+    """
+
+    def test_the_planner_gives_positive_controls_a_real_concentration(self, tmp_path: Path) -> None:
+        path = tmp_path / "plan.csv"
+        plan_experiment(path, fields=1, wells_per_condition=2)
+        with path.open(newline="", encoding="utf-8") as handle:
+            rows = [row for row in csv.DictReader(handle) if row["control_type"] == "positive"]
+        assert rows, "the default plan should include a positive control"
+        for row in rows:
+            assert float(row["concentration_ug_per_ml"]) > 0
+            assert row["treatment"] == "doxorubicin"
+
+    def test_the_control_is_its_own_treatment_not_the_extract(self, tmp_path: Path) -> None:
+        """Otherwise it lands in the extract's dose series and distorts it."""
+        path = tmp_path / "plan.csv"
+        plan_experiment(path, fields=1, wells_per_condition=2)
+        with path.open(newline="", encoding="utf-8") as handle:
+            treatments = {row["treatment"] for row in csv.DictReader(handle)}
+        assert len(treatments) == 2
+
+    def test_a_reference_arm_is_not_reported_as_a_failed_dose_response(self) -> None:
+        """One concentration is not a dose series, and saying 'no response' would mislead."""
+        wells = [
+            {
+                "experiment_day": "day-1",
+                "concentration_ug_per_ml": 5.0,
+                "area_pixels_mean": 100.0 + index,
+            }
+            for index in range(4)
+        ]
+        result = _dose_response_for(wells, ["area_pixels_mean"], permutations=10)
+        assert result["dose_response"]["dose_series"] is False
+        assert "reference arm" in result["dose_response"]["reason"]
+        assert result["dose_response"]["feature_means"]["area_pixels_mean"] > 0
+
+    def test_a_real_dose_series_is_still_analysed(self) -> None:
+        wells = [
+            {
+                "experiment_day": "day-1",
+                "concentration_ug_per_ml": float(dose),
+                "area_pixels_mean": 100.0 - dose,
+            }
+            for dose in (0, 25, 50, 100)
+        ]
+        result = _dose_response_for(wells, ["area_pixels_mean"], permutations=10)
+        assert "dose_series" not in result["dose_response"]
+        assert result["usable"] == ["area_pixels_mean"]

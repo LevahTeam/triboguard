@@ -721,6 +721,30 @@ def _dose_response_for(
         [float(row["concentration_ug_per_ml"]) for row in well_rows], dtype=float
     )
 
+    distinct_doses = len({float(value) for value in concentrations})
+    if distinct_doses < 2:
+        # A positive control sits at one dose. Correlating a feature against a
+        # constant is undefined, and reporting "no dose response" for an arm that
+        # was never a dose series would read as a negative result.
+        return {
+            "dose_response": {
+                "dose_series": False,
+                "reason": (
+                    f"This stratum has a single concentration ({concentrations[0]:g}), so it "
+                    "is a reference arm rather than a dose series. Its wells are summarised "
+                    "for comparison and no dose-response test was run."
+                ),
+                "wells": len(well_rows),
+                "concentration": float(concentrations[0]),
+                "feature_means": {
+                    name: float(np.mean([float(row[name]) for row in well_rows]))
+                    for name in present
+                },
+            },
+            "usable": [],
+            "constant": constant,
+        }
+
     dose_response: dict[str, Any] = {}
     p_values: list[float] = []
     day_labels = np.array([str(row["experiment_day"]) for row in well_rows])
@@ -1145,6 +1169,8 @@ def plan_experiment(
     cell_line: str = "RAW264.7",
     treatment: str = "Tribonema extract",
     positive_control: bool = True,
+    positive_control_treatment: str = "doxorubicin",
+    positive_control_concentration: float = 5.0,
 ) -> dict[str, Any]:
     """Write every row an experiment will need, with the image paths left blank.
 
@@ -1168,7 +1194,19 @@ def plan_experiment(
             for concentration in concentrations
         ]
         if positive_control:
-            arms.append(("positive control", float("nan"), "positive"))
+            # A positive control is a drug at a dose, not a row with no
+            # concentration. Writing NaN here produced rows the manifest loader
+            # then refused, so the planner and the validator disagreed and the
+            # only test covering it deleted the rows before loading them. Now
+            # that analysis is stratified by treatment, the control forms its own
+            # stratum and cannot contaminate the extract's dose response.
+            arms.append(
+                (
+                    positive_control_treatment,
+                    float(positive_control_concentration),
+                    "positive",
+                )
+            )
         for arm, concentration, control_type in arms:
             for replicate in range(1, wells_per_condition + 1):
                 well_number += 1
