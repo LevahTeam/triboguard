@@ -101,12 +101,20 @@ class TreatmentRecord:
     control_type: str
     replicate: str
     viability_fraction: float | None = None
+    viability_source: str | None = None
+    mts_absorbance: float | None = None
+    mts_blank_absorbance: float | None = None
     micrometers_per_pixel: float | None = None
     extra: dict[str, Any] = dataclasses.field(default_factory=dict, repr=False)
 
     @property
-    def condition(self) -> tuple[str, float, float]:
-        return (self.treatment, self.concentration_ug_per_ml, self.exposure_hours)
+    def condition(self) -> tuple[str, str, float, float]:
+        return (
+            self.cell_line,
+            self.treatment,
+            self.concentration_ug_per_ml,
+            self.exposure_hours,
+        )
 
     @property
     def biological_unit(self) -> tuple[str, str, str]:
@@ -175,75 +183,256 @@ def load_treatment_manifest(path: Path, *, root: Path | None = None) -> list[Tre
                 f"Row {number}: image_path {image_value!r} escapes the manifest directory."
             )
         viability = _optional_float(row.get("viability_fraction"), "viability_fraction")
-        if viability is None and row.get("mts_absorbance") not in (None, ""):
-            absorbance = _require_float(row.get("mts_absorbance"), "mts_absorbance")
-            blank = _optional_float(row.get("mts_blank_absorbance"), "mts_blank_absorbance")
-            viability = absorbance - (blank or 0.0)
+        absorbance = _optional_float(row.get("mts_absorbance"), "mts_absorbance")
+        blank = _optional_float(row.get("mts_blank_absorbance"), "mts_blank_absorbance")
+        concentration = _require_float(row["concentration_ug_per_ml"], "concentration_ug_per_ml")
+        exposure = _require_float(row["exposure_hours"], "exposure_hours")
+        calibration = _optional_float(row.get("micrometers_per_pixel"), "micrometers_per_pixel")
+        if concentration < 0:
+            raise TreatmentDataError("Column 'concentration_ug_per_ml' must be non-negative.")
+        if exposure < 0:
+            raise TreatmentDataError("Column 'exposure_hours' must be non-negative.")
+        if viability is not None and viability < 0:
+            raise TreatmentDataError("Column 'viability_fraction' must be non-negative.")
+        if absorbance is not None and absorbance < 0:
+            raise TreatmentDataError("Column 'mts_absorbance' must be non-negative.")
+        if blank is not None and blank < 0:
+            raise TreatmentDataError("Column 'mts_blank_absorbance' must be non-negative.")
+        if absorbance is not None and blank is None and viability is None:
+            raise TreatmentDataError(
+                "mts_blank_absorbance is required when raw MTS absorbance is used to derive "
+                "viability."
+            )
+        if calibration is not None and calibration <= 0:
+            raise TreatmentDataError("Column 'micrometers_per_pixel' must be positive.")
+        text_fields = {
+            name: str(row[name]).strip()
+            for name in (
+                "experiment_day",
+                "plate_id",
+                "well_id",
+                "field",
+                "cell_line",
+                "treatment",
+                "control_type",
+                "replicate",
+            )
+        }
+        empty = [name for name, value in text_fields.items() if not value]
+        if empty:
+            raise TreatmentDataError(
+                f"Row {number}: required column(s) are empty: {', '.join(empty)}."
+            )
         records.append(
             TreatmentRecord(
                 image_path=image_path,
-                experiment_day=str(row["experiment_day"]).strip(),
-                plate_id=str(row["plate_id"]).strip(),
-                well_id=str(row["well_id"]).strip(),
-                field=str(row["field"]).strip(),
-                cell_line=str(row["cell_line"]).strip(),
-                treatment=str(row["treatment"]).strip(),
-                concentration_ug_per_ml=_require_float(
-                    row["concentration_ug_per_ml"], "concentration_ug_per_ml"
-                ),
-                exposure_hours=_require_float(row["exposure_hours"], "exposure_hours"),
-                control_type=str(row["control_type"]).strip(),
-                replicate=str(row["replicate"]).strip(),
+                experiment_day=text_fields["experiment_day"],
+                plate_id=text_fields["plate_id"],
+                well_id=text_fields["well_id"],
+                field=text_fields["field"],
+                cell_line=text_fields["cell_line"],
+                treatment=text_fields["treatment"],
+                concentration_ug_per_ml=concentration,
+                exposure_hours=exposure,
+                control_type=text_fields["control_type"],
+                replicate=text_fields["replicate"],
                 viability_fraction=viability,
-                micrometers_per_pixel=_optional_float(
-                    row.get("micrometers_per_pixel"), "micrometers_per_pixel"
-                ),
+                viability_source="provided_fraction" if viability is not None else None,
+                mts_absorbance=absorbance,
+                mts_blank_absorbance=blank,
+                micrometers_per_pixel=calibration,
                 extra={key: row[key] for key in OPTIONAL_COLUMNS if key in row},
             )
         )
 
+    records = _normalise_mts(records)
     _check_design(records)
     return records
 
 
+def _normalise_mts(records: list[TreatmentRecord]) -> list[TreatmentRecord]:
+    """Turn raw MTS readings into fractions of the matched vehicle mean.
+
+    Blank subtraction produces an absorbance, not a viability fraction. Raw MTS
+    values are therefore normalised within day, plate, cell line and assay time.
+    Duplicate image fields from one well must repeat the same assay value and are
+    counted once when the vehicle mean is calculated.
+    """
+    raw = [
+        record
+        for record in records
+        if record.viability_fraction is None and record.mts_absorbance is not None
+    ]
+    if not raw:
+        return records
+
+    by_measurement: dict[tuple[str, str, str, str, float], float] = {}
+    exposures_by_well: dict[tuple[str, str, str], set[float]] = defaultdict(set)
+    for record in raw:
+        assert record.mts_absorbance is not None and record.mts_blank_absorbance is not None
+        corrected = record.mts_absorbance - record.mts_blank_absorbance
+        if corrected <= 0:
+            raise TreatmentDataError(
+                "Raw MTS absorbance must be greater than its matched blank absorbance."
+            )
+        key = (*record.biological_unit, record.cell_line, record.exposure_hours)
+        previous = by_measurement.setdefault(key, corrected)
+        if not math.isclose(previous, corrected, rel_tol=1e-9, abs_tol=1e-12):
+            raise TreatmentDataError(
+                "Image rows from the same well and assay time contain conflicting MTS readings."
+            )
+        exposures_by_well[record.biological_unit].add(record.exposure_hours)
+
+    repeated = [key for key, exposures in exposures_by_well.items() if len(exposures) > 1]
+    if repeated:
+        raise TreatmentDataError(
+            "Raw MTS is destructive and cannot be recorded at multiple exposure times for the "
+            f"same well (e.g. {repeated[0]}). Record it only on the matching endpoint row."
+        )
+
+    vehicle_values: dict[tuple[str, str, str, float], list[float]] = defaultdict(list)
+    seen_vehicle_wells: set[tuple[str, str, str, str, float]] = set()
+    for record in raw:
+        if record.control_type.casefold() not in {"vehicle", "solvent"}:
+            continue
+        measurement_key = (*record.biological_unit, record.cell_line, record.exposure_hours)
+        if measurement_key in seen_vehicle_wells:
+            continue
+        seen_vehicle_wells.add(measurement_key)
+        group = (
+            record.experiment_day,
+            record.plate_id,
+            record.cell_line,
+            record.exposure_hours,
+        )
+        vehicle_values[group].append(by_measurement[measurement_key])
+
+    normalised: list[TreatmentRecord] = []
+    for record in records:
+        if record.viability_fraction is not None or record.mts_absorbance is None:
+            normalised.append(record)
+            continue
+        group = (
+            record.experiment_day,
+            record.plate_id,
+            record.cell_line,
+            record.exposure_hours,
+        )
+        controls = vehicle_values.get(group, [])
+        if not controls:
+            raise TreatmentDataError(
+                "Raw MTS readings need vehicle-control MTS readings on the same day, plate, "
+                f"cell line and exposure time; none matched {group}."
+            )
+        denominator = float(np.mean(controls))
+        measurement_key = (*record.biological_unit, record.cell_line, record.exposure_hours)
+        normalised.append(
+            dataclasses.replace(
+                record,
+                viability_fraction=by_measurement[measurement_key] / denominator,
+                viability_source="mts_normalized_to_vehicle",
+            )
+        )
+    return normalised
+
+
 def _check_design(records: list[TreatmentRecord]) -> None:
     """Refuse designs that cannot support the claim the analysis would make."""
-    days = {record.experiment_day for record in records}
-    concentrations = {record.concentration_ug_per_ml for record in records}
-    controls = [record for record in records if record.concentration_ug_per_ml == 0]
     problems: list[str] = []
-    if not controls:
-        problems.append("no zero-concentration control images")
-    if len(concentrations) < 2:
-        problems.append("only one concentration, so no dose response can be estimated")
-    wells_per_condition: dict[tuple[Any, ...], set[tuple[str, str, str]]] = defaultdict(set)
+    duplicate_images: dict[Path, set[tuple[Any, ...]]] = defaultdict(set)
     for record in records:
-        wells_per_condition[record.condition].add(record.biological_unit)
-    thin = [key for key, wells in wells_per_condition.items() if len(wells) < 2]
-    if thin:
-        problems.append(
-            f"{len(thin)} condition(s) have fewer than two independent wells "
-            f"(e.g. {thin[0]}), so within-condition variability is unestimated"
+        duplicate_images[record.image_path].add(
+            (
+                record.biological_unit,
+                record.field,
+                record.cell_line,
+                record.treatment,
+                record.concentration_ug_per_ml,
+                record.exposure_hours,
+            )
         )
-    if len(days) < 2:
+    conflicts = [path for path, assignments in duplicate_images.items() if len(assignments) > 1]
+    if conflicts:
         problems.append(
-            "only one experiment day, so nothing can be validated on a day the model "
-            "did not see, and a day effect cannot be separated from a treatment effect"
+            f"one image is assigned to conflicting conditions (e.g. {conflicts[0].name})"
         )
-    vehicle = [
-        record for record in controls if record.control_type.casefold() in {"vehicle", "solvent"}
-    ]
-    if controls and not vehicle:
+
+    well_assignments: dict[tuple[str, str, str], set[tuple[Any, ...]]] = defaultdict(set)
+    for record in records:
+        well_assignments[record.biological_unit].add(
+            (
+                record.cell_line,
+                record.treatment,
+                record.concentration_ug_per_ml,
+                record.replicate,
+            )
+        )
+    reused_wells = [unit for unit, assignments in well_assignments.items() if len(assignments) > 1]
+    if reused_wells:
         problems.append(
-            "no well is marked control_type='vehicle'. A zero-concentration well is not "
-            "a vehicle control unless it received the same solvent at the same final "
-            "concentration as the treated wells"
+            "a physical well is assigned conflicting cell-line, treatment, dose, or replicate "
+            f"metadata (e.g. {reused_wells[0]})"
         )
+
+    arms: dict[tuple[str, str], list[TreatmentRecord]] = defaultdict(list)
+    for record in records:
+        arms[(record.cell_line, record.treatment)].append(record)
+    dose_arms = 0
+    for arm, members in sorted(arms.items()):
+        if all(record.control_type.casefold() == "positive" for record in members):
+            continue
+        dose_arms += 1
+        label = f"cell_line={arm[0]}, treatment={arm[1]}"
+        days = {record.experiment_day for record in members}
+        concentrations = {record.concentration_ug_per_ml for record in members}
+        controls = [record for record in members if record.concentration_ug_per_ml == 0]
+        if not controls:
+            problems.append(f"{label}: no zero-concentration control images")
+        if len(concentrations) < 2:
+            problems.append(
+                f"{label}: only one concentration, so no dose response can be estimated"
+            )
+        if len(days) < 2:
+            problems.append(
+                f"{label}: only one experiment day, so a day effect cannot be separated "
+                "from a treatment effect"
+            )
+        vehicle_groups = {
+            (record.experiment_day, record.plate_id, record.exposure_hours)
+            for record in controls
+            if record.control_type.casefold() in {"vehicle", "solvent"}
+        }
+        required_groups = {
+            (record.experiment_day, record.plate_id, record.exposure_hours) for record in members
+        }
+        missing_vehicle = sorted(required_groups - vehicle_groups)
+        if missing_vehicle:
+            problems.append(
+                f"{label}: no matched control_type='vehicle' well for plate/time "
+                f"{missing_vehicle[0]}"
+            )
+        wells_per_condition: dict[tuple[Any, ...], set[tuple[str, str, str]]] = defaultdict(set)
+        for record in members:
+            key = (
+                record.experiment_day,
+                record.plate_id,
+                record.concentration_ug_per_ml,
+                record.exposure_hours,
+            )
+            wells_per_condition[key].add(record.biological_unit)
+        thin = [key for key, wells in wells_per_condition.items() if len(wells) < 2]
+        if thin:
+            problems.append(
+                f"{label}: {len(thin)} condition(s) have fewer than two independent wells "
+                f"on the same plate/day (e.g. {thin[0]})"
+            )
+    if dose_arms == 0:
+        problems.append("no treatment arm contains a dose series")
     if problems:
         raise TreatmentDataError(
             "This experimental design cannot support a dose-response claim: "
             + "; ".join(problems)
-            + f". Days present: {sorted(days)}."
+            + "."
         )
 
 
@@ -691,11 +880,16 @@ def stratified_spearman(
 #: micromolar, a dose effect is not comparable between cell lines, and pooling
 #: exposure times mixes "how much" with "how long".
 STRATUM_FIELDS = ("cell_line", "treatment", "exposure_hours")
+KINETIC_STRATUM_FIELDS = ("cell_line", "treatment")
 
 
 def stratum_label(row: dict[str, Any]) -> str:
     """The analysis stratum a well belongs to, as a readable key."""
     return " | ".join(f"{field}={row[field]}" for field in STRATUM_FIELDS)
+
+
+def _label_for(row: dict[str, Any], fields: Sequence[str]) -> str:
+    return " | ".join(f"{field}={row[field]}" for field in fields)
 
 
 def _dose_response_for(
@@ -771,8 +965,7 @@ def _dose_response_for(
         headline = correlation.get("p_value_day_stratified")
         p_values.append(float("nan") if headline is None else float(headline))
     for name, q_value in zip(usable, benjamini_hochberg(p_values), strict=True):
-        dose_response[name]["q_value_bh"] = None if np.isnan(q_value) else q_value
-        dose_response[name]["significant_at_q_0.05"] = bool(q_value < 0.05)
+        dose_response[name]["q_value_bh_within_stratum"] = None if np.isnan(q_value) else q_value
     for name in constant:
         dose_response[name] = {
             "constant": True,
@@ -780,6 +973,91 @@ def _dose_response_for(
             "note": "This feature took the same value in every well; no test was run.",
         }
     return {"dose_response": dose_response, "usable": usable, "constant": constant}
+
+
+def _apply_global_bh(per_stratum: dict[str, dict[str, Any]]) -> None:
+    """Correct the full family of morphology tests, including every stratum."""
+    tests: list[dict[str, Any]] = []
+    p_values: list[float] = []
+    for result in per_stratum.values():
+        for entry in result["dose_response"].values():
+            if not isinstance(entry, dict) or "p_value_day_stratified" not in entry:
+                continue
+            value = entry.get("p_value_day_stratified")
+            tests.append(entry)
+            p_values.append(float("nan") if value is None else float(value))
+    for entry, q_value in zip(tests, benjamini_hochberg(p_values), strict=True):
+        corrected = None if np.isnan(q_value) else q_value
+        entry["q_value_bh"] = corrected
+        entry["q_value_bh_global"] = corrected
+        entry["significant_at_q_0.05"] = bool(corrected is not None and corrected < 0.05)
+
+
+def _viability_for(
+    well_rows: list[dict[str, Any]],
+    features: Sequence[str],
+    primary_feature: str,
+) -> dict[str, Any]:
+    """Link morphology to viability inside one biological analysis stratum."""
+    viability_rows = [
+        row for row in well_rows if isinstance(row.get("viability_fraction"), int | float)
+    ]
+    result: dict[str, Any] = {"wells_with_viability": len(viability_rows)}
+    usable = [
+        name
+        for name in features
+        if viability_rows
+        and all(isinstance(row.get(name), int | float) for row in viability_rows)
+        and float(np.std([float(row[name]) for row in viability_rows])) >= 1e-12
+    ]
+    if len(viability_rows) < 6 or not usable:
+        result["prediction"] = {
+            "evaluated": False,
+            "reason": (
+                "At least six wells with paired viability measurements across two or more "
+                "experiment days and one varying feature are needed before a prediction "
+                "claim is meaningful."
+            ),
+        }
+        return result
+
+    sources = sorted(
+        {
+            str(row["viability_source"])
+            for row in viability_rows
+            if row.get("viability_source") is not None
+        }
+    )
+    result["viability_sources"] = sources
+    matrix = np.array([[float(row[name]) for name in usable] for row in viability_rows])
+    targets = np.array([float(row["viability_fraction"]) for row in viability_rows])
+    days = [str(row["experiment_day"]) for row in viability_rows]
+    result["exploratory_prediction"] = leave_one_day_out(matrix, targets, days)
+    result["prediction"] = result["exploratory_prediction"]
+    if primary_feature in usable:
+        column = np.array([[float(row[primary_feature])] for row in viability_rows])
+        result["confirmatory_prediction"] = {
+            "feature": primary_feature,
+            "feature_kind": FEATURE_KINDS.get(primary_feature, "unclassified"),
+            "pre_specified": True,
+            **leave_one_day_out(column, targets, days),
+        }
+    else:
+        result["confirmatory_prediction"] = {
+            "evaluated": False,
+            "feature": primary_feature,
+            "reason": (
+                f"The pre-specified endpoint {primary_feature!r} was not measurable and "
+                "variable in every well, so no confirmatory test was run."
+            ),
+        }
+    result["per_feature_correlation"] = {
+        name: _safe_spearman(matrix[:, index], targets) for index, name in enumerate(usable)
+    }
+    result["dose_response_of_viability"] = fit_dose_response(
+        np.array([float(row["concentration_ug_per_ml"]) for row in viability_rows]), targets
+    )
+    return result
 
 
 def analyse_kinetics(
@@ -830,6 +1108,7 @@ def analyse_kinetics(
     per_concentration: dict[str, Any] = {}
     rates: list[float] = []
     rate_concentrations: list[float] = []
+    rate_days: list[str] = []
 
     if design == "longitudinal":
         # A rate per well, which keeps the well as the unit of analysis.
@@ -845,6 +1124,7 @@ def analyse_kinetics(
             if fit["fitted"]:
                 rates.append(float(fit["linear_slope_per_hour"]))
                 rate_concentrations.append(float(member[0]["concentration_ug_per_ml"]))
+                rate_days.append(str(member[0]["experiment_day"]))
         grouped: dict[float, list[float]] = defaultdict(list)
         for concentration, rate in zip(rate_concentrations, rates, strict=True):
             grouped[concentration].append(rate)
@@ -857,17 +1137,32 @@ def analyse_kinetics(
                 ),
             }
     else:
-        for concentration in sorted({float(row["concentration_ug_per_ml"]) for row in well_rows}):
-            member = [
-                row for row in well_rows if float(row["concentration_ug_per_ml"]) == concentration
-            ]
+        cross_sectional_groups: dict[tuple[str, float], list[dict[str, Any]]] = defaultdict(list)
+        for row in well_rows:
+            cross_sectional_groups[
+                (str(row["experiment_day"]), float(row["concentration_ug_per_ml"]))
+            ].append(row)
+        grouped_rates: dict[float, list[float]] = defaultdict(list)
+        for (day, concentration), member in sorted(cross_sectional_groups.items()):
             hours = np.array([float(row["exposure_hours"]) for row in member])
             values = np.array([float(row[feature]) for row in member])
             fit = fit_kinetics(hours, values)
-            per_concentration[str(concentration)] = {"wells": len(member), **fit}
             if fit["fitted"]:
-                rates.append(float(fit["linear_slope_per_hour"]))
+                rate = float(fit["linear_slope_per_hour"])
+                rates.append(rate)
                 rate_concentrations.append(concentration)
+                rate_days.append(day)
+                grouped_rates[concentration].append(rate)
+        for concentration, concentration_rates in sorted(grouped_rates.items()):
+            per_concentration[str(concentration)] = {
+                "experiment_days_with_a_rate": len(concentration_rates),
+                "mean_slope_per_hour": float(np.mean(concentration_rates)),
+                "sd_slope_per_hour": (
+                    float(np.std(concentration_rates, ddof=1))
+                    if len(concentration_rates) > 1
+                    else 0.0
+                ),
+            }
 
     dose_dependence: dict[str, Any] = {"evaluated": False, "reason": "Fewer than three rates."}
     if len(rates) >= 3:
@@ -876,7 +1171,7 @@ def analyse_kinetics(
             **stratified_spearman(
                 np.array(rate_concentrations),
                 np.array(rates),
-                np.array(["all"] * len(rates)),
+                np.array(rate_days),
                 permutations=min(permutations, 2000),
             ),
             "question": "Does the rate of change itself depend on concentration?",
@@ -941,6 +1236,7 @@ def analyse(
                 "control_type": record.control_type,
                 "replicate": record.replicate,
                 "viability_fraction": record.viability_fraction,
+                "viability_source": record.viability_source,
                 **{name: summary.get(name) for name in features},
             }
         )
@@ -982,6 +1278,16 @@ def analyse(
             if isinstance(row.get("viability_fraction"), int | float)
         ]
         aggregated["viability_fraction"] = float(np.mean(viabilities)) if viabilities else None
+        sources = {
+            str(row["viability_source"])
+            for row in members
+            if row.get("viability_source") is not None
+        }
+        if len(sources) > 1:
+            raise TreatmentDataError(
+                "Image rows from one well/time use incompatible viability sources."
+            )
+        aggregated["viability_source"] = next(iter(sources), None)
         well_rows.append(aggregated)
 
     strata: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -992,6 +1298,7 @@ def analyse(
         label: _dose_response_for(members, features, permutations=permutations)
         for label, members in sorted(strata.items())
     }
+    _apply_global_bh(per_stratum)
     # The headline is the single stratum's result when there is only one. With
     # several, there is no honest pooled answer: concentration is not comparable
     # across treatments or cell lines, and pooling exposure times confounds dose
@@ -1016,62 +1323,44 @@ def analyse(
             "strata": sorted(per_stratum),
         }
 
-    viability_rows = [
-        row for row in well_rows if isinstance(row.get("viability_fraction"), int | float)
-    ]
-    viability: dict[str, Any] = {"wells_with_viability": len(viability_rows)}
-    if len(viability_rows) >= 6 and usable:
-        matrix = np.array(
-            [[float(row[name]) for name in usable] for row in viability_rows], dtype=float
-        )
-        targets = np.array([float(row["viability_fraction"]) for row in viability_rows])
-        days = [str(row["experiment_day"]) for row in viability_rows]
-        # Eight correlated features into a ridge at 20-30 wells roughly halves the
-        # power to detect a real association. The confirmatory test therefore uses
-        # the single pre-specified endpoint; the multi-feature model is reported
-        # beside it, labelled exploratory.
-        viability["exploratory_prediction"] = leave_one_day_out(matrix, targets, days)
-        viability["prediction"] = viability["exploratory_prediction"]
-        if primary_feature in usable:
-            column = np.array(
-                [[float(row[primary_feature])] for row in viability_rows], dtype=float
-            )
-            viability["confirmatory_prediction"] = {
-                "feature": primary_feature,
-                "feature_kind": FEATURE_KINDS.get(primary_feature, "unclassified"),
-                "pre_specified": True,
-                **leave_one_day_out(column, targets, days),
-            }
-        else:
-            viability["confirmatory_prediction"] = {
-                "evaluated": False,
-                "feature": primary_feature,
-                "reason": (
-                    f"The pre-specified endpoint {primary_feature!r} was not measurable "
-                    "in every well, so no confirmatory test was run. Everything below is "
-                    "exploratory."
-                ),
-            }
-        viability["per_feature_correlation"] = {
-            name: _safe_spearman(matrix[:, index], targets) for index, name in enumerate(usable)
-        }
-        viability["dose_response_of_viability"] = fit_dose_response(
-            np.array([float(row["concentration_ug_per_ml"]) for row in viability_rows]), targets
-        )
+    viability_by_stratum = {
+        label: _viability_for(members, features, primary_feature)
+        for label, members in sorted(strata.items())
+    }
+    if len(viability_by_stratum) == 1:
+        viability = next(iter(viability_by_stratum.values()))
     else:
-        viability["prediction"] = {
-            "evaluated": False,
-            "reason": (
-                "At least six wells with paired viability measurements across two or more "
-                "experiment days are needed before a prediction claim is meaningful."
+        viability = {
+            "pooled": False,
+            "wells_with_viability": sum(
+                int(entry["wells_with_viability"]) for entry in viability_by_stratum.values()
             ),
+            "reason": (
+                "Viability linkage is not pooled across cell lines, treatments or exposure "
+                "times. Each compatible stratum is reported separately under 'per_stratum'."
+            ),
+            "per_stratum": viability_by_stratum,
         }
 
-    kinetics = analyse_kinetics(
-        well_rows,
-        primary_feature if primary_feature in usable else (usable[0] if usable else ""),
-        permutations=permutations,
+    kinetic_groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for row in well_rows:
+        kinetic_groups[_label_for(row, KINETIC_STRATUM_FIELDS)].append(row)
+    kinetic_feature = (
+        primary_feature if primary_feature in usable else (usable[0] if usable else "")
     )
+    kinetics_by_stratum = {
+        label: analyse_kinetics(members, kinetic_feature, permutations=permutations)
+        for label, members in sorted(kinetic_groups.items())
+    }
+    if len(kinetics_by_stratum) == 1:
+        kinetics = next(iter(kinetics_by_stratum.values()))
+    else:
+        kinetics = {
+            "pooled": False,
+            "reason": "Kinetics is not pooled across cell lines or treatments.",
+            "stratum_fields": list(KINETIC_STRATUM_FIELDS),
+            "per_stratum": kinetics_by_stratum,
+        }
 
     return {
         "images_analysed": len(rows),
@@ -1105,8 +1394,8 @@ def analyse(
             "The well is treated as the independent unit; fields within a well are averaged "
             "first so that imaging more fields cannot inflate the sample size.",
             "Spearman correlation is used because a dose response need not be linear.",
-            "p-values across morphology features are corrected with Benjamini-Hochberg; "
-            "both raw p-values and q-values are reported.",
+            "p-values are corrected with Benjamini-Hochberg across every morphology "
+            "feature and every reported stratum; both raw p-values and q-values are reported.",
             "Morphology is evaluated as a predictor of viability, never as a substitute for "
             "it, and only on experiment days excluded from fitting.",
             "The headline dose-response p-value comes from permuting concentration labels "
@@ -1120,6 +1409,11 @@ def analyse(
             "Rates of change are reported only when at least three distinct exposure "
             "times exist, and the report says whether they were fitted within a well "
             "(longitudinal) or across wells (cross-sectional).",
+            "Viability linkage is fitted separately for every cell-line, treatment and "
+            "exposure-time stratum; kinetics is fitted separately for every cell-line and "
+            "treatment stratum.",
+            "Raw MTS values are blank-corrected and normalised to the matched vehicle-control "
+            "mean before they are called a viability fraction.",
         ],
     }
 

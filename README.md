@@ -259,12 +259,14 @@ tribovision analyze-treatment --manifest data/treatment/manifest.csv \
   --checkpoint runs/baseline/best_model.pt
 ```
 
-Produces per-well morphology, Spearman dose-response with Benjamini-Hochberg
-correction, 4-parameter-logistic IC50 fits with bootstrap confidence intervals,
-a leave-one-experiment-day-out test of whether morphology predicts viability
-against a within-day label-permutation null, and — when the plates were imaged at
-three or more exposure times — the *rate* at which each feature changes, with a
-half-time where the response has visibly plateaued.
+Produces per-well morphology, stratified Spearman dose-response with a global
+Benjamini-Hochberg correction, 4-parameter-logistic IC50 fits with bootstrap
+confidence intervals, and a leave-one-experiment-day-out test of whether
+morphology predicts viability against a within-day label-permutation null.
+Viability results are kept separate by cell line, treatment, and exposure time;
+kinetic results are kept separate by cell line and treatment. Raw MTS readings
+are blank-corrected and normalised to matched vehicle wells before being called a
+viability fraction.
 
 The manifest schema and the experimental design it requires are described in
 [docs/EXPERIMENT_PROTOCOL.md](docs/EXPERIMENT_PROTOCOL.md). Manifests that cannot

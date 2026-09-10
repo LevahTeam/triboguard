@@ -10,6 +10,7 @@ from __future__ import annotations
 import csv
 import json
 import math
+import shutil
 from pathlib import Path
 
 import numpy as np
@@ -82,20 +83,78 @@ def test_a_sound_design_loads(tmp_path: Path) -> None:
     assert {record.experiment_day for record in records} == {"2026-03-01", "2026-03-08"}
 
 
-def test_viability_is_derived_from_absorbance_when_not_given(tmp_path: Path) -> None:
+def test_raw_mts_is_blank_corrected_and_normalised_to_vehicle(tmp_path: Path) -> None:
     manifest = build_synthetic_experiment(tmp_path, days=("d1", "d2"))
     with manifest.open(newline="", encoding="utf-8") as handle:
         rows = list(csv.DictReader(handle))
     for row in rows:
         row["viability_fraction"] = ""
-        row["mts_absorbance"] = "0.8"
+        row["mts_absorbance"] = "0.8" if row["concentration_ug_per_ml"] == "0.0" else "0.45"
         row["mts_blank_absorbance"] = "0.1"
     with manifest.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
     records = load_treatment_manifest(manifest)
-    assert records[0].viability_fraction == pytest.approx(0.7)
+    vehicle = next(record for record in records if record.concentration_ug_per_ml == 0)
+    treated = next(record for record in records if record.concentration_ug_per_ml > 0)
+    assert vehicle.viability_fraction == pytest.approx(1.0)
+    assert treated.viability_fraction == pytest.approx(0.5)
+    assert treated.viability_source == "mts_normalized_to_vehicle"
+
+
+def test_raw_mts_requires_a_blank_and_one_endpoint_per_well(tmp_path: Path) -> None:
+    missing_blank = build_synthetic_experiment(tmp_path / "blank")
+    with missing_blank.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    for row in rows:
+        row["viability_fraction"] = ""
+        row["mts_absorbance"] = "0.8"
+        row["mts_blank_absorbance"] = ""
+    _write_rows(missing_blank, rows)
+    with pytest.raises(TreatmentDataError, match="mts_blank_absorbance is required"):
+        load_treatment_manifest(missing_blank)
+
+    repeated = build_synthetic_experiment(
+        tmp_path / "repeated", timepoints=(12.0, 24.0), longitudinal=True
+    )
+    with repeated.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    for row in rows:
+        row["viability_fraction"] = ""
+        row["mts_absorbance"] = "0.8"
+        row["mts_blank_absorbance"] = "0.1"
+    _write_rows(repeated, rows)
+    with pytest.raises(TreatmentDataError, match="destructive"):
+        load_treatment_manifest(repeated)
+
+
+@pytest.mark.parametrize(
+    ("column", "value", "message"),
+    [
+        ("concentration_ug_per_ml", "-1", "non-negative"),
+        ("exposure_hours", "-1", "non-negative"),
+        ("micrometers_per_pixel", "0", "positive"),
+        ("viability_fraction", "-0.1", "non-negative"),
+    ],
+)
+def test_invalid_treatment_measurements_are_rejected(
+    tmp_path: Path, column: str, value: str, message: str
+) -> None:
+    manifest = build_synthetic_experiment(tmp_path)
+    with manifest.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    rows[0][column] = value
+    _write_rows(manifest, rows)
+    with pytest.raises(TreatmentDataError, match=message):
+        load_treatment_manifest(manifest)
+
+
+def _write_rows(path: Path, rows: list[dict[str, str]]) -> None:
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
 
 
 def test_image_paths_cannot_escape_the_manifest_directory(tmp_path: Path) -> None:
@@ -308,6 +367,42 @@ def test_a_zero_dose_well_is_not_automatically_a_vehicle_control(tmp_path: Path)
         writer.writeheader()
         writer.writerows(rows)
     with pytest.raises(TreatmentDataError, match="control_type='vehicle'"):
+        load_treatment_manifest(manifest)
+
+
+def test_controls_and_replicates_are_validated_inside_each_arm(tmp_path: Path) -> None:
+    manifest = _with_second_treatment(build_synthetic_experiment(tmp_path), "second extract")
+    with manifest.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    rows = [
+        row
+        for row in rows
+        if not (row["treatment"] == "second extract" and float(row["concentration_ug_per_ml"]) == 0)
+    ]
+    _write_rows(manifest, rows)
+    with pytest.raises(TreatmentDataError, match="second extract.*no zero-concentration"):
+        load_treatment_manifest(manifest)
+
+
+def test_every_plate_and_time_requires_its_own_vehicle(tmp_path: Path) -> None:
+    manifest = build_synthetic_experiment(tmp_path)
+    with manifest.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    for row in rows:
+        if row["experiment_day"] == "2026-03-08" and row["control_type"] == "vehicle":
+            row["control_type"] = "untreated"
+    _write_rows(manifest, rows)
+    with pytest.raises(TreatmentDataError, match="no matched control_type='vehicle'"):
+        load_treatment_manifest(manifest)
+
+
+def test_one_physical_well_cannot_change_treatment_metadata(tmp_path: Path) -> None:
+    manifest = build_synthetic_experiment(tmp_path)
+    with manifest.open(newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    rows[0]["treatment"] = "different treatment"
+    _write_rows(manifest, rows)
+    with pytest.raises(TreatmentDataError, match="physical well is assigned conflicting"):
         load_treatment_manifest(manifest)
 
 
@@ -718,6 +813,30 @@ class TestStratification:
         assert len(report["analysis_strata"]) == 2
         assert report["dose_response"]["pooled"] is False
 
+    def test_viability_and_kinetics_are_not_pooled(self, tmp_path: Path) -> None:
+        manifest = _with_second_treatment(
+            build_synthetic_experiment(tmp_path, timepoints=(0.0, 12.0, 24.0), longitudinal=True),
+            "second extract",
+        )
+        report = run_treatment_analysis(manifest, tmp_path / "out", permutations=30)
+        assert report["viability_linkage"]["pooled"] is False
+        assert len(report["viability_linkage"]["per_stratum"]) == 6
+        assert report["kinetics"]["pooled"] is False
+        assert len(report["kinetics"]["per_stratum"]) == 2
+
+    def test_q_values_cover_all_strata(self, tmp_path: Path) -> None:
+        manifest = _with_second_treatment(build_synthetic_experiment(tmp_path), "second extract")
+        report = run_treatment_analysis(manifest, tmp_path / "out", permutations=30)
+        tests = [
+            entry
+            for stratum in report["per_stratum"].values()
+            for entry in stratum["dose_response"].values()
+            if isinstance(entry, dict) and "p_value_day_stratified" in entry
+        ]
+        assert tests
+        assert all("q_value_bh_global" in entry for entry in tests)
+        assert all(entry["q_value_bh"] >= entry["q_value_bh_within_stratum"] for entry in tests)
+
     def test_a_well_appears_once_within_a_stratum(self, tmp_path: Path) -> None:
         """The property that makes permuting wells legitimate at all."""
         manifest = build_synthetic_experiment(tmp_path, timepoints=(6.0, 24.0), longitudinal=True)
@@ -744,11 +863,20 @@ class TestStratification:
 
 
 def _with_second_treatment(manifest: Path, name: str) -> Path:
-    """Relabel half the rows so the manifest holds two treatments."""
+    """Clone a complete valid dose series under a second treatment name."""
     with manifest.open(newline="", encoding="utf-8") as handle:
         rows = list(csv.DictReader(handle))
-    for row in rows[: len(rows) // 2]:
-        row["treatment"] = name
+    clones: list[dict[str, str]] = []
+    for index, row in enumerate(rows):
+        clone = dict(row)
+        source = manifest.parent / row["image_path"]
+        target = source.with_name(f"second_{index}_{source.name}")
+        shutil.copy(source, target)
+        clone["image_path"] = str(target.relative_to(manifest.parent))
+        clone["well_id"] = f"second-{row['well_id']}"
+        clone["treatment"] = name
+        clones.append(clone)
+    rows.extend(clones)
     out = manifest.with_name("two_treatments.csv")
     with out.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))

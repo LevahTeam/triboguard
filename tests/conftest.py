@@ -199,11 +199,15 @@ def build_synthetic_experiment(
     well_index = 0
     ys, xs = np.mgrid[0:96, 0:96]
 
+    def well_name(index: int) -> str:
+        zero_based = (index - 1) % 96
+        return f"{chr(ord('A') + zero_based // 12)}{zero_based % 12 + 1:02d}"
+
     for day in days:
         for concentration in concentrations:
             for replicate in range(wells_per_condition):
                 well_index += 1
-                base_well = f"{chr(ord('A') + well_index % 8)}{well_index % 12 + 1:02d}"
+                base_well = well_name(well_index)
                 strength = concentration / max(max(concentrations), 1.0)
                 for exposure in timepoints:
                     # The effect accrues over time toward its plateau.
@@ -216,7 +220,7 @@ def build_synthetic_experiment(
                         well = base_well
                     else:
                         well_index += 1
-                        well = f"{chr(ord('A') + well_index % 8)}{well_index % 12 + 1:02d}"
+                        well = well_name(well_index)
                     radius = (
                         9.0 - (4.0 * strength * progress if effect else 0.0) + rng.normal(0, 0.25)
                     )

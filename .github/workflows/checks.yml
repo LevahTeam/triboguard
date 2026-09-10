@@ -21,6 +21,10 @@ jobs:
   python:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.13"]
     steps:
       - uses: actions/checkout@v4
 
@@ -28,11 +32,12 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
+          python-version: ${{ matrix.python-version }}
 
       - name: Install the pinned environment
         # --locked fails rather than silently resolving something new, so a stale
         # lock file is a build error instead of an untested dependency set.
-        run: uv sync --locked --extra dev
+        run: uv sync --locked --extra dev --python ${{ matrix.python-version }}
 
       - name: Lint
         run: uv run ruff check .
@@ -46,7 +51,9 @@ jobs:
       - name: Tests
         # No accelerator on a runner, so the device-matrix tests fall back to CPU
         # and the multiprocessing test is the long pole at roughly 35 seconds.
-        run: uv run pytest -q
+        run: >-
+          uv run pytest -q --cov=tribovision --cov=triboguard --cov-branch
+          --cov-report=term-missing --cov-fail-under=90
 
       - name: The lock file matches pyproject
         run: uv lock --check

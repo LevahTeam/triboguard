@@ -143,9 +143,12 @@ absorbance and blank absorbance:
 - `mts_absorbance` — the well reading
 - `mts_blank_absorbance` — medium plus reagent, no cells
 
-TriboVision computes `viability_fraction = mts_absorbance - mts_blank_absorbance`
-when `viability_fraction` is left blank. If you normalise to vehicle control
-yourself, put the normalised value in `viability_fraction` and say so in `notes`.
+When `viability_fraction` is left blank, TriboVision first subtracts the blank and
+then divides by the mean of the matched vehicle wells on the same day, plate, cell
+line, and assay time. Blank subtraction alone is still an absorbance, not a
+fraction. If you normalise to vehicle control yourself, put that value in
+`viability_fraction` and say so in `notes`. Because MTS is destructive, record a
+raw MTS value at only one exposure time for any physical well.
 
 Note the known limitation: MTS reports metabolic activity, not cell death. A
 reduced MTS signal is consistent with fewer cells, less metabolically active
@@ -203,13 +206,15 @@ For a header-only template instead, drop `--plan`.
   obtained by permuting concentration labels **within each experiment day** — so a
   day effect cannot masquerade as a dose effect — and Benjamini-Hochberg q-values
   across features. The pooled parametric p-value is reported alongside, as a
-  descriptive only.
+  descriptive only. The multiple-testing correction covers all tested features
+  across all cell-line, treatment, and exposure-time strata.
 - Each feature labelled `shape`, `density`, `density-contaminated` or `intensity`,
   so a reader can tell which results are about morphology and which are about
   confluency.
 - 4-parameter-logistic dose-response fits with bootstrap IC50 confidence
   intervals, flagged when the IC50 falls outside the tested range.
-- Leave-one-day-out ridge prediction of viability from morphology, with a
+- Leave-one-day-out ridge prediction of viability from morphology within each
+  cell-line, treatment, and exposure-time stratum, with a
   within-day label-permutation null and an exact permutation p-value. The model
   is fitted to each day's deviations from its own mean, so what it predicts is a
   well's viability **relative to its own day**, not an absolute value; the result
@@ -224,9 +229,10 @@ For a header-only template instead, drop `--plan`.
 - Bootstrap IC50 intervals with the resample convergence rate. Below 80%
   convergence no interval is reported, because one built from only the
   well-behaved resamples is biased narrow.
-- **Kinetics**: a rate of change per concentration, a half-time where the data
-  identify one, and a test of whether the rate itself depends on dose. The report
-  states whether rates were fitted within a well or across wells.
+- **Kinetics**, separately for each cell line and treatment: a rate of change per
+  concentration, a half-time where the data identify one, and a test of whether
+  the rate itself depends on dose. The report states whether rates were fitted
+  within a well or across wells.
 
 ## 8. What the analysis will not report
 

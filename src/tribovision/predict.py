@@ -12,6 +12,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import shutil
 from collections.abc import Iterable, Sequence
 from pathlib import Path
 from typing import Any
@@ -153,7 +154,24 @@ def collect_images(inputs: Sequence[Path]) -> list[Path]:
             raise PredictionError(f"Input does not exist: {item}")
     if not found:
         raise PredictionError("No readable images were found in the given inputs.")
-    return found
+    # A caller can pass both a directory and a file inside that directory. Count
+    # the physical image once; otherwise morphology rows and the object total are
+    # duplicated even though the output PNG merely overwrites itself.
+    return sorted({path.resolve() for path in found}, key=lambda path: path.as_posix())
+
+
+def _clear_previous_artifacts(output_dir: Path) -> None:
+    """Remove only files owned by this command from an earlier run."""
+    for pattern in ("*_mask.png", "*_overlay.png"):
+        for path in output_dir.glob(pattern):
+            if path.is_file():
+                path.unlink()
+            elif path.is_dir():  # pragma: no cover - defensive
+                shutil.rmtree(path)
+    for name in ("morphology_features.csv", "prediction_report.json"):
+        path = output_dir / name
+        if path.is_file():
+            path.unlink()
 
 
 def run_prediction(
@@ -180,6 +198,7 @@ def run_prediction(
 
     output_dir = Path(output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
+    _clear_previous_artifacts(output_dir)
     paths = collect_images(list(inputs))
 
     per_image: list[dict[str, Any]] = []
@@ -195,22 +214,28 @@ def run_prediction(
             model, image, image_size=size, device=torch_device, threshold=threshold
         )
         labels = morphology.label_objects(mask, method=instance_method, min_area=min_area)
+        stem = artifact_stem(path)
+        source_reference = provenance.relative_to_repo(path)
         rows = morphology.measure(
             labels,
             np.asarray(image, dtype=np.float32),
             calibration=calibration,
             method=instance_method,
-            extra={"source_image": path.name, "source_path": str(path)},
+            extra={
+                "source_image": path.name,
+                "source_path": source_reference,
+                "source_id": stem,
+            },
         )
         feature_rows.extend(rows)
-        stem = artifact_stem(path)
         Image.fromarray(mask.astype(np.uint8) * 255).save(output_dir / f"{stem}_mask.png")
         if save_overlays:
             overlay_image(image, mask).save(output_dir / f"{stem}_overlay.png")
         per_image.append(
             {
                 "source_image": path.name,
-                "source_path": str(path),
+                "source_path": source_reference,
+                "source_id": stem,
                 "artifact_stem": stem,
                 "width": image.width,
                 "height": image.height,

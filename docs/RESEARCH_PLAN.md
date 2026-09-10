@@ -205,7 +205,7 @@ and every claim withdrawn after a stricter test, is in
 | Quantitative result on held-out data | Done — 0.952 against a 0.710 trivial-predictor floor (see `results/comparison.json`) |
 | Comparison against non-learned baselines | Done — `tribovision compare` gates on the *stronger* of the classical rule and the all-foreground predictor |
 | Repeated seeds with reported spread | Done — `docs/RESULTS.md` |
-| Automated test suite | Done — 742 tests, 91% coverage |
+| Automated test suite | Done — 754 tests, 92% coverage |
 | Documented limitations | Done — this file, and every generated report |
 | Pre-specified analysis plan | Done — this file, section above |
 | A result that answers a question, not only a tool that works | Done — the mechanics half, with the conditions for its own failure measured |

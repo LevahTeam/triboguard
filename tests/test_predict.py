@@ -88,7 +88,8 @@ def test_full_prediction_run_writes_masks_overlays_and_morphology(
 
     persisted = json.loads((output / "prediction_report.json").read_text())
     assert persisted["images"][0]["source_image"] == new_image.name
-    assert "/Users/" not in json.dumps(persisted["checkpoint"])
+    assert "/Users/" not in json.dumps(persisted)
+    assert not Path(persisted["images"][0]["source_path"]).is_absolute()
     assert "does not by itself" not in persisted["units_note"]
     assert "not a measurement of viability" in persisted["interpretation_note"]
     assert report["objects"] >= 1
@@ -120,6 +121,11 @@ def test_a_directory_of_images_is_processed(
 ) -> None:
     report = run_prediction(trained_checkpoint, [new_image.parent], tmp_path / "dir", device="cpu")
     assert len(report["images"]) == 1
+
+
+def test_overlapping_inputs_are_processed_once(new_image: Path) -> None:
+    found = collect_images([new_image.parent, new_image, new_image.parent])
+    assert found == [new_image.resolve()]
 
 
 def test_missing_and_empty_inputs_are_reported(tmp_path: Path) -> None:
@@ -329,7 +335,22 @@ def test_two_images_with_the_same_name_do_not_overwrite_each_other(
     assert len({row["artifact_stem"] for row in report["images"]}) == 2
     # Both keep the readable stem, and both record where they came from.
     assert all(name.startswith("field1_") for name in masks)
-    assert len({row["source_path"] for row in report["images"]}) == 2
+    assert len({row["source_id"] for row in report["images"]}) == 2
+    assert all(not Path(row["source_path"]).is_absolute() for row in report["images"])
+
+
+def test_rerun_removes_artifacts_from_images_no_longer_requested(
+    trained_checkpoint: Path, new_image: Path, tmp_path: Path
+) -> None:
+    second = tmp_path / "second.tif"
+    shutil.copy(new_image, second)
+    output = tmp_path / "predictions"
+    run_prediction(trained_checkpoint, [new_image, second], output, device="cpu")
+    assert len(list(output.glob("*_mask.png"))) == 2
+
+    run_prediction(trained_checkpoint, [new_image], output, device="cpu")
+    assert len(list(output.glob("*_mask.png"))) == 1
+    assert len(list(output.glob("*_overlay.png"))) == 1
 
 
 def test_the_artifact_name_is_stable_across_runs(tmp_path: Path) -> None:
