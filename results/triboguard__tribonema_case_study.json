@@ -1,0 +1,482 @@
+{
+  "claims": [
+    {
+      "claim": "Tribonema extract affected the cells",
+      "id": "affected",
+      "missing_capabilities": [],
+      "reasons": [],
+      "supported": true,
+      "verdict": "supported by this design"
+    },
+    {
+      "claim": "About 40% of the cells died",
+      "id": "forty_percent_died",
+      "missing_capabilities": [
+        "cell_counts"
+      ],
+      "reasons": [
+        "MTS reports mitochondrial dehydrogenase activity, not cell number. A 40% fall in signal is consistent with 40% of cells dying, with every cell surviving at 60% of its former metabolic rate, and with any mixture of the two"
+      ],
+      "supported": false,
+      "verdict": "not established by this design"
+    },
+    {
+      "claim": "The surviving 60% were resistant",
+      "id": "sixty_percent_resistant",
+      "missing_capabilities": [
+        "cell_counts",
+        "recovery_test"
+      ],
+      "reasons": [
+        "MTS reports mitochondrial dehydrogenase activity, not cell number. A 40% fall in signal is consistent with 40% of cells dying, with every cell surviving at 60% of its former metabolic rate, and with any mixture of the two",
+        "a surviving fraction is only 'resistant' if it stays alive on re-exposure, which was not tested"
+      ],
+      "supported": false,
+      "verdict": "not established by this design"
+    },
+    {
+      "claim": "The effect was cell killing rather than growth inhibition",
+      "id": "cytotoxic_not_cytostatic",
+      "missing_capabilities": [
+        "cell_counts",
+        "replicate_variance"
+      ],
+      "reasons": [
+        "MTS reports mitochondrial dehydrogenase activity, not cell number. A 40% fall in signal is consistent with 40% of cells dying, with every cell surviving at 60% of its former metabolic rate, and with any mixture of the two",
+        "telling killing from growth inhibition needs the spread between wells, and the report states no replicate count anywhere"
+      ],
+      "supported": false,
+      "verdict": "not established by this design"
+    },
+    {
+      "claim": "The extract caused a specific death mechanism (apoptosis or necrosis)",
+      "id": "death_mechanism",
+      "missing_capabilities": [
+        "death_markers"
+      ],
+      "reasons": [
+        "apoptosis and necrosis are distinguished by membrane integrity and caspase activity, which methylene blue on formalin-fixed cells cannot show; fixation also destroys the membrane-integrity evidence"
+      ],
+      "supported": false,
+      "verdict": "not established by this design"
+    },
+    {
+      "claim": "The extract is selective for cancer cells over normal cells",
+      "id": "selective",
+      "missing_capabilities": [
+        "matched_normal_population"
+      ],
+      "reasons": [
+        "the normal comparator is peritoneal lymphocytes, a different lineage in primary culture, so the contrast confounds cancer-versus-normal with macrophage-versus-lymphocyte and cell-line-versus-primary. The confound is quantitative rather than merely conceptual: the cancer arm divides and the lymphocytes largely do not, and because cytotoxicity is scored against a same-time control, a compound that only stops division scores in the first arm and not in the second"
+      ],
+      "supported": false,
+      "verdict": "not established by this design"
+    },
+    {
+      "claim": "The effect is comparable in size to doxorubicin",
+      "id": "comparable_to_doxorubicin",
+      "missing_capabilities": [],
+      "reasons": [],
+      "supported": true,
+      "verdict": "supported by this design"
+    }
+  ],
+  "environment": {
+    "accelerators": {
+      "cuda": false,
+      "mps": true
+    },
+    "git": {
+      "branch": "master",
+      "commit": "8f940d01affe7fd3af160c9ead0cfd7793c15a60",
+      "dirty": true
+    },
+    "machine": "arm64",
+    "packages": {
+      "numpy": "2.5.2",
+      "pillow": "11.3.0",
+      "pycocotools": "2.0.11",
+      "remotezip": "0.12.6",
+      "scipy": "1.18.1",
+      "torch": "2.14.0"
+    },
+    "platform": "macOS-15.6-arm64-arm-64bit-Mach-O",
+    "python": "3.14.2",
+    "recorded_at_utc": "2026-09-10T11:16:38+00:00",
+    "torch_threads": 4
+  },
+  "follow_up": {
+    "as_run_with_mts": {
+      "assay": {
+        "destructive": true,
+        "name": "MTS",
+        "per_measurement": 0.35,
+        "per_well": 0.8
+      },
+      "calibration_experiments_needed": 9,
+      "current": {
+        "cost": 10.35,
+        "mechanism_estimable": true,
+        "relative_turnover_width": 39.22680517452536,
+        "timepoints": [
+          3.0,
+          6.0,
+          24.0
+        ],
+        "wells": 3,
+        "wells_consumed": 9
+      },
+      "options": [
+        {
+          "added_cost": 3.450000000000001,
+          "cost": 13.8,
+          "information": 1.0606771940486202,
+          "information_per_cost": 0.3074426649416289,
+          "label": "add 1 well per condition",
+          "note": "",
+          "relative_width": 13.581154381672867,
+          "timepoints": [
+            3.0,
+            6.0,
+            24.0
+          ],
+          "wells": 4
+        },
+        {
+          "added_cost": 6.9,
+          "cost": 17.25,
+          "information": 1.6027049902738786,
+          "information_per_cost": 0.2322760855469389,
+          "label": "add 2 wells per condition",
+          "note": "",
+          "relative_width": 7.8983614637339405,
+          "timepoints": [
+            3.0,
+            6.0,
+            24.0
+          ],
+          "wells": 5
+        },
+        {
+          "added_cost": 10.35,
+          "cost": 20.7,
+          "information": 1.9420185339264675,
+          "information_per_cost": 0.187634640959079,
+          "label": "add 3 wells per condition",
+          "note": "",
+          "relative_width": 5.625679746738635,
+          "timepoints": [
+            3.0,
+            6.0,
+            24.0
+          ],
+          "wells": 6
+        },
+        {
+          "added_cost": 17.25,
+          "cost": 27.6,
+          "information": 2.359628146473914,
+          "information_per_cost": 0.13679003747674864,
+          "label": "add 5 wells per condition",
+          "note": "",
+          "relative_width": 3.705181228425827,
+          "timepoints": [
+            3.0,
+            6.0,
+            24.0
+          ],
+          "wells": 8
+        },
+        {
+          "added_cost": 34.5,
+          "cost": 44.85,
+          "information": 2.8760446929725334,
+          "information_per_cost": 0.08336361428905895,
+          "label": "add 10 wells per condition",
+          "note": "",
+          "relative_width": 2.2107141886477617,
+          "timepoints": [
+            3.0,
+            6.0,
+            24.0
+          ],
+          "wells": 13
+        },
+        {
+          "added_cost": 69.0,
+          "cost": 79.35,
+          "information": 3.329266079551654,
+          "information_per_cost": 0.0482502330369805,
+          "label": "add 20 wells per condition",
+          "note": "",
+          "relative_width": 1.4050799976990622,
+          "timepoints": [
+            3.0,
+            6.0,
+            24.0
+          ],
+          "wells": 23
+        }
+      ],
+      "recommended": {
+        "added_cost": 3.450000000000001,
+        "cost": 13.8,
+        "information": 1.0606771940486202,
+        "information_per_cost": 0.3074426649416289,
+        "label": "add 1 well per condition",
+        "note": "",
+        "relative_width": 13.581154381672867,
+        "timepoints": [
+          3.0,
+          6.0,
+          24.0
+        ],
+        "wells": 4
+      },
+      "statement": "The best next spend is to add 1 well per condition. MTS destroys the well it reads, so each timepoint needs its own wells: this design consumes 12 wells rather than 4. Reaching a relative width of 1 needs 39 wells per condition.",
+      "target": {
+        "cost_at_requirement": 134.55,
+        "reachable": true,
+        "relative_width": 1.0,
+        "wells_required": 39
+      }
+    },
+    "assumed_wells": 3,
+    "assumption_note": "the report states no replicate count; three is assumed as the most favourable reading a plate experiment would support",
+    "switched_to_imaging": {
+      "assay": {
+        "destructive": false,
+        "name": "live-cell imaging",
+        "per_measurement": 0.2,
+        "per_well": 0.8
+      },
+      "calibration_experiments_needed": 9,
+      "current": {
+        "cost": 4.2,
+        "mechanism_estimable": true,
+        "relative_turnover_width": 39.22680517452536,
+        "timepoints": [
+          3.0,
+          6.0,
+          24.0
+        ],
+        "wells": 3,
+        "wells_consumed": 3
+      },
+      "options": [
+        {
+          "added_cost": 1.4000000000000004,
+          "cost": 5.6000000000000005,
+          "information": 1.0606771940486202,
+          "information_per_cost": 0.7576265671775856,
+          "label": "add 1 well per condition",
+          "note": "",
+          "relative_width": 13.581154381672867,
+          "timepoints": [
+            3.0,
+            6.0,
+            24.0
+          ],
+          "wells": 4
+        },
+        {
+          "added_cost": 2.8,
+          "cost": 7.0,
+          "information": 1.6027049902738786,
+          "information_per_cost": 0.5723946393835281,
+          "label": "add 2 wells per condition",
+          "note": "",
+          "relative_width": 7.8983614637339405,
+          "timepoints": [
+            3.0,
+            6.0,
+            24.0
+          ],
+          "wells": 5
+        },
+        {
+          "added_cost": 4.2,
+          "cost": 8.4,
+          "information": 1.9420185339264675,
+          "information_per_cost": 0.4623853652205875,
+          "label": "add 3 wells per condition",
+          "note": "",
+          "relative_width": 5.625679746738635,
+          "timepoints": [
+            3.0,
+            6.0,
+            24.0
+          ],
+          "wells": 6
+        },
+        {
+          "added_cost": 7.000000000000001,
+          "cost": 11.200000000000001,
+          "information": 2.359628146473914,
+          "information_per_cost": 0.3370897352105591,
+          "label": "add 5 wells per condition",
+          "note": "",
+          "relative_width": 3.705181228425827,
+          "timepoints": [
+            3.0,
+            6.0,
+            24.0
+          ],
+          "wells": 8
+        },
+        {
+          "added_cost": 14.000000000000004,
+          "cost": 18.200000000000003,
+          "information": 2.8760446929725334,
+          "information_per_cost": 0.20543176378375233,
+          "label": "add 10 wells per condition",
+          "note": "",
+          "relative_width": 2.2107141886477617,
+          "timepoints": [
+            3.0,
+            6.0,
+            24.0
+          ],
+          "wells": 13
+        },
+        {
+          "added_cost": 28.000000000000004,
+          "cost": 32.2,
+          "information": 3.329266079551654,
+          "information_per_cost": 0.11890235998398764,
+          "label": "add 20 wells per condition",
+          "note": "",
+          "relative_width": 1.4050799976990622,
+          "timepoints": [
+            3.0,
+            6.0,
+            24.0
+          ],
+          "wells": 23
+        }
+      ],
+      "recommended": {
+        "added_cost": 1.4000000000000004,
+        "cost": 5.6000000000000005,
+        "information": 1.0606771940486202,
+        "information_per_cost": 0.7576265671775856,
+        "label": "add 1 well per condition",
+        "note": "",
+        "relative_width": 13.581154381672867,
+        "timepoints": [
+          3.0,
+          6.0,
+          24.0
+        ],
+        "wells": 4
+      },
+      "statement": "The best next spend is to add 1 well per condition. Reaching a relative width of 1 needs 39 wells per condition.",
+      "target": {
+        "cost_at_requirement": 54.60000000000001,
+        "reachable": true,
+        "relative_width": 1.0,
+        "wells_required": 39
+      }
+    }
+  },
+  "internal_inconsistencies": [
+    "The MTS methods section states cells were cultured for 48 hours after treatment, while the results sections for figures 1, 2, 3 and 5 all describe 24-hour treatment. The report does not reconcile the two, and this analysis does not choose one for it."
+  ],
+  "not_reported": [
+    "number of wells per condition (no replicate count appears anywhere in the report)",
+    "biological versus technical replicate structure",
+    "raw per-well absorbance values",
+    "the statistical test used, and whether error bars are SD or SEM",
+    "extract concentration standardised by mass per volume",
+    "starting and final direct cell counts",
+    "per-cell survival outcomes",
+    "division events",
+    "death events",
+    "original full-resolution micrographs",
+    "image scale in micrometres per pixel",
+    "longitudinal tracking of the same cells",
+    "washout or recovery measurement",
+    "independent apoptosis or necrosis markers"
+  ],
+  "resolving_power": [
+    {
+      "mechanism_estimable": true,
+      "relative_turnover_width": 1018.0592206244621,
+      "turnover_ratio": 5115.613656363797,
+      "wells": 2
+    },
+    {
+      "mechanism_estimable": true,
+      "relative_turnover_width": 39.22680517452536,
+      "turnover_ratio": 145.70295565883683,
+      "wells": 3
+    },
+    {
+      "mechanism_estimable": true,
+      "relative_turnover_width": 13.581154381672867,
+      "turnover_ratio": 43.320704191616414,
+      "wells": 4
+    },
+    {
+      "mechanism_estimable": true,
+      "relative_turnover_width": 5.625679746738635,
+      "turnover_ratio": 15.438309313559573,
+      "wells": 6
+    },
+    {
+      "mechanism_estimable": true,
+      "relative_turnover_width": 3.705181228425827,
+      "turnover_ratio": 9.47574194365204,
+      "wells": 8
+    },
+    {
+      "mechanism_estimable": true,
+      "relative_turnover_width": 2.3809660733052276,
+      "turnover_ratio": 5.74462669233371,
+      "wells": 12
+    },
+    {
+      "mechanism_estimable": true,
+      "relative_turnover_width": 1.3636763728258194,
+      "turnover_ratio": 3.2575144896449175,
+      "wells": 24
+    },
+    {
+      "mechanism_estimable": true,
+      "relative_turnover_width": 0.8759532703854345,
+      "turnover_ratio": 2.2639939899045096,
+      "wells": 48
+    }
+  ],
+  "selectivity_check": {
+    "does_not_show": "This does not show the extract is non-selective. It shows the design cannot separate a selective compound from a cytostatic one.",
+    "evaluated": true,
+    "hours": 24.0,
+    "mean_hours_between_divisions": 46.98276453530922,
+    "non_selective_explanation_exists": true,
+    "not_reproduced": "The normal arm's viability was reported as more than doubled, not merely unharmed. No cell-number model produces a signal above the untreated control, so that part of the reported result is unexplained rather than accounted for.",
+    "observed_cytotoxicity": 0.4,
+    "statement": "A compound that kills nothing and only slows division reproduces the reported 40% in any control whose cells divide at least 0.0213 times per hour -- once every 47 h on average -- and reproduces the reported absence of cytotoxicity in a non-dividing comparator at the same time. The reported contrast therefore does not by itself establish selectivity.",
+    "threshold_birth_rate": 0.021284400990249613
+  },
+  "source": {
+    "authors": [
+      "Kim Si-on",
+      "Kim On-yu"
+    ],
+    "date": "2022-12-04",
+    "note": "Facts below are transcribed from the report. Anything the report does not state is recorded in not_reported rather than guessed at.",
+    "supervisor": "Prof. Kim Ho, Daejin University, Department of Life Science and Chemistry",
+    "title": "Anti-tumor activity of Tribonema extract on mouse leukemia cells"
+  },
+  "statement": "MTS measures mitochondrial dehydrogenase activity, read as absorbance at 450 nm, so the study's own readout cannot count cells. Of the 7 conclusions examined, 2 are supported by the design and 5 are not. At an assumed 3 wells per condition the birth-to-death split would be pinned only to within a factor of about 146, and narrowing that to a factor of two would take roughly 66 wells per condition. None of this is evidence against the extract having an effect; the reported effect stands. It is a statement about which further conclusions the measurements can carry.",
+  "supported": 2,
+  "system": {
+    "cell_line": "RAW264.7",
+    "correction": "ATCC classifies RAW264.7 as a macrophage/monocyte line from a tumour induced by Abelson murine leukaemia virus. It is tumour-derived, but calling it a general blood-cancer model overstates what a result in it supports.",
+    "described_in_paper_as": "mouse blood cancer cell",
+    "normal_comparator": "mouse peritoneal lymphocytes, isolated and supplied by the supervising staff",
+    "supplier": "Korean Cell Line Bank"
+  },
+  "unsupported": 5
+}

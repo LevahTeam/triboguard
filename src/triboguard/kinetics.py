@@ -7,7 +7,9 @@ mean size
 
 The mean depends on the *difference* of the two rates and on nothing else. So a
 treatment that halves division and one that doubles death can produce
-byte-identical mean trajectories. No amount of averaging separates them, and no
+identical mean trajectories -- exactly equal in real arithmetic, and equal to
+about 1e-12 in floating point, where ``birth - death`` is rounded differently for
+the two pairs. No amount of averaging separates them, and no
 schedule of extra timepoints helps, because every timepoint measures the same
 degenerate combination. This is a property of the model, not a shortage of data.
 

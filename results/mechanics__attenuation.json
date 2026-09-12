@@ -6,7 +6,7 @@
     },
     "git": {
       "branch": "master",
-      "commit": "26414dbf795b4aec8a389a7cdba58fc64a764473",
+      "commit": "60023e9f59b0333759d86495de48c27dfe845baf",
       "dirty": true
     },
     "machine": "arm64",
@@ -20,7 +20,7 @@
     },
     "platform": "macOS-15.6-arm64-arm-64bit-Mach-O",
     "python": "3.13.9",
-    "recorded_at_utc": "2026-09-07T18:07:49+00:00",
+    "recorded_at_utc": "2026-09-09T14:02:51+00:00",
     "torch_threads": 4
   },
   "note": "expected_rho uses the classical attenuation formula, which assumes Pearson correlation and errors independent of the true value. Neither holds exactly here, so it is read as a direction check rather than a fit.",

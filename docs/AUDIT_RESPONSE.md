@@ -184,9 +184,11 @@ The repository is now committed, in stages that reflect the actual work.
 
 ## 5. Missing tests
 
-All rows below now have coverage. Suite: **789 tests, 92% coverage** (was 27 tests,
-71%, with CLI at 0%; CLI is now 94%). Three further tests are skipped on this
-machine because it has no CUDA device.
+All rows below now have coverage. Suite: **925 tests, 92% branch-aware coverage**
+(was 27 tests, 71%, with CLI at 0%). The TriboVision CLI, at 94% when this was first
+written, is 82% after later commands were added without tests; the TriboGuard CLI is
+96%. Five further tests are skipped on this machine: three need a CUDA device and two
+need the optional Cellpose extra.
 
 | Priority | Coverage | Where |
 |---|---|---|
@@ -259,8 +261,8 @@ excluding zero-variance features from the family entirely.
 
 | Check | Before | After |
 |---|---|---|
-| Tests | 27 passed | 786 passed, 3 skipped (no CUDA) |
-| Coverage | 71% (CLI 0%) | 91% (CLI 94%) |
+| Tests | 27 passed | 920 passed, 5 skipped (3 need CUDA, 2 need Cellpose) |
+| Coverage | 71% (CLI 0%) | 92% branch-aware (TriboVision CLI 82%, TriboGuard CLI 96%) |
 | `ruff check` | pass | pass |
 | `ruff format --check` | **11 files would change** | pass |
 | `mypy` | 3 errors, not configured | configured in `pyproject.toml`, 0 errors |

@@ -1,0 +1,79 @@
+{
+  "id": "damage_blindness_v1",
+  "version": 1,
+  "status": "frozen before the confirmatory data existed",
+  "written": "2026-09-10",
+  "purpose": "Criteria for the corrected damage-blindness experiment, written before any result from the confirmatory cell lines had been produced. The analysis script records this file's SHA-256 at the start of every run, and the evaluation refuses to score an artifact whose recorded hash does not match the current file. The criteria therefore cannot be edited after the data is seen without the edit being visible: old artifacts stop evaluating and the experiment has to be run again under the new plan.",
+  "what_had_already_been_seen": [
+    "A172 detection rates from an earlier version of this experiment. That version pooled every cell into one rate instead of analysing per image, and its blur leaked into 89% of the supposedly untouched control cells. It showed gaps between intact and damaged detection of roughly 0.6 to 0.9 at severities of 0.4 and above.",
+    "The severity, coverage threshold and minimum effect below were chosen with that A172 result in view. A172 is therefore exploratory in this plan and does not count toward the verdict.",
+    "No damage-blindness result for MCF7, SHSY5Y or SkBr3 had been produced by any version of the experiment when this file was written. An interrupted run processed MCF7 but printed only progress lines and wrote no results."
+  ],
+  "question": "Do automated segmenters detect synthetically damaged cells less reliably than undamaged cells in the same image, and does that hold beyond the cell line it was first seen in?",
+  "design": {
+    "damage_axis": "combined",
+    "severities": [0.0, 0.2, 0.4, 0.6, 0.8],
+    "images_per_cell_line": 20,
+    "image_selection": "the first 20 records of each cell line's test manifest, a deterministic hash-ranked sample fixed before this plan was written",
+    "split": "each annotated cell assigned to damaged or intact by coin flip, seeded by image position so the same cells are damaged at every severity",
+    "segmenters": ["three_class", "unet_watershed", "cellpose"],
+    "coverage_thresholds": [0.3, 0.5, 0.7],
+    "unit_of_analysis": "acquisition group (one field of view at one timestamp)"
+  },
+  "primary_endpoint": {
+    "quantity": "mean per-image paired difference in detection rate, intact minus damaged",
+    "severity": 0.6,
+    "coverage_threshold": 0.5,
+    "primary_segmenter": "cellpose",
+    "primary_segmenter_reason": "Cellpose is the only segmenter here that this project did not train, so it is the only one whose behaviour cannot have been shaped by choices made while looking at these images.",
+    "interval": "95% percentile bootstrap resampling acquisition groups, 2000 resamples, seed 0"
+  },
+  "confirmatory_cell_lines": ["MCF7", "SHSY5Y", "SkBr3"],
+  "exploratory_cell_lines": ["A172"],
+  "criteria": {
+    "baseline_detection": {
+      "severity": 0.0,
+      "coverage_threshold": 0.5,
+      "minimum_rate": 0.5,
+      "rule": "With no damage applied, the primary segmenter finds at least half of the cells, averaged over images. A segmenter that cannot see healthy cells cannot show that it loses damaged ones, so a line failing this is void for the same reason a failed negative control is."
+    },
+    "negative_control": {
+      "severity": 0.0,
+      "coverage_threshold": 0.5,
+      "equivalence_margin": 0.05,
+      "rule": "Both bounds of the 95% interval lie within plus or minus the margin: with no damage applied, the coin-flip split must manufacture no gap. A cell line whose primary segmenter fails this is void."
+    },
+    "replication": {
+      "severity": 0.6,
+      "coverage_threshold": 0.5,
+      "minimum_effect": 0.1,
+      "rule": "The lower bound of the primary segmenter's 95% interval is strictly greater than the minimum effect of ten percentage points."
+    },
+    "segmenter_generality": {
+      "severity": 0.6,
+      "coverage_threshold": 0.5,
+      "minimum_effect": 0.1,
+      "required_segmenters": 2,
+      "rule": "At least two of the three segmenters have an interval lower bound strictly greater than the minimum effect."
+    },
+    "threshold_robustness": {
+      "severity": 0.6,
+      "coverage_thresholds": [0.3, 0.7],
+      "minimum_effect": 0.1,
+      "rule": "The primary segmenter's point estimate is strictly greater than the minimum effect at every listed coverage threshold, so the result does not depend on where the detection line is drawn."
+    },
+    "dose_response": {
+      "severities": [0.0, 0.2, 0.4, 0.6],
+      "coverage_threshold": 0.5,
+      "tolerance": 0.02,
+      "rule": "The primary segmenter's point estimate never falls by more than the tolerance from one severity to the next. Severity 0.8 is excluded because detection can floor near zero there, where a small decline carries no information."
+    }
+  },
+  "verdict_rule": "Each confirmatory cell line is classed pass, fail, void (its primary segmenter failed the baseline-detection or negative-control criterion) or missing (a required result is absent). The verdict is 'replicated' if every confirmatory line passes; 'partially replicated' if at least one passes; 'not replicated' if none passes and at least one fails; 'not evaluable' otherwise. A void or missing line therefore prevents a full 'replicated' verdict instead of being quietly dropped. Segmenter generality, threshold robustness and dose response are reported beside the verdict and do not change it.",
+  "known_limitations": [
+    "Every image of a given cell line comes from one well, so acquisition groups are fields and timestamps within that well. The interval describes variation between fields, not between wells, plates or laboratories.",
+    "The damage is synthetic. A pass means segmenters lose cells degraded along these axes, not that they lose real dying cells. That needs real treated images with independent live/dead labels.",
+    "The three-class network and the binary U-Net share a network body, so only Cellpose is independent of this project; that is why it is primary.",
+    "Cellpose's cell diameter (15 px) was chosen on the A172 training split and is not retuned for the other lines, because retuning it after seeing their images would compromise this plan. The baseline-detection criterion exists to catch the case where that choice fails badly on a line."
+  ]
+}

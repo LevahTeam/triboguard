@@ -961,6 +961,18 @@ PUBLISHED = (
     "mechanics/attenuation.json",
     "diversity/selection_cost.json",
     "diversity_balanced/diversity_balanced.json",
+    # TriboGuard and the damage experiment. The technical report cites these by
+    # path, and runs/ is git-ignored, so without them a reader who clones the
+    # repository could not check a single number the report quotes.
+    "triboguard/failure_boundary.json",
+    "triboguard/tribonema_case_study.json",
+    "triboguard/selectivity.json",
+    "damage/blindness_combined_A172.json",
+    "damage/blindness_combined_MCF7.json",
+    "damage/blindness_combined_SHSY5Y.json",
+    "damage/blindness_combined_SkBr3.json",
+    "damage/preregistered_outcome.json",
+    "damage/blindness_applied.json",
 )
 
 

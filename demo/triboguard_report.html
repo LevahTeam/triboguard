@@ -166,7 +166,7 @@
   </p>
   <p class="byline">
     Method, results and corrections &middot; birth&ndash;death inference, conformal abstention,
-    cost-aware design &middot; 789 tests, all code and artifacts reproducible
+    cost-aware design &middot; 925 tests, all code and artifacts reproducible
   </p>
 
   <div class="col">
@@ -189,6 +189,21 @@
       &mdash; pin the birth-to-death split only to within a factor of 146. An endpoint assay such as
       MTS costs four times the plate of live imaging for identical information. And a conformal
       guarantee calibrated on one experimental design collapses when applied to another.
+    </p>
+    <p>
+      A fifth result comes from the other end of the pipeline. Imaging is only cheaper than an
+      endpoint assay if a segmenter can see the cells, and measured against the hand-drawn
+      outlines of 34,129 cells in four cell lines, it cannot see the damaged ones. At moderate
+      damage Cellpose finds 85&ndash;97% of untouched cells and at most 5% of damaged ones in
+      the same images. The test was pre-registered before three of the four lines were
+      measured, and it replicated on all three. The same blindness biases a morphology readout
+      downward and a count readout upward.
+    </p>
+    <p>
+      And the same reasoning applied to the study's selectivity claim finds that the
+      contrast it reports needs no selective compound to produce it. A compound that kills
+      nothing and only slows division reproduces the reported effect in the dividing
+      cancer arm, and its absence in the non-dividing normal arm, exactly.
     </p>
 
     <h2><span class="n">2</span> The problem</h2>
@@ -217,8 +232,9 @@
     </div>
     <p>
       The mean depends on <strong>b − d</strong> and on nothing else. So for any treatment, another
-      treatment with a different mechanism and the same net rate produces a byte-identical mean
-      curve. No schedule of extra timepoints helps, because every timepoint measures the same
+      treatment with a different mechanism and the same net rate produces an identical mean
+      curve &mdash; exactly equal in real arithmetic, and equal to within 1&times;10<sup>&minus;12</sup>
+      in floating point. No schedule of extra timepoints helps, because every timepoint measures the same
       degenerate combination.
     </p>
   </div>
@@ -341,7 +357,7 @@
     </div>
     <figcaption>
       Two distinct quantities, reported separately because an earlier version of this work conflated
-      them (&sect;7). &ldquo;Known to within a factor of&rdquo; is the ratio of the interval's
+      them (&sect;9). &ldquo;Known to within a factor of&rdquo; is the ratio of the interval's
       endpoints; the relative width is its span divided by the estimate.
     </figcaption>
   </figure>
@@ -359,6 +375,10 @@
         A convenient property falls out of the estimator: it reads a mean and a variance at each
         timepoint and never follows one well through time. So a destructive assay costs money here
         but not information, and switching to imaging is a pure saving rather than a trade.
+      </p>
+      <p>
+        That holds for the well count. It does not hold unconditionally for what imaging then
+        measures, and &sect;7 puts a number on the gap.
       </p>
     </div>
 
@@ -499,7 +519,7 @@
           <tr><td>The surviving 60% were resistant</td><td><span class="chip no">not established</span></td><td>cell counts, recovery test</td></tr>
           <tr><td>Killing rather than growth inhibition</td><td><span class="chip no">not established</span></td><td>cell counts, replicate variance</td></tr>
           <tr><td>A specific death mechanism</td><td><span class="chip no">not established</span></td><td>death markers</td></tr>
-          <tr><td>Selective for cancer over normal cells</td><td><span class="chip no">not established</span></td><td>matched normal population</td></tr>
+          <tr><td>Selective for cancer over normal cells</td><td><span class="chip no">not established</span></td><td>matched normal population &mdash; and see &sect;8</td></tr>
         </tbody>
       </table>
     </div>
@@ -526,10 +546,359 @@
       </p>
     </div>
 
-    <h2><span class="n">7</span> What was wrong along the way</h2>
+    <h2><span class="n">7</span> The same blindness, one layer up</h2>
     <p>
-      Seven errors were found and corrected during development, each by a measurement rather than by
-      review. They are listed because a system whose purpose is preventing overconfident claims
+      &sect;5.4 recommends imaging over an endpoint assay, on the grounds that it costs a
+      quarter of the plate for identical information. That recommendation needs a
+      qualification, and the qualification is measurable.
+    </p>
+    <p>
+      Segmenters are trained on healthy cultures, because that is what annotated datasets
+      contain. If they find damaged cells less reliably than healthy ones, then a
+      measurement built on segmentation is blind in exactly the region where the biology is
+      happening. That is testable without a laboratory: LIVECell ships a hand-drawn outline
+      for every cell, so damage can be applied to known cells in known amounts and the
+      detection rate read off against the truth.
+    </p>
+    <p>
+      The design is paired <em>inside</em> each image. Every annotated cell is assigned to
+      damaged or untouched by coin flip, both arms sit in the same frame, and so no
+      difference between them can be illumination, focus or confluence. Four cell lines,
+      twenty images each, 34,129 hand-outlined cells, every one scored at five damage
+      severities by three segmenters: the three-class network trained here, a binary U-Net
+      whose mask is split into cells by watershed, and Cellpose. A cell counts as found when
+      one predicted object covers at least half of it.
+    </p>
+    <div class="note">
+      <p>
+        <strong>This result was pre-registered.</strong> The hypotheses, the primary
+        endpoint and every pass/fail rule were fixed in
+        <code>preregistration/damage_blindness_v1.json</code> before any result existed for
+        MCF7, SHSY5Y or SkBr3. Each run recorded the plan&rsquo;s SHA-256 as it started, and
+        the evaluation refuses results scored under any other version, so the rules could
+        not move after the data arrived. A172 is exploratory only, because an earlier and
+        flawed version of this experiment had already been run on it (&sect;9). Cellpose is
+        the primary segmenter because it is the only one this project did not train. The
+        unit of analysis is the acquisition group: the gap is computed per image, and its
+        interval resamples whole groups, because cells in one frame are not independent
+        trials.
+      </p>
+    </div>
+  </div>
+
+  <figure>
+    <div class="scroller">
+      <table>
+        <thead>
+          <tr>
+            <th>Cell line</th><th>Role</th>
+            <th class="num">Intact found</th><th class="num">Damaged found</th>
+            <th class="num">Gap [95% interval]</th><th class="num">No-damage control</th>
+            <th>Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>MCF7</td><td>confirmatory</td><td class="num">0.85</td><td class="num">0.00</td><td class="num">+0.848 [+0.801, +0.898]</td><td class="num">[&minus;0.018, +0.004]</td><td><span class="chip yes">pass</span></td></tr>
+          <tr><td>SHSY5Y</td><td>confirmatory</td><td class="num">0.86</td><td class="num">0.00</td><td class="num">+0.855 [+0.836, +0.874]</td><td class="num">[&minus;0.032, +0.003]</td><td><span class="chip yes">pass</span></td></tr>
+          <tr><td>SkBr3</td><td>confirmatory</td><td class="num">0.97</td><td class="num">0.05</td><td class="num">+0.913 [+0.865, +0.952]</td><td class="num">[&minus;0.010, +0.004]</td><td><span class="chip yes">pass</span></td></tr>
+          <tr><td>A172</td><td>exploratory</td><td class="num">0.94</td><td class="num">0.00</td><td class="num">+0.939 [+0.922, +0.957]</td><td class="num">[&minus;0.003, +0.034]</td><td><span class="chip yes">pass</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figcaption>
+      Cellpose at severity 0.6, the pre-registered primary endpoint. Rates are means over
+      images; intervals resample acquisition groups, 15 to 18 per line. The verdict is
+      <strong>replicated</strong>: the plan&rsquo;s bar was an interval lower bound above ten
+      percentage points, and every confirmatory line clears it by at least seventy. With no
+      damage applied, every segmenter on every line shows no gap &mdash; every interval lies
+      within &plusmn;0.034, inside the plan&rsquo;s &plusmn;0.05. The secondary criteria pass on
+      every line as well: all three segmenters clear the bar, the result holds at detection
+      thresholds of 0.3 and 0.7, and the gap never shrinks as damage grows.
+    </figcaption>
+  </figure>
+
+  <div class="col">
+    <h3>7.1 The strongest segmenter is the most blind</h3>
+    <p>
+      One pattern was not pre-registered and is reported as exploratory. At moderate damage
+      the three segmenters part company, and not in the order their general reputations
+      would suggest.
+    </p>
+  </div>
+
+  <figure>
+    <div class="scroller">
+      <table>
+        <thead>
+          <tr>
+            <th>Damaged cells found, severity 0.4</th>
+            <th class="num">A172</th><th class="num">MCF7</th>
+            <th class="num">SHSY5Y</th><th class="num">SkBr3</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>three-class</td><td class="num">0.34</td><td class="num">0.68</td><td class="num">0.69</td><td class="num">0.83</td></tr>
+          <tr><td>U-Net + watershed</td><td class="num">0.42</td><td class="num">0.80</td><td class="num">0.63</td><td class="num">0.86</td></tr>
+          <tr class="hi"><td>Cellpose</td><td class="num">0.10</td><td class="num">0.05</td><td class="num">0.07</td><td class="num">0.56</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figcaption>
+      Means over images. Cellpose &mdash; trained by somebody else on far more data, and the
+      strongest general-purpose segmenter available &mdash; finds the fewest damaged cells on
+      every one of the four lines, and a tenth or fewer on three of them, while still finding
+      0.84 to 0.97 of the untouched cells in the same images. Its cell-size setting was tuned
+      on A172 alone, which may contribute on the other lines; the pre-registered baseline
+      check rules out outright failure, not every mismatch.
+    </figcaption>
+  </figure>
+
+  <div class="col">
+    <h3>7.2 What it costs, in two opposite directions</h3>
+    <p>
+      The consequence is not one number, and getting this wrong was the most instructive
+      mistake in the project. A <em>morphology</em> readout &mdash; averaging a shape feature
+      over segmented cells, which is what this project&rsquo;s treatment pipeline does &mdash;
+      is <em>diluted</em> by blindness, because the cells carrying the signal are dropped from
+      the average. A <em>count</em> readout is <em>inflated</em> by the same blindness,
+      because a dying cell that cannot be seen is indistinguishable from one that has gone.
+    </p>
+  </div>
+
+  <figure>
+    <div class="scroller">
+      <table>
+        <thead>
+          <tr>
+            <th>Severity 0.6</th>
+            <th class="num">Cellpose: morphology shift recovered</th>
+            <th class="num">Cellpose: kill a count reports</th>
+            <th class="num">Three-class: morphology recovered</th>
+            <th class="num">Three-class: kill a count reports</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>A172</td><td class="num">0.01</td><td class="num">0.50</td><td class="num">0.17</td><td class="num">0.45</td></tr>
+          <tr><td>MCF7</td><td class="num">0.00</td><td class="num">0.50</td><td class="num">0.39</td><td class="num">0.37</td></tr>
+          <tr><td>SHSY5Y</td><td class="num">0.01</td><td class="num">0.50</td><td class="num">0.48</td><td class="num">0.34</td></tr>
+          <tr><td>SkBr3</td><td class="num">0.10</td><td class="num">0.47</td><td class="num">0.47</td><td class="num">0.34</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figcaption>
+      Half the cells affected, none killed; means over images. Through Cellpose a morphology
+      endpoint recovers at most a tenth of a real effect, while a count reports close to a
+      50% kill that never happened. The three-class network is less blind at this severity,
+      and its errors are correspondingly smaller in both directions &mdash; the same blindness,
+      in proportion.
+    </figcaption>
+  </figure>
+
+  <div class="col">
+    <h3>7.3 What a count can still conclude</h3>
+    <p>
+      Blindness need not end the analysis; it can bound it. Write a treated well relative to
+      its control as cells genuinely <em>absent</em> (a fraction <em>g</em>), cells
+      <em>damaged but present</em> (<em>k</em>), and the rest intact. If intact cells are found
+      at rate <em>h</em> and damaged ones at <em>d</em>, the counted ratio is
+    </p>
+    <div class="eq">
+      R = 1 &minus; g &minus; k&middot;b,&nbsp;&nbsp;&nbsp; b = 1 &minus; d/h&nbsp;&nbsp;(the segmenter&rsquo;s blindness)<br>
+      g &isin; [ max(0, (1 &minus; R &minus; b) / (1 &minus; b)),&nbsp; 1 &minus; R ]
+    </div>
+    <p>
+      One observation and two unknowns, so the absent fraction is an interval. It closes to
+      a single value when the segmenter sees damaged cells as well as healthy ones, and opens
+      to the whole range when it sees none of them. The sweep measures <em>b</em>, so the
+      interval can be computed &mdash; and the system abstains when it straddles the effect
+      threshold. Note what <em>g</em> is not: separating death from slowed division inside it
+      is still the problem of &sect;3.
+    </p>
+  </div>
+
+  <figure>
+    <div class="scroller">
+      <table>
+        <thead>
+          <tr>
+            <th>Segmenter</th><th class="num">Severity</th><th class="num">Blindness measured</th>
+            <th class="num">Absent, given a 40% count drop</th><th>Verdict</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>three-class</td><td class="num">0.2</td><td class="num">0.00&ndash;0.07</td><td class="num">35&ndash;40%</td><td><span class="chip yes">resolved</span></td></tr>
+          <tr><td>three-class</td><td class="num">0.4</td><td class="num">0.12&ndash;0.71</td><td class="num">0&ndash;40%</td><td><span class="chip warn">abstain</span></td></tr>
+          <tr><td>three-class</td><td class="num">0.6</td><td class="num">0.60&ndash;0.94</td><td class="num">0&ndash;40%</td><td><span class="chip warn">abstain</span></td></tr>
+          <tr><td>U-Net + watershed</td><td class="num">0.2</td><td class="num">0.01&ndash;0.11</td><td class="num">32&ndash;40%</td><td><span class="chip yes">resolved</span></td></tr>
+          <tr><td>U-Net + watershed</td><td class="num">0.4</td><td class="num">0.08&ndash;0.54</td><td class="num">0&ndash;40%</td><td><span class="chip warn">abstain</span></td></tr>
+          <tr><td>U-Net + watershed</td><td class="num">0.6</td><td class="num">0.34&ndash;0.87</td><td class="num">0&ndash;40%</td><td><span class="chip warn">abstain</span></td></tr>
+          <tr><td>Cellpose</td><td class="num">0.2</td><td class="num">0.00&ndash;0.18</td><td class="num">27&ndash;40%</td><td><span class="chip warn">absent, size unresolved</span></td></tr>
+          <tr><td>Cellpose</td><td class="num">0.4</td><td class="num">0.34&ndash;1.00</td><td class="num">0&ndash;40%</td><td><span class="chip warn">abstain</span></td></tr>
+          <tr><td>Cellpose</td><td class="num">0.6</td><td class="num">0.89&ndash;1.00</td><td class="num">0&ndash;40%</td><td><span class="chip warn">abstain</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figcaption>
+      Exploratory, and not part of the pre-registered plan. Suppose the study&rsquo;s 40% had
+      been measured as an image-based count rather than by MTS &mdash; which is what
+      switching to imaging would mean. Each blindness range spans the 95% interval bounds of
+      the gap, divided by the intact rate, across all four lines, which errs toward
+      abstaining. At mild damage the three-class network and the U-Net pin the answer to
+      35&ndash;40% and 32&ndash;40%; Cellpose, already slipping, establishes that cells are gone
+      but not how many. From severity 0.4 onward every segmenter&rsquo;s count is consistent with
+      anything from no cells absent to all 40%, and the system abstains. Imaging buys the
+      answer only while the segmenter can still see the damaged cells.
+    </figcaption>
+  </figure>
+
+  <div class="col">
+    <div class="note">
+      <p>
+        <strong>Synthetic damage is not real damage.</strong> What is measured is how a
+        segmenter responds to a controlled loss of contrast, edge definition and interior
+        texture. Whether dying cells in a real plate degrade along those axes is what a real
+        experiment settles &mdash; and the source study&rsquo;s own morphology figure is where to
+        check, since its pale, vacuolated, arrow-marked cells were the ones a segmenter
+        failed to outline.
+      </p>
+    </div>
+
+    <h2><span class="n">8</span> Selectivity the compound did not cause</h2>
+    <p>
+      &sect;6 recorded the study's selectivity claim as unsupported for want of a matched
+      normal population. That is true and it is also the weakest available reading,
+      because it describes something the authors did not do. The stronger question is
+      whether the comparison they <em>did</em> run could have shown selectivity at all.
+    </p>
+    <p>
+      The two arms were a dividing cancer line and primary peritoneal lymphocytes, which
+      in short-term culture largely do not divide. And &ldquo;% cytotoxicity&rdquo; is not
+      measured against the starting population: it is measured against an untreated
+      control read <em>at the same time</em>, which has been dividing all day in one plate
+      and sitting still in the other.
+    </p>
+    <p>
+      That asymmetry is enough by itself. A compound that stops division and kills nothing
+      removes cells the cancer control <em>would have gained</em>, and is invisible in
+      cells that were never going to divide. The result is a large number in one arm, none
+      in the other, and no selective action anywhere.
+    </p>
+    <div class="note">
+      <p>
+        <strong>The threshold needs no assumptions.</strong> Inverting the question removes
+        every unknown: a compound that kills nothing reproduces the reported 40% in
+        24&nbsp;hours in any control whose cells divide at least
+        <strong>0.0213 times per hour</strong> &mdash; one division per cell every
+        47&nbsp;hours on average. No replicate count, no assumed growth rate, no raw data
+        &mdash; which matters, because the report supplies none of them.
+      </p>
+      <p>
+        That threshold is a <em>division-event rate</em>, not a growth rate, and the
+        distinction is not pedantry: the two coincide only when nothing dies. A population
+        doubling only every 50&nbsp;hours while dividing and dying briskly clears this bar,
+        and an earlier draft of this section quoted a doubling time that would have
+        excluded it.
+      </p>
+    </div>
+  </div>
+
+  <figure>
+    <div class="scroller">
+      <table>
+        <thead>
+          <tr>
+            <th>Arm</th><th>Control behaviour</th>
+            <th class="num">Apparent cytotoxicity</th><th class="num">Cells actually killed</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="hi"><td>RAW264.7</td><td>divides, ~12 h doubling</td><td class="num">40.0%</td><td class="num">0.0%</td></tr>
+          <tr><td>Peritoneal lymphocytes</td><td>static</td><td class="num">0.0%</td><td class="num">0.0%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figcaption>
+      One compound, applied identically to both arms, with no selective action of any
+      kind: it stops a third of divisions and adds no death at all. It reproduces the
+      effect reported in the cancer arm and the <em>absence of cytotoxicity</em> reported
+      in the normal one, while killing nothing anywhere. It does <strong>not</strong>
+      reproduce the rest of the normal-arm result: that viability was reported as more than
+      doubled, and no cell-number model puts a signal above its own untreated control, so
+      that half is left unexplained rather than accounted for. The 12-hour doubling is a
+      stated assumption used only for this illustration; the threshold in the box above is
+      what the argument rests on.
+    </figcaption>
+  </figure>
+
+  <div class="col">
+    <h3>8.1 The contrast measures the division rate</h3>
+    <p>
+      Holding the compound fixed and varying only how fast the <em>normal</em> arm divides
+      shows what the reported gap is actually made of.
+    </p>
+  </div>
+
+  <figure>
+    <div class="scroller">
+      <table>
+        <thead>
+          <tr>
+            <th>Normal arm</th><th class="num">Apparent in cancer</th>
+            <th class="num">Apparent in normal</th><th class="num">Apparent gap</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="hi"><td>never divides <em>(as run)</em></td><td class="num">40.0%</td><td class="num">0.0%</td><td class="num">+40.0%</td></tr>
+          <tr><td>doubles every 96 h</td><td class="num">40.0%</td><td class="num">9.2%</td><td class="num">+30.8%</td></tr>
+          <tr><td>doubles every 48 h</td><td class="num">40.0%</td><td class="num">14.2%</td><td class="num">+25.8%</td></tr>
+          <tr><td>doubles every 24 h</td><td class="num">40.0%</td><td class="num">23.5%</td><td class="num">+16.5%</td></tr>
+          <tr><td>doubles every 12 h <em>(matched)</em></td><td class="num">40.0%</td><td class="num">39.0%</td><td class="num">+1.0%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figcaption>
+      The compound never changes down this column; only the normal arm's division rate
+      does. Apparent selectivity falls from 40 points to one as the two arms are matched,
+      which makes this a design fault with a fix rather than only a criticism: comparing
+      populations matched for division rate removes the artifact entirely.
+    </figcaption>
+  </figure>
+
+  <div class="col">
+    <h3>8.2 Two further things the reported numbers cannot settle</h3>
+    <p>
+      The same inversion applied to the cancer arm alone reproduces &sect;3 on the study's
+      own figure. A 40% fall at 24 hours is consistent with <strong>40% of the cells
+      genuinely killed</strong> at one end and <strong>none killed at all</strong> at the
+      other, with every mixture in between; the reported number selects no point on that
+      range.
+    </p>
+    <p>
+      And the study's time course does not come from one unchanging treatment. Read as a
+      constant-rate effect, its three points imply net-rate changes that differ
+      <strong>four-fold</strong> &mdash; 10% at 3&nbsp;h, 40% at 6&nbsp;h, and still 40% at
+      24&nbsp;h cannot all describe the same steady process. This is a second internal
+      inconsistency, independent of the 24-versus-48-hour contradiction &sect;6 records.
+    </p>
+    <div class="note">
+      <p>
+        <strong>None of this says the extract is not selective.</strong> It may well be.
+        The claim here is only that this experiment cannot separate a selective compound
+        from one that slows division, which is the same claim the rest of the report makes
+        about mechanism. One further route is not modelled at all: MTS absorbance is
+        treated throughout as proportional to viable cell number, so a compound that lowers
+        metabolism per cell without touching one produces the identical fall. And the
+        normal arm's viability was reported as having <em>more than doubled</em> &mdash; a
+        signal that rose, which needs proliferation or raised metabolism to explain and
+        cannot be read as safety without distinguishing them.
+      </p>
+    </div>
+
+    <h2><span class="n">9</span> What was wrong along the way</h2>
+    <p>
+      Eleven errors were found and corrected during development. Nine were caught by a
+      measurement; the two in the damage experiment were caught by an outside review, and
+      then confirmed by measuring them. They are listed because a system whose purpose is preventing overconfident claims
       should show its own.
     </p>
   </div>
@@ -574,6 +943,26 @@
             <td>Understated the gap nearly fourfold (39 quoted where the ratio is 146) and priced &ldquo;a factor of two&rdquo; at 39 wells when it is 66</td>
             <td>Computing both quantities before writing them down</td>
           </tr>
+          <tr>
+            <td>Detection bias modelled for the wrong readout</td>
+            <td>&sect;7 first claimed blindness makes a treatment look <em>weaker</em>. The arithmetic underneath was a count readout, where blindness makes it look <em>stronger</em>: at severity 0.6 it manufactures a 50% kill out of nothing</td>
+            <td>A test asserting the two readouts move in opposite directions</td>
+          </tr>
+          <tr>
+            <td>Partial correlation on a fully explained series</td>
+            <td>When cell size accounted for the shape index exactly, the residuals were constant and the correlation undefined &mdash; the one case the control was built to detect. It surfaced as a warning from inside SciPy rather than as the answer &ldquo;nothing survives&rdquo;</td>
+            <td>Running the suite in the pinned environment</td>
+          </tr>
+          <tr>
+            <td>Damage leaking into the control arm</td>
+            <td>The blur applied to a damaged cell reached across into its neighbours. On confluent images 89% of the supposedly untouched control cells had pixels altered &mdash; in an experiment whose whole claim rests on that arm being untouched. A test had passed throughout, because its two synthetic cells sat 42&nbsp;px apart</td>
+            <td>Outside review; confirmed by counting altered pixels in every control cell</td>
+          </tr>
+          <tr>
+            <td>Cells pooled as independent trials</td>
+            <td>Thousands of cells from twenty frames were summarised as one rate, overstating precision &mdash; inconsistent with this project&rsquo;s own benchmark, which already resampled acquisition groups</td>
+            <td>Outside review</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -585,7 +974,7 @@
   </figure>
 
   <div class="col">
-    <h2><span class="n">8</span> Limitations</h2>
+    <h2><span class="n">10</span> Limitations</h2>
     <ul class="spaced">
       <li>
         <strong>Simulated ground truth.</strong> Every result here is measured on simulated wells
@@ -609,16 +998,31 @@
         the design can support, and nothing here validates or refutes the biology.
       </li>
       <li>
+        <strong>The damage is synthetic.</strong> &sect;7 measures a segmenter's response to a
+        controlled loss of contrast, edge definition and interior texture, not to real cell death.
+        The result is a hypothesis about real images, and the only thing that settles it is a plate
+        of dying cells with outlines drawn by hand. And every cell line&rsquo;s images come from a
+        single well, so the intervals describe variation between fields of view, not between
+        wells, plates or laboratories.
+      </li>
+      <li>
+        <strong>The selectivity result is an existence argument.</strong> &sect;8 shows a
+        non-selective compound reproducing the reported contrast; it does not show that is
+        what happened. Ruling the artifact in or out needs arms matched for division rate,
+        which is an experiment rather than a calculation.
+      </li>
+      <li>
         <strong>No external dataset yet.</strong> Validating against published longitudinal cell
         counts with independent live/dead measurement is the obvious next step and has not been
         done.
       </li>
     </ul>
 
-    <h2><span class="n">9</span> Reproduction</h2>
-    <pre>python scripts/run_failure_boundary.py    # the regime map
-python scripts/run_case_study.py         # the Tribonema assessment
-python -m pytest                         # 789 tests</pre>
+    <h2><span class="n">11</span> Reproduction</h2>
+    <pre>python scripts/reproduce.py --list     # every stage, in dependency order
+python scripts/reproduce.py --fast     # everything except the damage sweep
+python scripts/reproduce.py            # everything, including the sweep
+python -m pytest                       # the test suite</pre>
     <p>
       Every figure in this report is produced by one of those commands and written to a JSON
       artifact recording the code revision and package versions that made it. The interactive
@@ -629,7 +1033,11 @@ python -m pytest                         # 789 tests</pre>
 
   <footer>
     Report generated from the project's own artifacts. Numbers are quoted from
-    <code>runs/triboguard/failure_boundary.json</code> and
-    <code>runs/triboguard/tribonema_case_study.json</code> rather than transcribed.
+    <code>runs/triboguard/failure_boundary.json</code>,
+    <code>runs/triboguard/tribonema_case_study.json</code>,
+    <code>runs/triboguard/selectivity.json</code>,
+    <code>runs/damage/blindness_combined_A172.json</code> with its MCF7, SHSY5Y and SkBr3
+    siblings, <code>runs/damage/preregistered_outcome.json</code> and
+    <code>runs/damage/blindness_applied.json</code> rather than transcribed.
   </footer>
 </div>

@@ -1,0 +1,213 @@
+{
+  "answer": "yes",
+  "contrast_is_the_division_rate": [
+    {
+      "apparent_gap": 0.4,
+      "apparent_in_cancer": 0.4,
+      "apparent_in_normal": 0.0,
+      "normal_doubling_hours": null
+    },
+    {
+      "apparent_gap": 0.30810979785299963,
+      "apparent_in_cancer": 0.4,
+      "apparent_in_normal": 0.09189020214700039,
+      "normal_doubling_hours": 96.0
+    },
+    {
+      "apparent_gap": 0.25783676662249,
+      "apparent_in_cancer": 0.4,
+      "apparent_in_normal": 0.14216323337751002,
+      "normal_doubling_hours": 48.0
+    },
+    {
+      "apparent_gap": 0.16548598758917343,
+      "apparent_in_cancer": 0.4,
+      "apparent_in_normal": 0.2345140124108266,
+      "normal_doubling_hours": 24.0
+    },
+    {
+      "apparent_gap": 0.00954029887405039,
+      "apparent_in_cancer": 0.4,
+      "apparent_in_normal": 0.39045970112594963,
+      "normal_doubling_hours": 12.0
+    }
+  ],
+  "demonstration": {
+    "apparent_gap": 0.4,
+    "apparent_ratio": null,
+    "arms": {
+      "RAW264.7": {
+        "apparent_cytotoxicity": 0.4,
+        "cells_actually_killed": 0.0,
+        "control_birth": 0.0647622650466621,
+        "control_death": 0.007,
+        "control_doubling_hours": 12.0,
+        "divides": true
+      },
+      "peritoneal lymphocytes": {
+        "apparent_cytotoxicity": 0.0,
+        "cells_actually_killed": 0.0,
+        "control_birth": 0.0,
+        "control_death": 0.005,
+        "control_doubling_hours": null,
+        "divides": false
+      }
+    },
+    "hours": 24.0,
+    "treatment": {
+      "birth_scale": 0.6713456366154904,
+      "death_increase": 0.0
+    },
+    "truly_selective": false
+  },
+  "environment": {
+    "accelerators": {
+      "cuda": false,
+      "mps": true
+    },
+    "git": {
+      "branch": "master",
+      "commit": "8f940d01affe7fd3af160c9ead0cfd7793c15a60",
+      "dirty": true
+    },
+    "machine": "arm64",
+    "packages": {
+      "numpy": "2.5.2",
+      "pillow": "11.3.0",
+      "pycocotools": "2.0.11",
+      "remotezip": "0.12.6",
+      "scipy": "1.18.1",
+      "torch": "2.14.0"
+    },
+    "platform": "macOS-15.6-arm64-arm-64bit-Mach-O",
+    "python": "3.14.2",
+    "recorded_at_utc": "2026-09-10T11:16:22+00:00",
+    "torch_threads": 4
+  },
+  "explaining_family": [
+    {
+      "apparent_cytotoxicity": 0.4,
+      "birth_scale": 1.0,
+      "cells_actually_killed": 0.4,
+      "death_rate": 0.028284400990249613
+    },
+    {
+      "apparent_cytotoxicity": 0.4,
+      "birth_scale": 0.9342691273230981,
+      "cells_actually_killed": 0.3354601940510261,
+      "death_rate": 0.02402752079219969
+    },
+    {
+      "apparent_cytotoxicity": 0.4,
+      "birth_scale": 0.8685382546461962,
+      "cells_actually_killed": 0.2639780771821667,
+      "death_rate": 0.01977064059414977
+    },
+    {
+      "apparent_cytotoxicity": 0.4,
+      "birth_scale": 0.8028073819692942,
+      "cells_actually_killed": 0.18480689039407738,
+      "death_rate": 0.015513760396099849
+    },
+    {
+      "apparent_cytotoxicity": 0.4,
+      "birth_scale": 0.7370765092923923,
+      "cells_actually_killed": 0.09711954855256566,
+      "death_rate": 0.01125688019804992
+    },
+    {
+      "apparent_cytotoxicity": 0.4,
+      "birth_scale": 0.6713456366154904,
+      "cells_actually_killed": 0.0,
+      "death_rate": 0.006999999999999999
+    }
+  ],
+  "observed": {
+    "comparator": "mouse peritoneal lymphocytes, isolated and supplied by the supervising staff",
+    "cytotoxicity": 0.4,
+    "hours": 24.0,
+    "normal_arm_as_reported": "no cytotoxicity; viability reported as more than doubled"
+  },
+  "question": "Is there a compound with no selective action that reproduces the cytotoxicity reported in the cancer arm together with the absence of cytotoxicity reported in the normal arm?",
+  "sweep": [
+    {
+      "cells_killed_under_that_reading": 0.0,
+      "control_birth": 0.09364339756999317,
+      "control_doubling_hours": 8.0,
+      "divisions_that_must_stop": 0.22729206268216318,
+      "stalling_alone_suffices": true
+    },
+    {
+      "cells_killed_under_that_reading": 0.0,
+      "control_birth": 0.0647622650466621,
+      "control_doubling_hours": 12.0,
+      "divisions_that_must_stop": 0.32865436338450965,
+      "stalling_alone_suffices": true
+    },
+    {
+      "cells_killed_under_that_reading": 0.0,
+      "control_birth": 0.05032169878499658,
+      "control_doubling_hours": 16.0,
+      "divisions_that_must_stop": 0.4229666625760965,
+      "stalling_alone_suffices": true
+    },
+    {
+      "cells_killed_under_that_reading": 0.0,
+      "control_birth": 0.035881132523331055,
+      "control_doubling_hours": 24.0,
+      "divisions_that_must_stop": 0.5931920063116686,
+      "stalling_alone_suffices": true
+    },
+    {
+      "cells_killed_under_that_reading": 0.0,
+      "control_birth": 0.02866084939249829,
+      "control_doubling_hours": 32.0,
+      "divisions_that_must_stop": 0.7426298048173201,
+      "stalling_alone_suffices": true
+    },
+    {
+      "cells_killed_under_that_reading": 0.0,
+      "control_birth": 0.021440566261665527,
+      "control_doubling_hours": 48.0,
+      "divisions_that_must_stop": 0.9927163644136057,
+      "stalling_alone_suffices": true
+    }
+  ],
+  "threshold": {
+    "birth_rate": 0.021284400990249613,
+    "doubling_hours_if_nothing_died": 32.56597077256137,
+    "mean_hours_between_divisions": 46.98276453530922,
+    "statement": "A control whose cells divide at least 0.0213 times per hour -- one division per cell every 47 h on average -- can produce the reported 40% in 24 h with no cell death at all. This needs no replicate count and no assumed growth rate.",
+    "units_note": "The threshold is a division-event rate, not a growth rate. It is stated that way because the two coincide only when basal death is zero: a population doubling slowly while dividing and dying quickly can clear this bar, and one doubling faster than 32.6 h can fail it if it never dies."
+  },
+  "time_course": {
+    "constant_rate_consistent": false,
+    "implied_rate_spread": 4.0,
+    "monotone_in_time": true,
+    "points": [
+      {
+        "cytotoxicity": 0.1,
+        "hours": 3.0,
+        "implied_net_change": -0.035120171885942096
+      },
+      {
+        "cytotoxicity": 0.4,
+        "hours": 6.0,
+        "implied_net_change": -0.08513760396099845
+      },
+      {
+        "cytotoxicity": 0.4,
+        "hours": 24.0,
+        "implied_net_change": -0.021284400990249613
+      }
+    ]
+  },
+  "what_it_does_not_reproduce": "The normal arm was not merely unharmed: its viability was reported as more than doubled. No cell-number model produces a signal above the untreated control, so that half of the reported result is left unexplained here rather than accounted for.",
+  "what_this_does_not_show": [
+    "It does not reproduce the reported rise in lymphocyte viability, only the reported absence of cytotoxicity there. The rise is outside every model used here.",
+    "It does not show the extract is inactive. The reported effect stands.",
+    "It does not show the extract is non-selective. It shows the design cannot separate a selective compound from a cytostatic one.",
+    "MTS absorbance is treated as proportional to viable cell number. A compound that lowers metabolism per cell produces the same fall, which is a second route to the same wrong conclusion and is not modelled here.",
+    "The normal arm's reported viability rose rather than fell. Under a cell-number reading that is negative cytotoxicity, which needs either proliferation or raised metabolism to explain and cannot be read as 'the extract is safe' without distinguishing them. That reading is the one piece of the reported result this analysis does not account for."
+  ]
+}

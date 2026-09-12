@@ -204,3 +204,68 @@ class TestTheTwoFactors:
         for key in ("turnover_ratio", "relative_turnover_width"):
             values = [r[key] for r in rows]
             assert values == sorted(values, reverse=True), key
+
+
+class TestTheSelectivityCheck:
+    """Whether a non-selective compound could reproduce the reported contrast.
+
+    The check is deliberately narrow, so these tests pin the narrowness as much
+    as the arithmetic: it must not be readable as a verdict that the extract is
+    not selective, and it must not need anything the report failed to state.
+    """
+
+    def test_it_finds_a_non_selective_explanation(self) -> None:
+        check = case_study.selectivity_check(case_study.load(PAPER))
+        assert check["evaluated"]
+        assert check["non_selective_explanation_exists"] is True
+
+    def test_the_threshold_matches_the_prose(self) -> None:
+        check = case_study.selectivity_check(case_study.load(PAPER))
+        assert f"{check['threshold_birth_rate']:.4f} times per hour" in check["statement"]
+
+    def test_the_threshold_is_a_division_rate_and_not_a_doubling_time(self) -> None:
+        """A slow-growing, fast-turning-over population must clear the bar.
+
+        Quoting a doubling time here would be wrong in both directions, and the
+        first version of this check did exactly that. The population below
+        doubles only every 50 h -- far slower than the doubling time that gloss
+        implied -- yet divides fast enough for stalling alone to explain the
+        result.
+        """
+        from triboguard import selectivity
+        from triboguard.kinetics import BirthDeath
+
+        check = case_study.selectivity_check(case_study.load(PAPER))
+        slow_but_busy = BirthDeath(birth=check["threshold_birth_rate"] * 1.4, death=0.016)
+        assert slow_but_busy.doubling_hours is not None
+        assert slow_but_busy.doubling_hours > 40.0
+        assert selectivity.stalling_fraction(slow_but_busy, 0.40, 24.0) is not None
+
+    def test_it_says_what_it_does_not_reproduce(self) -> None:
+        """The normal arm's viability rose; no model here produces that."""
+        check = case_study.selectivity_check(case_study.load(PAPER))
+        assert "more than doubled" in check["not_reproduced"]
+
+    def test_it_refuses_to_be_read_as_a_verdict_on_the_compound(self) -> None:
+        check = case_study.selectivity_check(case_study.load(PAPER))
+        assert "does not show the extract is non-selective" in check["does_not_show"]
+
+    def test_it_agrees_with_the_module_it_defers_to(self) -> None:
+        """The case study repeats one number; it must be the same number."""
+        from triboguard import selectivity
+
+        check = case_study.selectivity_check(case_study.load(PAPER))
+        birth = selectivity.birth_rate_for_pure_stalling(
+            check["observed_cytotoxicity"], check["hours"]
+        )
+        assert check["threshold_birth_rate"] == pytest.approx(birth)
+        assert check["mean_hours_between_divisions"] == pytest.approx(1.0 / birth)
+
+    def test_a_study_reporting_no_percentage_is_not_assessed(self) -> None:
+        payload = case_study.load(PAPER)
+        payload["reported_results"] = {}
+        check = case_study.selectivity_check(payload)
+        assert check["evaluated"] is False
+
+    def test_the_report_carries_it(self) -> None:
+        assert case_study.report(PAPER)["selectivity_check"]["evaluated"]

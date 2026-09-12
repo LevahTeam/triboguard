@@ -138,29 +138,39 @@ def apply_damage(
     if damage.blur > 0:
         # Soften across the boundary rather than inside the cell, so the edge
         # stops being crisp without the whole cell turning to mush.
-        band = ndimage.binary_dilation(selected, np.ones((5, 5), bool))
+        #
+        # The band must stop at any *other* annotated cell. LIVECell images are
+        # confluent by design, so a plain dilation reaches its neighbours: at
+        # severity 0.6 an earlier version of this function altered pixels in 89%
+        # of the untouched cells, which silently damaged the control arm of a
+        # study whose entire claim rests on the control arm being untouched.
+        # Background may still be smoothed -- it belongs to no arm -- but a cell
+        # that was not selected keeps every pixel it started with.
+        protected = (labels > 0) & ~selected
+        band = ndimage.binary_dilation(selected, np.ones((5, 5), bool)) & ~protected
         smoothed = ndimage.gaussian_filter(out, sigma=0.5 + 2.5 * damage.blur)
         out[band] = smoothed[band]
 
     return np.clip(out, 0.0, 255.0)
 
 
-def detected_cells(
-    predicted: np.ndarray, truth: np.ndarray, *, coverage: float = DETECTION_COVERAGE
-) -> set[int]:
-    """Which ground-truth cells a prediction actually found.
+def detection_coverage(predicted: np.ndarray, truth: np.ndarray) -> dict[int, float]:
+    """For each ground-truth cell, the largest share of it one predicted object covers.
 
-    A cell counts as found when one predicted object covers at least ``coverage``
-    of it. Using a single object rather than the union of all foreground is what
-    stops a prediction that merges a whole cluster into one blob from counting as
-    having found every cell in it.
+    Kept separate from the yes/no verdict so a whole sweep of coverage
+    thresholds costs one pass instead of one pass each. A detection threshold is
+    an arbitrary line through a continuous quantity, and a result that only holds
+    at one value of it is worth knowing about; storing the continuous quantity is
+    what makes that checkable.
+
+    Using a *single* predicted object rather than the union of all foreground is
+    what stops a prediction that merges a whole cluster into one blob from
+    counting as having found every cell in it.
     """
     if predicted.shape != truth.shape:
         raise DamageError(f"predicted {predicted.shape} and truth {truth.shape} disagree.")
-    if not 0 < coverage <= 1:
-        raise DamageError(f"coverage must lie in (0, 1], got {coverage}.")
 
-    found: set[int] = set()
+    shares: dict[int, float] = {}
     for cell in np.unique(truth):
         if cell == 0:
             continue
@@ -171,11 +181,26 @@ def detected_cells(
         overlaps = predicted[mask]
         overlaps = overlaps[overlaps > 0]
         if overlaps.size == 0:
+            shares[int(cell)] = 0.0
             continue
         _, counts = np.unique(overlaps, return_counts=True)
-        if int(counts.max()) / area >= coverage:
-            found.add(int(cell))
-    return found
+        shares[int(cell)] = float(int(counts.max()) / area)
+    return shares
+
+
+def detected_cells(
+    predicted: np.ndarray, truth: np.ndarray, *, coverage: float = DETECTION_COVERAGE
+) -> set[int]:
+    """Which ground-truth cells a prediction actually found.
+
+    A cell counts as found when one predicted object covers at least ``coverage``
+    of it.
+    """
+    if not 0 < coverage <= 1:
+        raise DamageError(f"coverage must lie in (0, 1], got {coverage}.")
+    return {
+        cell for cell, share in detection_coverage(predicted, truth).items() if share >= coverage
+    }
 
 
 def split_cells(

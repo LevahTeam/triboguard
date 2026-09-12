@@ -10,6 +10,12 @@ Model weights, overlays and downloaded data are intentionally not here: they are
 - `classical_baseline__baseline_report.json`
 - `classical_baseline__per_image_metrics.csv`
 - `comparison__comparison.json`
+- `damage__blindness_applied.json`
+- `damage__blindness_combined_A172.json`
+- `damage__blindness_combined_MCF7.json`
+- `damage__blindness_combined_SHSY5Y.json`
+- `damage__blindness_combined_SkBr3.json`
+- `damage__preregistered_outcome.json`
 - `diversity__diversity.json`
 - `diversity__selection_cost.json`
 - `instance_benchmark__instance_benchmark.json`
@@ -31,3 +37,6 @@ Model weights, overlays and downloaded data are intentionally not here: they are
 - `seed_2__metrics.json`
 - `seed_3__metrics.json`
 - `transfer__transfer.json`
+- `triboguard__failure_boundary.json`
+- `triboguard__selectivity.json`
+- `triboguard__tribonema_case_study.json`

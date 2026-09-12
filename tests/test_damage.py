@@ -35,6 +35,25 @@ def _two_cells() -> tuple[np.ndarray, np.ndarray]:
     return image, labels
 
 
+def _crowded(gap: int = 1) -> tuple[np.ndarray, np.ndarray]:
+    """Two cells almost touching, which is what LIVECell actually looks like.
+
+    The far-apart pair above cannot detect damage leaking between neighbours,
+    because nothing reaches that far. Confluence is the condition the real
+    experiment runs under and so it is the condition the control arm has to
+    survive.
+    """
+    ys, xs = np.mgrid[0:60, 0:60]
+    labels = np.zeros((60, 60), dtype=np.int32)
+    radius = 9
+    left, right = 20, 20 + 2 * radius + gap
+    labels[((ys - 30) ** 2 + (xs - left) ** 2) <= radius**2] = 1
+    labels[((ys - 30) ** 2 + (xs - right) ** 2) <= radius**2] = 2
+    image = np.full((60, 60), 200.0, dtype=np.float32)
+    image[labels > 0] = 90.0
+    return image, labels
+
+
 def _contrast(image: np.ndarray, labels: np.ndarray, cell: int) -> float:
     inside = labels == cell
     return abs(float(image[inside].mean()) - float(image[labels == 0].mean()))
@@ -73,6 +92,31 @@ class TestTheDamageModel:
         image, labels = _two_cells()
         out = damage.apply_damage(image, labels, {1}, Damage.at(0.8), rng=np.random.default_rng(0))
         np.testing.assert_allclose(out[labels == 2], image[labels == 2])
+
+    def test_a_neighbouring_cell_keeps_its_pixels_even_when_touching(self) -> None:
+        """The control arm must survive confluence, not just isolation.
+
+        The isolated pair used above sits 42 px apart, so no blur band could
+        reach across it and the guarantee went untested for the case that
+        matters. Measured on real images, the version of this function without a
+        protected mask altered pixels in 89% of the untouched cells.
+        """
+        image, labels = _crowded()
+        out = damage.apply_damage(image, labels, {1}, Damage.at(0.8), rng=np.random.default_rng(0))
+        np.testing.assert_allclose(out[labels == 2], image[labels == 2])
+
+    @pytest.mark.parametrize("gap", [0, 1, 2, 4])
+    def test_no_separation_lets_damage_reach_the_neighbour(self, gap: int) -> None:
+        """Swept across separations, because one spacing proves one spacing."""
+        image, labels = _crowded(gap=gap)
+        out = damage.apply_damage(image, labels, {1}, Damage.at(1.0), rng=np.random.default_rng(1))
+        assert not np.any(out[labels == 2] != image[labels == 2])
+
+    def test_the_damaged_cell_is_still_blurred_when_crowded(self) -> None:
+        """Guards the obvious over-correction: protecting everything blurs nothing."""
+        image, labels = _crowded()
+        out = damage.apply_damage(image, labels, {1}, Damage.at(0.8), rng=np.random.default_rng(0))
+        assert _contrast(out, labels, 1) < 0.5 * _contrast(out, labels, 2)
 
     def test_damaging_one_cell_does_not_damage_the_other(self) -> None:
         image, labels = _two_cells()
@@ -135,6 +179,61 @@ class TestDetection:
         _, labels = _one_cell()
         with pytest.raises(DamageError, match="coverage"):
             damage.detected_cells(labels, labels, coverage=bad)
+
+
+class TestDetectionCoverage:
+    """The continuous quantity underneath the yes/no verdict.
+
+    Recorded rather than thresholded on the spot so a whole sweep of coverage
+    thresholds costs one pass, which is what makes it cheap to check whether the
+    finding survives the choice of threshold.
+    """
+
+    def test_a_perfect_prediction_covers_everything(self) -> None:
+        _, labels = _one_cell()
+        assert damage.detection_coverage(labels.copy(), labels) == {1: 1.0}
+
+    def test_a_missing_cell_is_recorded_as_zero_not_omitted(self) -> None:
+        """An absent key and a zero mean different things to a caller."""
+        _, labels = _one_cell()
+        assert damage.detection_coverage(np.zeros_like(labels), labels) == {1: 0.0}
+
+    def test_partial_coverage_is_reported_as_the_fraction(self) -> None:
+        _, labels = _one_cell()
+        partial = np.zeros_like(labels)
+        cell = np.argwhere(labels == 1)
+        half = len(cell) // 2
+        for y, x in cell[:half]:
+            partial[y, x] = 1
+        share = damage.detection_coverage(partial, labels)[1]
+        assert share == pytest.approx(half / len(cell))
+
+    def test_the_largest_single_object_wins_not_the_union(self) -> None:
+        """Two predicted fragments splitting a cell must not sum to a detection."""
+        _, labels = _one_cell()
+        fragments = np.zeros_like(labels)
+        cell = np.argwhere(labels == 1)
+        for index, (y, x) in enumerate(cell):
+            fragments[y, x] = 1 + index % 2
+        share = damage.detection_coverage(fragments, labels)[1]
+        assert share < 0.6, "the union would be 1.0; one fragment is about half"
+
+    def test_the_verdict_is_the_coverage_thresholded(self) -> None:
+        """The two functions must not be able to disagree."""
+        _, labels = _one_cell()
+        partial = np.zeros_like(labels)
+        cell = np.argwhere(labels == 1)
+        for y, x in cell[: int(len(cell) * 0.62)]:
+            partial[y, x] = 1
+        shares = damage.detection_coverage(partial, labels)
+        for threshold in (0.3, 0.5, 0.7):
+            expected = {c for c, s in shares.items() if s >= threshold}
+            assert damage.detected_cells(partial, labels, coverage=threshold) == expected
+
+    def test_mismatched_shapes_are_refused(self) -> None:
+        _, labels = _one_cell()
+        with pytest.raises(DamageError, match="disagree"):
+            damage.detection_coverage(labels[:-1], labels)
 
 
 class TestSplitting:

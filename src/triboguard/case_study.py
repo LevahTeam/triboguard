@@ -26,7 +26,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from triboguard import design
+from triboguard import design, selectivity
 
 #: Capabilities a design can offer. A claim is supportable only if every
 #: capability it requires is present.
@@ -71,7 +71,11 @@ WHY_MISSING = {
     "matched_normal_population": (
         "the normal comparator is peritoneal lymphocytes, a different lineage in "
         "primary culture, so the contrast confounds cancer-versus-normal with "
-        "macrophage-versus-lymphocyte and cell-line-versus-primary"
+        "macrophage-versus-lymphocyte and cell-line-versus-primary. The confound "
+        "is quantitative rather than merely conceptual: the cancer arm divides "
+        "and the lymphocytes largely do not, and because cytotoxicity is scored "
+        "against a same-time control, a compound that only stops division scores "
+        "in the first arm and not in the second"
     ),
     "single_cell_resolution": (
         "the published figure is a representative field, not a measured population"
@@ -196,6 +200,58 @@ def follow_up(
     }
 
 
+def selectivity_check(payload: dict[str, Any]) -> dict[str, Any]:
+    """Could a compound with no selective action produce the reported contrast?
+
+    Deliberately narrow. It asks only whether an explanation exists that
+    involves no selectivity, because that question is answerable from the
+    reported percentage and the exposure time alone -- no replicate count, no
+    raw data, and no assumed growth rate for either arm.
+
+    The full analysis, including what the contrast looks like when the two arms
+    are matched for division rate, lives in :mod:`triboguard.selectivity` and is
+    written to its own artifact. Only the assumption-free part is repeated here,
+    so the two cannot disagree.
+    """
+    results = payload.get("reported_results", {})
+    observed = results.get("cytotoxicity_at_24h_percent")
+    exposure = payload["design"].get("morphology", {}).get("exposure_hours")
+    if observed is None or exposure is None:
+        return {"evaluated": False, "reason": "No cytotoxicity percentage and exposure reported."}
+    fraction = observed / 100.0
+    birth = selectivity.birth_rate_for_pure_stalling(fraction, float(exposure))
+    return {
+        "evaluated": True,
+        "observed_cytotoxicity": fraction,
+        "hours": float(exposure),
+        # A division-event rate, not a growth rate. The two coincide only when
+        # basal death is zero, so quoting a doubling time here would exclude
+        # slow-growing populations that divide and die quickly and would admit
+        # fast-growing ones that never divide enough. The rate is the primitive.
+        "threshold_birth_rate": birth,
+        "mean_hours_between_divisions": 1.0 / birth,
+        "non_selective_explanation_exists": True,
+        "statement": (
+            f"A compound that kills nothing and only slows division reproduces the "
+            f"reported {fraction:.0%} in any control whose cells divide at least "
+            f"{birth:.4f} times per hour -- once every {1.0 / birth:.0f} h on average "
+            f"-- and reproduces the reported absence of cytotoxicity in a "
+            f"non-dividing comparator at the same time. The reported contrast "
+            f"therefore does not by itself establish selectivity."
+        ),
+        "not_reproduced": (
+            "The normal arm's viability was reported as more than doubled, not merely "
+            "unharmed. No cell-number model produces a signal above the untreated "
+            "control, so that part of the reported result is unexplained rather than "
+            "accounted for."
+        ),
+        "does_not_show": (
+            "This does not show the extract is non-selective. It shows the design "
+            "cannot separate a selective compound from a cytostatic one."
+        ),
+    }
+
+
 def report(
     path: str | Path,
     *,
@@ -216,6 +272,7 @@ def report(
         "not_reported": payload["not_reported"],
         "internal_inconsistencies": payload.get("internal_inconsistencies", []),
         "resolving_power": resolving_power(confidence=confidence),
+        "selectivity_check": selectivity_check(payload),
         "follow_up": follow_up(
             payload, assumed_wells=assumed_wells, target_width=target_width, confidence=confidence
         ),

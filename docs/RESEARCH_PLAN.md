@@ -205,9 +205,9 @@ and every claim withdrawn after a stricter test, is in
 | Quantitative result on held-out data | Done — 0.952 against a 0.710 trivial-predictor floor (see `results/comparison.json`) |
 | Comparison against non-learned baselines | Done — `tribovision compare` gates on the *stronger* of the classical rule and the all-foreground predictor |
 | Repeated seeds with reported spread | Done — `docs/RESULTS.md` |
-| Automated test suite | Done — 789 tests, 92% coverage |
+| Automated test suite | Done — 925 tests, 92% branch-aware coverage |
 | Documented limitations | Done — this file, and every generated report |
-| Pre-specified analysis plan | Done — this file, section above |
+| Pre-specified analysis plan | Done — this file, section above; for the damage experiment, a machine-checked plan (`preregistration/damage_blindness_v1.json`) whose hash every run records, applied by `scripts/evaluate_preregistration.py` without further choices |
 | A result that answers a question, not only a tool that works | Done — the mechanics half, with the conditions for its own failure measured |
 | Own experimental data | **Not started** — this is the critical path for the *Tribonema* question specifically |
 | Paired viability assay | **Not started** |
