@@ -1,5 +1,37 @@
 # TriboVision
 
+## In one minute
+
+A 2022 student study reported that a *Tribonema* algae extract cut an MTS viability
+signal by 40% in RAW264.7 cells, spared normal lymphocytes, and caused a specific
+kind of cell death. **TriboGuard** asks which of those conclusions the experiment
+could actually support, and answers with numbers rather than opinion:
+
+- **Killing and stalling look identical in averages.** The mean of a birth–death
+  process depends only on birth minus death, so a treatment that kills cells and
+  one that stops them dividing give the same curve. Only the spread between
+  replicate wells separates them. Of the study's seven conclusions, two are
+  supported by its design.
+- **The selectivity can come from cell division alone.** A compound that does not
+  kill a single cell, and only slows division, reproduces the reported 40% in the
+  dividing cancer line and no cytotoxicity in non-dividing lymphocytes. It does not
+  reproduce the lymphocytes' reported rise in viability, which stays unexplained.
+- **Switching to a microscope has its own trap.** Segmenters miss damaged cells.
+  Pre-registered before three of four cell lines were measured, and replicated on
+  all three: Cellpose finds 85–97% of untouched cells and at most 5% of damaged ones
+  in the same images, over 34,129 hand-outlined cells. The damage is synthetic;
+  testing it on real dying cells is the next step.
+
+Try it: open [the interactive demo](demo/triboguard.html) in a browser, read
+[the technical report](demo/triboguard_report.html), check
+[the pre-registered plan](preregistration/damage_blindness_v1.json) against
+[its verdict](results/damage__preregistered_outcome.json), and regenerate every
+number with `python scripts/reproduce.py --fast` (minutes; drop `--fast` to rerun
+the damage sweep). The suite is 925 tests, at 92% branch coverage. No *Tribonema*
+images have been collected, so nothing here is evidence about the extract itself.
+
+## What is in this repository
+
 TriboVision turns ordinary phase-contrast microscope images into quantitative,
 auditable measurements of cell morphology, and provides the statistical machinery
 to test whether those visible changes track an independent viability assay.

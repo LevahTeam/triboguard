@@ -157,6 +157,14 @@
   }
   button.go:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
+  .bars td { vertical-align: middle; }
+  .bar { height: 8px; background: var(--sunk); border-radius: 2px; position: relative; min-width: 90px; }
+  .bar > span { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 2px; background: var(--accent); }
+  .bar.lost > span { background: var(--bad); }
+  .lead { font-family: var(--serif); font-size: 19px; line-height: 1.45; margin: 0 0 14px; max-width: 64ch; }
+  .fine { font-size: 12.5px; color: var(--ink-faint); margin: 10px 0 0; max-width: 78ch; }
+  .tag.maybe { background: var(--warn-soft); color: var(--warn); }
+
   footer { margin-top: 46px; padding-top: 18px; border-top: 1px solid var(--rule); font-size: 12.5px; color: var(--ink-faint); }
   code { font-family: var(--mono); font-size: .92em; background: var(--sunk); padding: 1px 5px; border-radius: 2px; }
   a { color: var(--accent); }
@@ -169,7 +177,8 @@
     <p class="lede">
       A treatment that halves a cell population may have killed half the cells or stopped half of
       them dividing. Those need different follow-up experiments. This works out whether your design
-      can tell them apart &mdash; and what the answer would cost.
+      can tell them apart &mdash; and what the answer would cost. Further down: how a selectivity
+      claim can come from cell division alone, and why switching to a microscope has a trap of its own.
     </p>
   </header>
 
@@ -251,6 +260,147 @@
   </section>
 
   <section>
+    <h2>Selectivity the compound didn&rsquo;t cause</h2>
+    <p class="lead">
+      &ldquo;% cytotoxicity&rdquo; is measured against an untreated control read the same day. A
+      dividing control has been gaining cells all day; a non-dividing one has not. So a compound that
+      kills no cell and only slows division scores in one arm and not the other.
+    </p>
+    <div class="console">
+      <div class="panel">
+        <div class="field">
+          <label for="selNormal">Normal arm divides &mdash; <span class="val" id="selNormalVal"></span></label>
+          <input type="range" id="selNormal" min="0" max="4" value="0">
+          <p class="hint">The study compared against lymphocytes, which barely divide.</p>
+        </div>
+        <div class="field">
+          <label for="selCancer">Cancer arm doubles every &mdash; <span class="val" id="selCancerVal"></span></label>
+          <input type="range" id="selCancer" min="0" max="5" value="1">
+          <p class="hint">The report states no growth rate, so this is yours to choose.</p>
+        </div>
+      </div>
+      <div class="panel verdict">
+        <span class="pill no" id="selPill">&nbsp;</span>
+        <p class="verdict-line" id="selVerdict">&nbsp;</p>
+        <dl class="readout">
+          <div><dt>Apparent, cancer arm</dt><dd id="selCancerOut">&mdash;</dd></div>
+          <div><dt>Apparent, normal arm</dt><dd id="selNormalOut">&mdash;</dd></div>
+          <div><dt>Cells actually killed</dt><dd>0%</dd></div>
+        </dl>
+        <p class="hint" id="selNote"></p>
+      </div>
+    </div>
+    <p class="fine">
+      One identical treatment in both arms: it stops the share of divisions needed to reproduce the
+      reported 40% at 24&nbsp;h and adds no death. No growth rate is needed for the core result: any
+      control whose cells divide at least 0.0213 times per hour can produce that 40% with nothing
+      dying. This reproduces the absence of cytotoxicity in the lymphocytes, not their reported rise
+      in viability, which no cell-count model produces and which stays unexplained.
+    </p>
+  </section>
+
+  <section>
+    <h2>The microscope&rsquo;s blind spot &mdash; pre-registered</h2>
+    <p class="lead">
+      Imaging is only better than MTS if the software can see the cells. In each image, half the
+      hand-outlined cells were damaged by coin flip and half left alone, so both groups share the
+      same lighting and focus. The pass/fail rules were fixed before three of the four cell lines
+      were measured.
+    </p>
+    <div class="panel scroller">
+      <table>
+        <thead><tr><th>Cell line</th><th>Role</th><th style="text-align:right">Healthy found</th>
+          <th style="text-align:right">Damaged found</th><th style="text-align:right">Gap [95% interval]</th>
+          <th style="text-align:right">No-damage control</th><th>Result</th></tr></thead>
+        <tbody id="preRows"></tbody>
+      </table>
+      <p class="fine" id="preNote"></p>
+    </div>
+    <div class="console" style="margin-top:20px">
+      <div class="panel">
+        <div class="field">
+          <label>Segmenter</label>
+          <div class="seg" role="group" aria-label="Segmenter">
+            <button id="detCellpose" aria-pressed="true">Cellpose</button>
+            <button id="detThree" aria-pressed="false">Three-class</button>
+            <button id="detUnet" aria-pressed="false">U-Net</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="detSev">Damage severity &mdash; <span class="val" id="detSevVal"></span></label>
+          <input type="range" id="detSev" min="0" max="4" value="2">
+          <p class="hint">0 is no damage. Fade, blur and vacuoles rise together.</p>
+        </div>
+      </div>
+      <div class="panel scroller">
+        <table class="bars">
+          <thead><tr><th>Cell line</th><th>Healthy cells found</th><th style="text-align:right"></th>
+            <th>Damaged cells found</th><th style="text-align:right"></th></tr></thead>
+          <tbody id="detRows"></tbody>
+        </table>
+      </div>
+    </div>
+    <p class="fine">
+      Synthetic damage is not real damage: this measures how segmenters respond to controlled fading,
+      blurring and vacuoles. Each cell line&rsquo;s images come from one well. Testing it on real dying
+      cells, with an independent live/dead stain, is the next step.
+    </p>
+  </section>
+
+  <section>
+    <h2>What a cell count can still conclude</h2>
+    <p class="lead">
+      A cell the software cannot see counts exactly like a cell that is gone. So a count drop is not a
+      number but a range &mdash; and when the range covers both &ldquo;nothing happened&rdquo; and
+      &ldquo;a real effect&rdquo;, the honest answer is to abstain.
+    </p>
+    <div class="console">
+      <div class="panel">
+        <div class="field">
+          <label for="cntDrop">Count dropped by &mdash; <span class="val" id="cntDropVal"></span></label>
+          <input type="range" id="cntDrop" min="0" max="80" value="40">
+          <p class="hint">The study&rsquo;s MTS fell 40%. Imagine it had been a count.</p>
+        </div>
+        <div class="field">
+          <label>Segmenter</label>
+          <div class="seg" role="group" aria-label="Counting segmenter">
+            <button id="cntCellpose" aria-pressed="false">Cellpose</button>
+            <button id="cntThree" aria-pressed="true">Three-class</button>
+            <button id="cntUnet" aria-pressed="false">U-Net</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>How damaged the cells are</label>
+          <div class="seg" role="group" aria-label="Damage">
+            <button id="cntMild" aria-pressed="true">Mild</button>
+            <button id="cntMod" aria-pressed="false">Moderate</button>
+            <button id="cntSev" aria-pressed="false">Severe</button>
+          </div>
+          <p class="hint">Severity 0.2, 0.4 and 0.6 in the experiment above.</p>
+        </div>
+      </div>
+      <div class="panel verdict">
+        <span class="pill maybe" id="cntPill">&nbsp;</span>
+        <p class="verdict-line" id="cntVerdict">&nbsp;</p>
+        <dl class="readout">
+          <div><dt>Blindness measured</dt><dd id="cntBlind">&mdash;</dd></div>
+          <div><dt>Cells truly gone</dt><dd id="cntRange">&mdash;</dd></div>
+          <div><dt>Range width</dt><dd id="cntWidth">&mdash;</dd></div>
+        </dl>
+        <p class="hint">
+          Gone = <code>[max(0, (1&minus;R&minus;b)/(1&minus;b)), 1&minus;R]</code>, where R is the counted
+          ratio and b the blindness. &ldquo;Gone&rdquo; means dead <em>or never born</em>; telling those
+          apart is the first problem on this page.
+        </p>
+      </div>
+    </div>
+    <p class="fine">
+      Exploratory, not part of the pre-registered plan. Each blindness range spans the 95% interval of
+      the detection gap across all four cell lines, which errs toward abstaining.
+    </p>
+  </section>
+
+  <section>
     <h2>Analyse your own counts</h2>
     <div class="panel">
       <p class="hint" style="margin-top:0">
@@ -277,7 +427,10 @@
     can produce identical average curves. Only the variance between wells depends on birth plus
     death. Intervals here come from the chi-squared law of a sample variance on
     <code>wells &minus; 1</code> degrees of freedom &mdash; the same arithmetic as the Python
-    package, with exact quantiles tabulated rather than approximated.
+    package, with exact quantiles tabulated rather than approximated. Every number on this page is
+    produced by the project&rsquo;s own scripts; the full account, including every error found and
+    corrected, is in the
+    <a href="https://claude.ai/code/artifact/5acfbc51-18f7-4c88-976d-ef535caf1496">technical report</a>.
   </footer>
 </div>
 
@@ -409,7 +562,7 @@ const CLAIMS = [
   ["The surviving 60% were resistant", false, "Needs cell counts, and a washout or re-treatment that was never run. A fraction is only resistant if it survives re-exposure."],
   ["The effect was killing rather than growth inhibition", false, "Needs cell counts and the spread between wells. The report states no replicate count anywhere."],
   ["It caused a specific death mechanism", false, "Apoptosis and necrosis differ by membrane integrity and caspase activity. Formalin fixation destroys the membrane evidence before staining."],
-  ["It is selective for cancer cells over normal cells", false, "The comparator is peritoneal lymphocytes — a different lineage, in primary culture. The contrast confounds cancer-versus-normal with macrophage-versus-lymphocyte."]
+  ["It is selective for cancer cells over normal cells", false, "The comparator is non-dividing lymphocytes. A compound that only slows division reproduces the reported effect in the dividing cancer line and none in the lymphocytes — see the next panel."]
 ];
 
 function claims() {
@@ -521,4 +674,120 @@ claims();
 sample();
 render();
 analyse();
+
+// ---- Data below is generated from the committed result files, not typed. ----
+const DET = {"cellpose": {"0.0": {"MCF7": [0.806, 0.813], "SHSY5Y": [0.724, 0.739], "SkBr3": [0.973, 0.975], "A172": [0.881, 0.866]}, "0.2": {"MCF7": [0.752, 0.718], "SHSY5Y": [0.76, 0.656], "SkBr3": [0.973, 0.945], "A172": [0.894, 0.805]}, "0.4": {"MCF7": [0.838, 0.046], "SHSY5Y": [0.839, 0.068], "SkBr3": [0.969, 0.563], "A172": [0.939, 0.097]}, "0.6": {"MCF7": [0.851, 0.002], "SHSY5Y": [0.859, 0.004], "SkBr3": [0.968, 0.054], "A172": [0.943, 0.004]}, "0.8": {"MCF7": [0.848, 0.002], "SHSY5Y": [0.849, 0.002], "SkBr3": [0.971, 0.012], "A172": [0.939, 0.001]}}, "three_class": {"0.0": {"MCF7": [0.968, 0.969], "SHSY5Y": [0.898, 0.902], "SkBr3": [0.977, 0.979], "A172": [0.932, 0.926]}, "0.2": {"MCF7": [0.96, 0.969], "SHSY5Y": [0.902, 0.867], "SkBr3": [0.979, 0.955], "A172": [0.903, 0.864]}, "0.4": {"MCF7": [0.972, 0.685], "SHSY5Y": [0.907, 0.691], "SkBr3": [0.979, 0.832], "A172": [0.93, 0.335]}, "0.6": {"MCF7": [0.978, 0.246], "SHSY5Y": [0.915, 0.302], "SkBr3": [0.978, 0.317], "A172": [0.938, 0.093]}, "0.8": {"MCF7": [0.982, 0.102], "SHSY5Y": [0.915, 0.108], "SkBr3": [0.978, 0.034], "A172": [0.935, 0.012]}}, "unet_watershed": {"0.0": {"MCF7": [0.984, 0.986], "SHSY5Y": [0.782, 0.786], "SkBr3": [0.943, 0.95], "A172": [0.832, 0.835]}, "0.2": {"MCF7": [0.986, 0.975], "SHSY5Y": [0.791, 0.748], "SkBr3": [0.948, 0.927], "A172": [0.829, 0.766]}, "0.4": {"MCF7": [0.971, 0.804], "SHSY5Y": [0.789, 0.632], "SkBr3": [0.955, 0.858], "A172": [0.802, 0.417]}, "0.6": {"MCF7": [0.969, 0.446], "SHSY5Y": [0.781, 0.401], "SkBr3": [0.952, 0.553], "A172": [0.812, 0.157]}, "0.8": {"MCF7": [0.967, 0.223], "SHSY5Y": [0.782, 0.196], "SkBr3": [0.95, 0.073], "A172": [0.816, 0.033]}}};
+const PRE = [{"line": "MCF7", "role": "confirmatory", "intact": 0.851, "damaged": 0.002, "gap": 0.848, "lo": 0.801, "hi": 0.898, "clo": -0.018, "chi": 0.004, "status": "pass"}, {"line": "SHSY5Y", "role": "confirmatory", "intact": 0.859, "damaged": 0.004, "gap": 0.855, "lo": 0.836, "hi": 0.874, "clo": -0.032, "chi": 0.003, "status": "pass"}, {"line": "SkBr3", "role": "confirmatory", "intact": 0.968, "damaged": 0.054, "gap": 0.913, "lo": 0.865, "hi": 0.952, "clo": -0.01, "chi": 0.004, "status": "pass"}, {"line": "A172", "role": "exploratory", "intact": 0.943, "damaged": 0.004, "gap": 0.939, "lo": 0.922, "hi": 0.957, "clo": -0.003, "chi": 0.034, "status": "pass"}];
+const BLIND = {"three_class": {"0.2": [0.0, 0.0727], "0.4": [0.1176, 0.7094], "0.6": [0.5953, 0.9382]}, "unet_watershed": {"0.2": [0.0055, 0.1112], "0.4": [0.0801, 0.5413], "0.6": [0.3443, 0.8717]}, "cellpose": {"0.2": [0.0033, 0.1824], "0.4": [0.3412, 0.996], "0.6": [0.8934, 1.0]}};
+const VERDICT = "replicated";
+const CELLS = 34129;
+
+const pct = (v) => (100 * v).toFixed(0) + "%";
+const signed = (v) => (v >= 0 ? "+" : "\u2212") + Math.abs(v).toFixed(3);
+function press(ids, on) { ids.forEach((id) => $(id).setAttribute("aria-pressed", String(id === on))); }
+
+// ---- Selectivity: the same closed form as triboguard.selectivity ----
+const OBSERVED = 0.40, EXPOSURE = 24, BASAL_CANCER = 0.007, BASAL_NORMAL = 0.005;
+const NEEDED = -Math.log(1 - OBSERVED) / EXPOSURE;          // birth rate needed to stall to 40%
+const NORMAL_DOUBLING = [null, 96, 48, 24, 12];
+const CANCER_DOUBLING = [8, 12, 16, 24, 32, 48];
+const birthFor = (doubling, basal) => doubling === null ? 0 : Math.LN2 / doubling + basal;
+
+function renderSelectivity() {
+  const nd = NORMAL_DOUBLING[+$("selNormal").value], cd = CANCER_DOUBLING[+$("selCancer").value];
+  $("selNormalVal").textContent = nd === null ? "never" : "every " + nd + " h";
+  $("selCancerVal").textContent = cd + " h";
+  const cb = birthFor(cd, BASAL_CANCER), stall = NEEDED / cb;
+  if (stall > 1) {
+    $("selPill").className = "pill maybe"; $("selPill").textContent = "Needs killing";
+    $("selVerdict").textContent = "This cancer line divides too slowly for stalling alone to produce 40%.";
+    $("selCancerOut").textContent = "\u2014"; $("selNormalOut").textContent = "\u2014"; $("selNote").textContent = "";
+    return;
+  }
+  const inCancer = 1 - Math.exp(-cb * stall * EXPOSURE);
+  const inNormal = 1 - Math.exp(-birthFor(nd, BASAL_NORMAL) * stall * EXPOSURE);
+  const gap = inCancer - inNormal;
+  $("selCancerOut").textContent = pct(inCancer);
+  $("selNormalOut").textContent = pct(inNormal);
+  const big = gap > 0.15;
+  $("selPill").className = "pill " + (big ? "no" : "yes");
+  $("selPill").textContent = big ? "Looks selective" : "Artifact gone";
+  $("selVerdict").textContent = big
+    ? "A compound that kills nothing looks " + (100 * gap).toFixed(0) + " points more toxic to the cancer cells."
+    : "With the arms matched for division, the apparent selectivity shrinks to " + (100 * gap).toFixed(0) + " points.";
+  $("selNote").textContent = "It stops " + pct(stall) + " of cancer-cell divisions and adds no death at all.";
+}
+
+// ---- The pre-registered result ----
+function renderPre() {
+  $("preRows").innerHTML = PRE.map((r) =>
+    `<tr><td>${r.line}</td><td>${r.role}</td><td class="num">${pct(r.intact)}</td><td class="num">${pct(r.damaged)}</td>`
+    + `<td class="num">${signed(r.gap)} [${signed(r.lo)}, ${signed(r.hi)}]</td>`
+    + `<td class="num">[${signed(r.clo)}, ${signed(r.chi)}]</td>`
+    + `<td><span class="tag ${r.status === "pass" ? "yes" : "no"}">${r.status}</span></td></tr>`).join("");
+  $("preNote").textContent = "Cellpose at severity 0.6, the pre-registered test. Verdict: " + VERDICT
+    + ". " + CELLS.toLocaleString() + " hand-outlined cells, three segmenters, four cell lines. The rule was a lower bound above"
+    + " 10 points; the no-damage control had to stay within \u00b10.05.";
+}
+
+let detSeg = "cellpose";
+const SEG_LABEL = { cellpose: "Cellpose", three_class: "Three-class", unet_watershed: "U-Net" };
+function renderDetection() {
+  const sev = (0.2 * +$("detSev").value).toFixed(1);
+  $("detSevVal").textContent = sev;
+  const rows = DET[detSeg][sev];
+  $("detRows").innerHTML = Object.keys(rows).map((line) => {
+    const [h, d] = rows[line];
+    return `<tr><td>${line}</td><td><div class="bar"><span style="width:${(100 * h).toFixed(1)}%"></span></div></td>`
+      + `<td class="num">${pct(h)}</td><td><div class="bar lost"><span style="width:${(100 * d).toFixed(1)}%"></span></div></td>`
+      + `<td class="num">${pct(d)}</td></tr>`;
+  }).join("");
+}
+[["detCellpose", "cellpose"], ["detThree", "three_class"], ["detUnet", "unet_watershed"]].forEach(([id, seg]) =>
+  $(id).addEventListener("click", () => { detSeg = seg; press(["detCellpose", "detThree", "detUnet"], id); renderDetection(); }));
+$("detSev").addEventListener("input", renderDetection);
+
+// ---- What a count can conclude: the same rules as triboguard.blindness ----
+const EFFECT = 0.15, RESOLUTION = 0.10;
+function absentBounds(ratio, b) {
+  const top = Math.max(0, 1 - ratio);
+  if (b >= 1) return [0, top];
+  return [Math.min(Math.max(0, (1 - ratio - b) / (1 - b)), top), top];
+}
+let cntSeg = "three_class", cntSev = "0.2";
+function renderCount() {
+  const drop = +$("cntDrop").value / 100, ratio = 1 - drop;
+  $("cntDropVal").textContent = pct(drop);
+  const [bLo, bHi] = BLIND[cntSeg][cntSev];
+  const bottom = absentBounds(ratio, bHi)[0], top = absentBounds(ratio, bLo)[1], width = top - bottom;
+  $("cntBlind").textContent = bLo.toFixed(2) + "\u2013" + bHi.toFixed(2);
+  $("cntRange").textContent = (100 * bottom).toFixed(0) + "\u2013" + pct(top);
+  $("cntWidth").textContent = (100 * width).toFixed(0) + " pts";
+  const pill = $("cntPill"), line = $("cntVerdict");
+  if (top < EFFECT) {
+    pill.className = "pill yes"; pill.textContent = "No meaningful loss";
+    line.textContent = "At most " + pct(top) + " of cells are gone \u2014 below the effect threshold.";
+  } else if (bottom >= EFFECT && width <= RESOLUTION) {
+    pill.className = "pill yes"; pill.textContent = "Resolved";
+    line.textContent = "The count supports " + pct(bottom) + " to " + pct(top) + " of cells gone.";
+  } else if (bottom >= EFFECT) {
+    pill.className = "pill maybe"; pill.textContent = "Loss real, size unclear";
+    line.textContent = "Cells are really gone \u2014 somewhere from " + pct(bottom) + " to " + pct(top) + ".";
+  } else {
+    pill.className = "pill no"; pill.textContent = "Abstain";
+    line.textContent = "Anywhere from " + pct(bottom) + " to " + pct(top) + " could be gone: the same count fits no effect and a real one.";
+  }
+}
+[["cntCellpose", "cellpose"], ["cntThree", "three_class"], ["cntUnet", "unet_watershed"]].forEach(([id, seg]) =>
+  $(id).addEventListener("click", () => { cntSeg = seg; press(["cntCellpose", "cntThree", "cntUnet"], id); renderCount(); }));
+[["cntMild", "0.2"], ["cntMod", "0.4"], ["cntSev", "0.6"]].forEach(([id, sev]) =>
+  $(id).addEventListener("click", () => { cntSev = sev; press(["cntMild", "cntMod", "cntSev"], id); renderCount(); }));
+$("cntDrop").addEventListener("input", renderCount);
+$("selNormal").addEventListener("input", renderSelectivity);
+$("selCancer").addEventListener("input", renderSelectivity);
+
+renderSelectivity();
+renderPre();
+renderDetection();
+renderCount();
 </script>
