@@ -312,8 +312,24 @@ def _partial_spearman(x: np.ndarray, y: np.ndarray, control: np.ndarray) -> dict
     for series in ranks[:2]:
         coefficients, *_ = np.linalg.lstsq(design, series, rcond=None)
         residuals.append(series - design @ coefficients)
+
+    # When the control explains one series completely, its residuals are
+    # constant and a correlation is undefined. That is not a failure of the
+    # method -- it is the strongest form of the answer this function exists to
+    # give: once the confound is removed there is nothing left to correlate.
+    # Reported as no association, with a flag, rather than left to surface as an
+    # undefined-correlation warning from somewhere further down.
+    spreads = [float(np.std(residual)) for residual in residuals]
+    scales = [max(float(np.std(series)), 1.0) for series in ranks[:2]]
+    if any(spread < 1e-9 * scale for spread, scale in zip(spreads, scales, strict=True)):
+        return {"rho": 0.0, "p_value": 1.0, "control_explains_everything": True}
+
     result = stats.pearsonr(residuals[0], residuals[1])
-    return {"rho": float(result.statistic), "p_value": float(result.pvalue)}
+    return {
+        "rho": float(result.statistic),
+        "p_value": float(result.pvalue),
+        "control_explains_everything": False,
+    }
 
 
 def density_relationship(rows: list[dict[str, Any]]) -> dict[str, Any]:

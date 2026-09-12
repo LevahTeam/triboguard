@@ -266,6 +266,35 @@ def test_a_correlation_driven_purely_by_cell_size_does_not_survive_the_control()
     assert result["by_confluence"]["p_value"] < 0.05
     # Once cell size is removed, the residual association is gone.
     assert result["survives_size_control"] is False
+    # And the reason is reported rather than left to look like a weak result:
+    # size explains the shape index exactly, so no residual remains to correlate.
+    assert result["controlling_for_cell_size"]["control_explains_everything"] is True
+    assert result["controlling_for_cell_size"]["rho"] == 0.0
+
+
+def test_a_real_residual_association_is_not_reported_as_fully_explained() -> None:
+    """The other side of the branch above, so the flag cannot be stuck on.
+
+    Shape index here depends on crowding *and* on size, so removing size leaves
+    a residual the partial correlation can still see.
+    """
+    rng = np.random.default_rng(0)
+    rows = []
+    # Size and crowding are drawn independently, so neither one's ranks can
+    # explain the other's and a residual genuinely survives.
+    for _ in range(20):
+        area = float(rng.uniform(400.0, 1600.0))
+        confluence = float(rng.uniform(0.2, 0.9))
+        rows.append(
+            {
+                "cells_per_megapixel": 1e6 / area,
+                "confluence": confluence,
+                "median_area_pixels": area,
+                "median_q": 4.2 - 0.4 * confluence + rng.normal(0.0, 0.01),
+            }
+        )
+    result = mechanics.density_relationship(rows)
+    assert result["controlling_for_cell_size"]["control_explains_everything"] is False
 
 
 # ------------------------------------------------------------- time trajectories
