@@ -1,160 +1,152 @@
 <title>Counting What a Plate Cannot Tell You</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=Azeret+Mono:wght@400;500;600&display=swap">
 <style>
   :root {
-    --ground: #f7f7fa;
-    --panel: #ffffff;
-    --sunk: #eeedf3;
-    --ink: #191922;
-    --ink-soft: #55536a;
-    --ink-faint: #86839c;
-    --rule: #dedbe8;
-    --rule-firm: #c3bed4;
-    --accent: #6d4aa8;
-    --good: #35735a;
-    --good-soft: #e2efe9;
-    --warn: #96690f;
-    --warn-soft: #f6ecd6;
-    --bad: #a63f37;
-    --bad-soft: #f7e3e1;
-    --sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
-    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", monospace;
-    --serif: "Newsreader", ui-serif, Georgia, serif;
+    --ground: #eceeeb;
+    --paper: #f7f8f6;
+    --ink: #0f1213;
+    --ink-2: #48504e;
+    --ink-3: #7b8481;
+    --rule: #cdd3d0;
+    --signal: #e0364f;
+    --signal-wash: #f7d9de;
+    --true: #0b8a5c;
+    --true-wash: #d3ece1;
+    --unknown-wash: #dfe3e1;
+    --sans: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    --mono: "Azeret Mono", ui-monospace, Menlo, monospace;
   }
   :root:not([data-theme="light"]) {
     @media (prefers-color-scheme: dark) {
-      --ground: #121218;
-      --panel: #1a1a22;
-      --sunk: #22222c;
-      --ink: #eceaf3;
-      --ink-soft: #a29fb6;
-      --ink-faint: #726f87;
-      --rule: #2d2b39;
-      --rule-firm: #443f56;
-      --accent: #ab8ce2;
-      --good: #6fbf9b;
-      --good-soft: #1b2c25;
-      --warn: #d8a94a;
-      --warn-soft: #2d2517;
-      --bad: #e08279;
-      --bad-soft: #2f1d1c;
+      --ground: #0e1112;
+      --paper: #161a1b;
+      --ink: #e8edeb;
+      --ink-2: #a7b0ad;
+      --ink-3: #6e7774;
+      --rule: #2a3133;
+      --signal: #ff5b6f;
+      --signal-wash: #3b1a20;
+      --true: #35c98c;
+      --true-wash: #11291f;
+      --unknown-wash: #22282a;
     }
   }
   :root[data-theme="dark"] {
-    --ground: #121218;
-    --panel: #1a1a22;
-    --sunk: #22222c;
-    --ink: #eceaf3;
-    --ink-soft: #a29fb6;
-    --ink-faint: #726f87;
-    --rule: #2d2b39;
-    --rule-firm: #443f56;
-    --accent: #ab8ce2;
-    --good: #6fbf9b;
-    --good-soft: #1b2c25;
-    --warn: #d8a94a;
-    --warn-soft: #2d2517;
-    --bad: #e08279;
-    --bad-soft: #2f1d1c;
+    --ground: #0e1112;
+    --paper: #161a1b;
+    --ink: #e8edeb;
+    --ink-2: #a7b0ad;
+    --ink-3: #6e7774;
+    --rule: #2a3133;
+    --signal: #ff5b6f;
+    --signal-wash: #3b1a20;
+    --true: #35c98c;
+    --true-wash: #11291f;
+    --unknown-wash: #22282a;
   }
 
   * { box-sizing: border-box; }
   body {
     margin: 0; background: var(--ground); color: var(--ink);
-    font-family: var(--serif); font-size: 17.5px; line-height: 1.62;
-    -webkit-font-smoothing: antialiased;
+    font-family: var(--sans); font-size: 17px; line-height: 1.62; -webkit-font-smoothing: antialiased;
   }
-  .page { max-width: 1000px; margin: 0 auto; padding: 52px 28px 90px; }
-  .col { max-width: 66ch; }
+  a { color: inherit; text-decoration-color: var(--signal); text-underline-offset: 3px; }
+  :focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
 
-  .stamp {
-    font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
-    text-transform: uppercase; color: var(--accent); margin: 0 0 10px;
+  .strip {
+    position: sticky; top: 0; z-index: 5; border-bottom: 1px solid var(--rule);
+    background: color-mix(in srgb, var(--ground) 88%, transparent); backdrop-filter: blur(6px);
   }
+  .strip-in { max-width: 1040px; margin: 0 auto; padding: 10px 28px; display: flex; align-items: center; gap: 16px; }
+  .brand { font-weight: 800; font-stretch: 125%; letter-spacing: -0.01em; font-size: 15px; }
+  .strip-sub { font: 500 12px var(--mono); letter-spacing: .06em; color: var(--ink-3); }
+  .strip-link {
+    margin-left: auto; font-weight: 600; font-stretch: 110%; font-size: 13px; text-decoration: none;
+    border: 1.5px solid var(--ink); border-radius: 999px; padding: 6px 14px; white-space: nowrap;
+  }
+  .strip-link:hover { background: var(--ink); color: var(--ground); }
+  @media (max-width: 560px) { .strip-sub { display: none; } }
+
+  .page { max-width: 1040px; margin: 0 auto; padding: 72px 28px 90px; }
+  .col { max-width: 68ch; }
+
+  .stamp { font: 500 12px var(--mono); letter-spacing: .08em; color: var(--signal); margin: 0 0 20px; }
   h1 {
-    font-family: var(--serif); font-weight: 600; font-size: 44px; line-height: 1.12;
-    margin: 0 0 14px; letter-spacing: -.015em; text-wrap: balance; max-width: 18ch;
+    font-weight: 800; font-stretch: 125%; letter-spacing: -0.025em; line-height: 0.98;
+    font-size: clamp(40px, 6.4vw, 84px); margin: 0 0 24px; max-width: 15ch; text-wrap: balance;
   }
-  .sub { font-size: 20px; color: var(--ink-soft); margin: 0 0 26px; max-width: 60ch; }
+  .sub { font-size: clamp(18px, 1.7vw, 21px); line-height: 1.45; color: var(--ink-2); max-width: 52ch; margin: 0 0 32px; }
   .byline {
-    font-family: var(--mono); font-size: 12px; color: var(--ink-faint);
-    border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
-    padding: 12px 0; margin-bottom: 40px;
+    font: 500 12px/1.6 var(--mono); letter-spacing: .02em; color: var(--ink-3);
+    border-top: 2px solid var(--ink); border-bottom: 1px solid var(--rule); padding: 12px 0; margin-bottom: 48px;
   }
 
   h2 {
-    font-family: var(--sans); font-weight: 600; font-size: 15px; letter-spacing: .02em;
-    margin: 52px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--rule-firm);
-    display: flex; gap: 12px; align-items: baseline;
+    font-weight: 800; font-stretch: 122%; letter-spacing: -0.02em; line-height: 1.04;
+    font-size: clamp(26px, 3vw, 36px); margin: 76px 0 18px; padding-top: 18px;
+    border-top: 2px solid var(--ink); display: flex; gap: 16px; align-items: baseline;
+    text-wrap: balance; scroll-margin-top: 64px;
   }
-  h2 .n { font-family: var(--mono); font-size: 12px; color: var(--accent); font-weight: 500; }
-  h3 {
-    font-family: var(--sans); font-weight: 600; font-size: 13.5px; color: var(--ink-soft);
-    margin: 30px 0 10px; letter-spacing: .01em;
-  }
+  h2 .n { font: 600 13px var(--mono); letter-spacing: .04em; color: var(--signal); flex: none; }
+  h2 .n::before { content: "\00a7 "; }
+  h3 { font-weight: 700; font-stretch: 112%; font-size: 19px; letter-spacing: -0.005em; margin: 38px 0 10px; }
   p { margin: 0 0 16px; }
-  strong { font-weight: 600; }
+  strong { font-weight: 700; }
   em { font-style: italic; }
+  .lead { font-size: 20px; line-height: 1.5; }
 
-  .lead { font-size: 19px; }
-  .note {
-    background: var(--sunk); border-left: 2px solid var(--accent);
-    padding: 14px 18px; margin: 22px 0; font-size: 16px;
-  }
+  .note { background: var(--paper); border-left: 3px solid var(--ink); padding: 16px 20px; margin: 26px 0; font-size: 16px; }
   .note p:last-child { margin-bottom: 0; }
 
-  figure { margin: 26px 0; }
-  figcaption {
-    font-family: var(--sans); font-size: 12.5px; color: var(--ink-faint);
-    margin-top: 10px; line-height: 1.5; max-width: 72ch;
-  }
+  figure { margin: 32px 0; }
+  figcaption { font-size: 13.5px; line-height: 1.55; color: var(--ink-3); margin-top: 12px; max-width: 78ch; }
   .scroller { overflow-x: auto; }
 
-  table { width: 100%; border-collapse: collapse; font-family: var(--sans); font-size: 13.5px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
   th {
-    text-align: left; font-family: var(--mono); font-size: 10px; letter-spacing: .09em;
-    text-transform: uppercase; color: var(--ink-faint); font-weight: 600;
-    padding: 0 14px 8px 0; white-space: nowrap;
+    text-align: left; font: 500 10.5px var(--mono); letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink-3); padding: 0 14px 9px 0; white-space: nowrap; border-bottom: 2px solid var(--ink);
   }
-  td { padding: 9px 14px 9px 0; border-top: 1px solid var(--rule); vertical-align: top; }
+  td { padding: 10px 14px 10px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
   td:last-child, th:last-child { padding-right: 0; }
   .num { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
-  tr.hi td { background: var(--bad-soft); }
+  tr.hi td { background: var(--signal-wash); }
 
   .chip {
-    font-family: var(--mono); font-size: 10px; letter-spacing: .07em; text-transform: uppercase;
-    padding: 2px 7px; border-radius: 2px; white-space: nowrap;
+    font: 700 10.5px var(--sans); font-stretch: 118%; letter-spacing: .05em; text-transform: uppercase;
+    padding: 3px 8px; white-space: nowrap;
   }
-  .chip.yes { background: var(--good-soft); color: var(--good); }
-  .chip.no { background: var(--bad-soft); color: var(--bad); }
-  .chip.warn { background: var(--warn-soft); color: var(--warn); }
+  .chip.yes { background: var(--true-wash); color: var(--true); }
+  .chip.no { background: var(--signal-wash); color: var(--signal); }
+  .chip.warn { background: var(--unknown-wash); color: var(--ink-2); }
 
-  .map { border-collapse: separate; border-spacing: 2px; font-family: var(--mono); font-size: 10.5px; }
-  .map td { border: 0; padding: 8px 6px; text-align: center; border-radius: 2px; color: var(--ink); }
-  .map th { padding: 0 6px 6px; text-align: center; }
+  .map { border-collapse: separate; border-spacing: 3px; font: 500 11px var(--mono); }
+  .map th { border: 0; padding: 0 6px 6px; text-align: center; }
   .map th.row { text-align: right; padding-right: 10px; }
-  .r-reliable { background: var(--good-soft); color: var(--good); }
-  .r-abstains { background: var(--sunk); color: var(--ink-soft); }
-  .r-over { background: var(--bad-soft); color: var(--bad); }
-  .r-none { background: transparent; color: var(--ink-faint); }
+  .map td { border: 0; padding: 10px 6px; text-align: center; color: var(--ink); }
+  .r-reliable { background: var(--true-wash); color: var(--true); }
+  .r-abstains { background: var(--unknown-wash); color: var(--ink-2); }
+  .r-over { background: var(--signal-wash); color: var(--signal); font-weight: 600; }
+  .r-none { background: transparent; color: var(--ink-3); }
 
-  code { font-family: var(--mono); font-size: .86em; background: var(--sunk); padding: 1px 5px; border-radius: 2px; }
+  code { font-family: var(--mono); font-size: .84em; background: var(--paper); border: 1px solid var(--rule); padding: 1px 5px; }
   pre {
-    font-family: var(--mono); font-size: 12.5px; line-height: 1.6; background: var(--sunk);
-    border: 1px solid var(--rule); border-radius: 3px; padding: 14px 16px; overflow-x: auto; margin: 18px 0;
+    font: 12.5px/1.6 var(--mono); background: var(--paper); border: 1px solid var(--rule);
+    border-left: 3px solid var(--ink); padding: 14px 16px; overflow-x: auto; margin: 18px 0;
   }
-  .eq {
-    font-family: var(--mono); font-size: 14px; background: var(--sunk);
-    border-radius: 3px; padding: 14px 18px; margin: 18px 0; overflow-x: auto;
-  }
-  a { color: var(--accent); }
-  ol.spaced li, ul.spaced li { margin-bottom: 10px; }
-  footer {
-    margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--rule-firm);
-    font-family: var(--sans); font-size: 12.5px; color: var(--ink-faint);
-  }
+  .eq { font: 14px/1.7 var(--mono); background: var(--paper); border-left: 3px solid var(--signal); padding: 14px 18px; margin: 20px 0; overflow-x: auto; }
+  ol.spaced li, ul.spaced li { margin-bottom: 12px; }
+  footer { margin-top: 64px; padding-top: 18px; border-top: 2px solid var(--ink); font-size: 13.5px; color: var(--ink-2); }
 </style>
+
+<nav class="strip" aria-label="Report">
+  <div class="strip-in">
+    <span class="brand">TriboGuard</span>
+    <span class="strip-sub">Technical report</span>
+    <a class="strip-link" href="https://claude.ai/code/artifact/08decdc8-8c1f-438a-8c96-1f5c071dd151">Interactive demo &rarr;</a>
+  </div>
+</nav>
 
 <div class="page">
   <p class="stamp">Technical report &middot; TriboGuard</p>
