@@ -22,8 +22,8 @@ could actually support, and answers with numbers rather than opinion:
   in the same images, over 34,129 hand-outlined cells. The damage is synthetic;
   testing it on real dying cells is the next step.
 
-Try it: open [the interactive demo](demo/triboguard.html) in a browser, read
-[the technical report](demo/triboguard_report.html), check
+Try it live: [the interactive demo](https://levahteam.github.io/triboguard/) and
+[the technical report](https://levahteam.github.io/triboguard/demo/triboguard_report.html). Check
 [the pre-registered plan](preregistration/damage_blindness_v1.json) against
 [its verdict](results/damage__preregistered_outcome.json), and regenerate every
 number with `python scripts/reproduce.py --fast` (minutes; drop `--fast` to rerun
