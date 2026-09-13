@@ -71,8 +71,11 @@ jobs:
       - run: uv sync --locked --extra dev
 
       - name: RESULTS.md is regenerated, not hand-edited
+        # runs/ is git-ignored, so the runner rebuilds it from the published
+        # copies first: the table must regenerate from exactly the evidence
+        # committed beside it.
         run: |
-          uv run python scripts/collect_results.py runs > /tmp/RESULTS.md
+          uv run python scripts/collect_results.py runs --unpublish results > /tmp/RESULTS.md
           diff -u docs/RESULTS.md /tmp/RESULTS.md
 
       - name: The experiment plan is regenerated, not hand-edited

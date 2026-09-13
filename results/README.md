@@ -17,6 +17,9 @@ Model weights, overlays and downloaded data are intentionally not here: they are
 - `damage__blindness_combined_SkBr3.json`
 - `damage__preregistered_outcome.json`
 - `diversity__diversity.json`
+- `diversity__mixed_1__metrics.json`
+- `diversity__mixed_2__metrics.json`
+- `diversity__mixed_42__metrics.json`
 - `diversity__selection_cost.json`
 - `instance_benchmark__instance_benchmark.json`
 - `instance_model__metrics.json`
@@ -36,6 +39,9 @@ Model weights, overlays and downloaded data are intentionally not here: they are
 - `seed_1__metrics.json`
 - `seed_2__metrics.json`
 - `seed_3__metrics.json`
+- `seedrun_304_1__metrics.json`
+- `seedrun_304_2__metrics.json`
+- `seeds__seeds.json`
 - `transfer__transfer.json`
 - `triboguard__failure_boundary.json`
 - `triboguard__selectivity.json`

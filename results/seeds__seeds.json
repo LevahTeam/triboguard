@@ -1,0 +1,107 @@
+{
+  "difference_304_vs_79": {
+    "accounts_for": [
+      "image sampling",
+      "training seed"
+    ],
+    "ci_high": 0.10129030585189537,
+    "ci_low": 0.062312833692762526,
+    "difference": 0.0801850027272353,
+    "evaluated": true,
+    "excludes_zero": true,
+    "seeds": {
+      "first": 3,
+      "second": 3
+    }
+  },
+  "environment": {
+    "accelerators": {
+      "cuda": false,
+      "mps": true
+    },
+    "git": {
+      "branch": "master",
+      "commit": "66fa908035d31a61ec538cb361b902f9a1e2055e",
+      "dirty": true
+    },
+    "machine": "arm64",
+    "packages": {
+      "numpy": "2.3.5",
+      "pillow": "11.3.0",
+      "pycocotools": "2.0.11",
+      "remotezip": "0.12.6",
+      "scipy": "1.16.3",
+      "torch": "2.11.0"
+    },
+    "platform": "macOS-15.6-arm64-arm-64bit-Mach-O",
+    "python": "3.13.9",
+    "recorded_at_utc": "2026-09-07T15:42:13+00:00",
+    "torch_threads": 4
+  },
+  "images": 60,
+  "per_size": {
+    "304": {
+      "images_only": {
+        "ci_high": 0.24652549980226235,
+        "ci_low": 0.19138643164138233,
+        "clusters": 33,
+        "confidence": 0.95,
+        "evaluated": true,
+        "mean": 0.21751981633578993,
+        "resamples": 2000,
+        "resampling_unit": "acquisition group"
+      },
+      "seeds_and_images": {
+        "accounts_for": [
+          "image sampling",
+          "training seed"
+        ],
+        "ci_high": 0.25198885280204475,
+        "ci_low": 0.18862903371182177,
+        "confidence": 0.95,
+        "evaluated": true,
+        "images": 60,
+        "mean": 0.21751981633578998,
+        "seed_sd": 0.016032285205287697,
+        "seed_values": {
+          "1": 0.23602293158458335,
+          "2": 0.208778369945429,
+          "42": 0.20775814747735757
+        },
+        "seeds": 3
+      }
+    },
+    "79": {
+      "images_only": {
+        "ci_high": 0.16222373424306463,
+        "ci_low": 0.11712285857803793,
+        "clusters": 33,
+        "confidence": 0.95,
+        "evaluated": true,
+        "mean": 0.1373348136085547,
+        "resamples": 2000,
+        "resampling_unit": "acquisition group"
+      },
+      "seeds_and_images": {
+        "accounts_for": [
+          "image sampling",
+          "training seed"
+        ],
+        "ci_high": 0.16538546341009533,
+        "ci_low": 0.1153178275173328,
+        "confidence": 0.95,
+        "evaluated": true,
+        "images": 60,
+        "mean": 0.13733481360855468,
+        "seed_sd": 0.010816860929067605,
+        "seed_values": {
+          "1": 0.12501059616463947,
+          "2": 0.14525468473058556,
+          "42": 0.141739159930439
+        },
+        "seeds": 3
+      }
+    }
+  },
+  "question": "How much of the scaling result is training seed rather than data?"
+}

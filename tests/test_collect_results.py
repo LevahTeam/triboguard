@@ -10,7 +10,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
-from collect_results import format_report, main  # noqa: E402
+from collect_results import format_report, main, publish, unpublish  # noqa: E402
 
 
 def _metrics(seed: int, test_dice: float) -> dict:
@@ -160,3 +160,40 @@ def test_the_published_p_value_is_the_group_level_one(runs: Path) -> None:
     # The inflated per-image value may appear only with its disclaimer.
     if "1.7e-18" in report:
         assert "pseudoreplication" in report
+
+
+def test_unpublishing_is_the_exact_inverse_of_publishing(runs: Path, tmp_path: Path) -> None:
+    published = tmp_path / "results"
+    publish(runs, published)
+    rebuilt = tmp_path / "rebuilt"
+    restored = unpublish(published, rebuilt)
+    assert restored, "the fixture must publish something for this to test anything"
+    for relative in restored:
+        assert (rebuilt / relative).read_bytes() == (runs / relative).read_bytes()
+
+
+def test_a_fresh_clone_regenerates_the_same_report(runs: Path, tmp_path: Path) -> None:
+    """What CI does: rebuild runs/ from the published copies alone, then regenerate."""
+    published = tmp_path / "results"
+    publish(runs, published)
+    clone = tmp_path / "clone-runs"
+    unpublish(published, clone)
+    assert format_report(clone) == format_report(runs)
+
+
+def test_unpublish_without_a_directory_is_an_error(tmp_path: Path) -> None:
+    assert main([str(tmp_path / "runs"), "--unpublish"]) == 1
+
+
+def test_the_committed_results_regenerate_the_committed_table(tmp_path: Path) -> None:
+    """The drift check CI runs, runnable here: results/ alone reproduces RESULTS.md.
+
+    runs/ is git-ignored, so this is the only way a reader who clones the
+    repository can confirm the table matches its evidence. It failed on the first
+    push to GitHub because two sections read files that had never been published.
+    """
+    root = Path(__file__).resolve().parents[1]
+    rebuilt = tmp_path / "runs"
+    unpublish(root / "results", rebuilt)
+    expected = (root / "docs" / "RESULTS.md").read_text(encoding="utf-8")
+    assert format_report(rebuilt) == expected

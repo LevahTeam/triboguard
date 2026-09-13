@@ -7,6 +7,7 @@ inaccuracy.
 
     python scripts/collect_results.py runs > docs/RESULTS.md
     python scripts/collect_results.py runs --publish results
+    python scripts/collect_results.py runs --unpublish results   # a fresh clone
 
 ``runs/`` is git-ignored because it holds model weights and downloaded data, which
 meant every "evidence: runs/....json" pointer in the documentation referred to a
@@ -973,6 +974,15 @@ PUBLISHED = (
     "damage/blindness_combined_SkBr3.json",
     "damage/preregistered_outcome.json",
     "damage/blindness_applied.json",
+    # Inputs of two RESULTS.md sections -- the seed-uncertainty table and the
+    # checkpoint-selection caveat. Without them a fresh clone cannot regenerate
+    # the table it is checked against.
+    "seeds/seeds.json",
+    "seedrun_304_1/metrics.json",
+    "seedrun_304_2/metrics.json",
+    "diversity/mixed_1/metrics.json",
+    "diversity/mixed_2/metrics.json",
+    "diversity/mixed_42/metrics.json",
 )
 
 
@@ -1001,6 +1011,27 @@ def publish(runs: Path, destination: Path) -> list[str]:
     return copied
 
 
+def unpublish(source: Path, runs: Path) -> list[str]:
+    """Rebuild a run directory from the published copies -- the inverse of ``publish``.
+
+    ``runs/`` is git-ignored, so a fresh clone has ``results/`` and nothing else.
+    This lets it regenerate the results table from exactly the evidence that was
+    published with it, which is what the continuous-integration drift check does.
+    The mapping comes from ``PUBLISHED`` itself rather than from splitting file
+    names, so it is the exact reverse of publishing and cannot misplace a file.
+    """
+    restored: list[str] = []
+    for relative in PUBLISHED:
+        published = source / relative.replace("/", "__")
+        if not published.is_file():
+            continue
+        target = runs / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(published.read_bytes())
+        restored.append(relative)
+    return restored
+
+
 def main(argv: list[str] | None = None) -> int:
     arguments = list(sys.argv[1:] if argv is None else argv)
     destination: Path | None = None
@@ -1012,7 +1043,19 @@ def main(argv: list[str] | None = None) -> int:
             print("--publish needs a destination directory", file=sys.stderr)
             return 1
         del arguments[index : index + 2]
+    source: Path | None = None
+    if "--unpublish" in arguments:
+        index = arguments.index("--unpublish")
+        try:
+            source = Path(arguments[index + 1])
+        except IndexError:
+            print("--unpublish needs the published directory to rebuild from", file=sys.stderr)
+            return 1
+        del arguments[index : index + 2]
     runs = Path(arguments[0]) if arguments else Path("runs")
+    if source is not None:
+        restored = unpublish(source, runs)
+        print(f"Rebuilt {len(restored)} artifact(s) into {runs} from {source}", file=sys.stderr)
     if not runs.is_dir():
         print(f"No run directory at {runs}", file=sys.stderr)
         return 1

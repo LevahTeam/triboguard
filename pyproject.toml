@@ -72,7 +72,9 @@ extend-exclude = ["web"]
 select = ["E", "F", "I", "UP", "B", "SIM"]
 
 [tool.mypy]
-python_version = "3.10"
+# No python_version pin: each CI job type-checks against the interpreter it runs,
+# with the dependency versions that interpreter resolves. Pinning 3.10 made mypy
+# read numpy's stubs for Python 3.12+ with 3.10 grammar, and fail on numpy.
 files = ["src/tribovision", "src/triboguard"]
 ignore_missing_imports = true
 warn_unused_ignores = true

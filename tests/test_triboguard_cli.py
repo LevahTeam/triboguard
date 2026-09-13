@@ -7,6 +7,7 @@ works from the repository root and nowhere else.
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 import pytest
@@ -105,7 +106,12 @@ class TestBoundary:
 
 def test_the_console_script_is_declared() -> None:
     """The entry point is what makes any of the above reachable after install."""
-    import tomllib
+    # tomllib joined the standard library in 3.11; on 3.10 the same parser is the
+    # tomli backport, which pytest already installs there.
+    if sys.version_info >= (3, 11):
+        import tomllib
+    else:
+        import tomli as tomllib
 
     root = Path(__file__).resolve().parents[1]
     with (root / "pyproject.toml").open("rb") as handle:
